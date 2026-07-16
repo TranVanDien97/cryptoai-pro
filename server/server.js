@@ -465,20 +465,35 @@ app.get('/api/market/analyze', async (req, res) => {
 // ═══════════════════════════════════════════════════════
 // BATCH PRICE LOOKUP — tránh CORS browser
 // ═══════════════════════════════════════════════════════
+// Cache all Binance prices (refresh every 5s)
+let allPricesCache = { data: {}, ts: 0 };
+async function getAllBinancePrices() {
+  if (Date.now() - allPricesCache.ts < 5000 && Object.keys(allPricesCache.data).length > 0) return allPricesCache.data;
+  try {
+    const r = await fetch(`${BINANCE_BASE}/api/v3/ticker/price`);
+    if (!r.ok) return allPricesCache.data;
+    const tickers = await r.json();
+    const map = {};
+    tickers.forEach(t => { map[t.symbol] = parseFloat(t.price); });
+    allPricesCache = { data: map, ts: Date.now() };
+    return map;
+  } catch (e) { console.error('getAllBinancePrices error:', e.message); return allPricesCache.data; }
+}
+
 app.get('/api/market/prices', async (req, res) => {
   try {
     const symbols = (req.query.symbols || '').split(',').filter(Boolean);
     if (!symbols.length) return res.json({ success: false, error: 'No symbols' });
+    const allPrices = await getAllBinancePrices();
     const prices = {};
-    const promises = symbols.map(async sym => {
-      try {
-        const pair = sym.toUpperCase() + 'USDT';
-        const r = await fetch(`${BINANCE_BASE}/api/v3/ticker/price?symbol=${pair}`);
-        if (r.ok) { const j = await r.json(); prices[sym.toUpperCase()] = parseFloat(j.price); }
-      } catch {}
+    symbols.forEach(sym => {
+      const pair = sym.toUpperCase() + 'USDT';
+      if (allPrices[pair]) prices[sym.toUpperCase()] = allPrices[pair];
+      // Try BUSD/FDUSD fallback
+      else if (allPrices[sym.toUpperCase() + 'BUSD']) prices[sym.toUpperCase()] = allPrices[sym.toUpperCase() + 'BUSD'];
+      else if (allPrices[sym.toUpperCase() + 'FDUSD']) prices[sym.toUpperCase()] = allPrices[sym.toUpperCase() + 'FDUSD'];
     });
-    await Promise.allSettled(promises);
-    res.json({ success: true, prices });
+    res.json({ success: true, prices, source: 'binance_bulk', cached: Date.now() - allPricesCache.ts < 1000 });
   } catch (err) { res.json({ success: false, error: err.message }); }
 });
 

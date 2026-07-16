@@ -546,6 +546,67 @@ ${holdings||'Chưa có coin nào'}`;
   btn.disabled=false;btn.textContent='🧠 Hỏi AI phân tích ngay';
 }
 
+// AI phân tích riêng cho coin đang giữ
+async function analyzeMyHoldings(){
+  if(!S.holdings.length){toast('Thêm coin vào danh mục trước','warn');return}
+  const resultEl=$('myHoldingsAI');
+  if(!resultEl)return;
+  resultEl.innerHTML='<div class="gemini-loading">🔄 Đang phân tích danh mục của bạn...</div>';
+
+  // Build portfolio data
+  let portfolioText='DANH MỤC ĐANG NẮM GIỮ:\n';
+  let totalVal=0,totalCost=0;
+  S.holdings.forEach(h=>{
+    const cp=getCurPrice(h);
+    const val=cp*h.qty,cost=h.cost*h.qty;
+    const pnl=cost>0?((val-cost)/cost*100):0;
+    totalVal+=val;totalCost+=cost;
+    portfolioText+=`- ${h.name} (${(h.symbolLower||h.symbol).toUpperCase()}): Mua ${h.qty} x $${h.cost} = $${cost.toFixed(2)} | Giá hiện tại: $${cp} | Giá trị: $${val.toFixed(2)} | P/L: ${pnl.toFixed(2)}%\n`;
+  });
+  const totalPnl=totalCost>0?((totalVal-totalCost)/totalCost*100):0;
+  portfolioText+=`\nTỔNG: Vốn $${totalCost.toFixed(2)} → Hiện tại $${totalVal.toFixed(2)} → P/L: ${totalPnl.toFixed(2)}%\n`;
+
+  // Add market context
+  const btc=S.crypto.find(c=>c.id==='bitcoin');
+  if(btc)portfolioText+=`\nBTC: $${btc.current_price} (24h: ${btc.price_change_percentage_24h?.toFixed(1)}%)\n`;
+  if(S.fng)portfolioText+=`Fear & Greed Index: ${S.fng.value} (${S.fng.value_classification})\n`;
+
+  const prompt=`Bạn là cố vấn đầu tư crypto chuyên nghiệp. Phân tích CHI TIẾT danh mục CỤ THỂ của tôi dưới đây.
+
+${portfolioText}
+
+YÊU CẦU PHÂN TÍCH CHO TỪNG COIN:
+1. **Đánh giá hiện tại**: Coin này đang ở vị thế gì? Lãi hay lỗ bao nhiêu %?
+2. **Khuyến nghị cụ thể**: NÊN GIỮ / NÊN BÁN / NÊN DCA (mua thêm)?
+3. **Giá bán chốt lời**: Nếu giữ, bán ở giá nào?
+4. **Giá DCA**: Nếu mua thêm, mua ở giá nào?
+5. **Stop-loss**: Đặt cắt lỗ ở đâu?
+6. **Dự đoán 1-4 tuần tới**: Xu hướng giá sắp tới?
+
+TỔNG QUAN DANH MỤC:
+- Đánh giá phân bổ danh mục có hợp lý không?
+- Nên thêm/bớt coin nào?
+- Chiến lược tổng thể (ngắn hạn + trung hạn)
+
+Trả lời bằng tiếng Việt, ngắn gọn, có số liệu cụ thể.`;
+
+  try{
+    const r=await fetch(BACKEND+'/api/ai/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({marketData:prompt})});
+    const j=await r.json();
+    if(j.success){
+      let html=j.analysis.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')
+        .replace(/(NÊN MUA|MUA THÊM|DCA|STRONG_BUY)/gi,'<span class="ai-buy">$1</span>')
+        .replace(/(NÊN BÁN|BÁN|CHỐT LỜI|CẮT LỖ|TRÁNH)/gi,'<span class="ai-sell">$1</span>')
+        .replace(/(GIỮ|HOLD|NẮM GIỮ)/gi,'<span style="color:var(--yellow);font-weight:700">$1</span>');
+      resultEl.innerHTML=`<div class="gemini-answer">${html}<div class="gemini-meta">Nguồn: ${j.model} • ${new Date(j.timestamp).toLocaleTimeString('vi-VN')}</div></div>`;
+    }else{
+      resultEl.innerHTML=`<div class="gemini-error">❌ ${j.error}</div>`;
+    }
+  }catch(e){
+    resultEl.innerHTML=`<div class="gemini-error">❌ Lỗi: ${e.message}</div>`;
+  }
+}
+
 // ═══════════════════════════════════════════════════════
 // AI ADVISOR (Rule-based)
 // ═══════════════════════════════════════════════════════
@@ -839,56 +900,24 @@ function renderDash(){
 function sigCardHTML(s){
   const isBuy=s.signal.includes('BUY');
   const cls=isBuy?'buy-card':'sell-card';
-
-  // Multi-timeframe scores
-  let tfHTML='';
-  if(s.tfScores){
-    const tf=s.tfScores;
-    tfHTML='<div class="tf-row">';
-    ['1h','4h','1d'].forEach(k=>{
-      const d=tf[k];if(!d)return;
-      const c=d.score>3?'tf-bull':d.score<-3?'tf-bear':'tf-neutral';
-      tfHTML+=`<span class="tf-badge ${c}">${k.toUpperCase()} ${d.dir}</span>`;
-    });
-    tfHTML+='</div>';
-  }
-
-  // Checklist
-  let checkHTML='';
+  const src=s.dataSource==='binance'?'BN':'CG';
+  let checks='';
   if(s.checks&&s.checks.length){
-    checkHTML='<div class="sig-checklist">'+s.checks.map(c=>{
-      const cls=c.good?'check-good':c.neutral?'check-ok':'check-bad';
-      const icon=c.good?'✅':c.neutral?'🟡':'❌';
-      return`<span class="check-item ${cls}">${icon} ${c.label}</span>`;
-    }).join('')+'</div>';
+    checks=s.checks.slice(0,6).map(c=>`<span class="sig-check ${c.good?'good':c.neutral?'neutral':'bad'}">${c.good?'✓':c.neutral?'~':'✗'} ${c.label}</span>`).join('');
   }
-
-  // Data source badge
-  const srcBadge=s.dataSource==='binance'
-    ?'<span class="src-badge src-binance">📊 Binance Real Data</span>'
-    :'<span class="src-badge src-cg">🌐 CoinGecko</span>';
-
-  // Action box
-  const actionText=isBuy
-    ?`<div class="sig-action-box buy-box">👉 <strong>NÊN MUA</strong> — ${simplifyReason(s.reasons[0])}</div>`
-    :`<div class="sig-action-box sell-box">👉 <strong>NÊN BÁN</strong> — ${simplifyReason(s.reasons[0])}</div>`;
-
   return`<div class="sig-card ${cls}" onclick="openCoinModal('${s.id}')">
     <div class="sig-top">
-      <span class="sig-name"><img src="${s.image}" alt="${s.symbol}">${s.symbol} <span style="font-weight:400;color:var(--t3);font-size:11px">#${s.rank||'--'}</span></span>
+      <img class="sig-img" src="${s.image}" alt="">
+      <div class="sig-name"><div class="sym">${s.symbol} <small style="color:var(--t4);font-weight:400">#${s.rank||''}</small></div><div class="name">${src} · ${s.confidence}%</div></div>
       <span class="sig-badge ${s.signal}">${F.sig(s.signal)}</span>
     </div>
-    <div class="sig-meta">${srcBadge}${tfHTML}</div>
-    ${actionText}
-    ${checkHTML}
-    <div class="sig-conf"><div class="sig-conf-text">Độ tin cậy: ${s.confidence}%</div><div class="conf-bar"><div class="conf-fill" style="width:${s.confidence}%"></div></div></div>
-    <ul class="sig-reason">${s.reasons.slice(1).map(r=>'<li>'+simplifyReason(r)+'</li>').join('')}</ul>
-    <div class="sig-prices">
-      <div class="sig-price"><span class="sig-price-label">💰 Mua ở giá</span><span class="sig-price-val">${F.usd(s.entry)}</span></div>
-      <div class="sig-price"><span class="sig-price-label">🛑 Cắt lỗ (-${s.slPct||'7'}%)</span><span class="sig-price-val loss">${F.usd(s.sl)}</span></div>
-      <div class="sig-price"><span class="sig-price-label">🎯 Chốt lời (+${s.tpPct||'20'}%)</span><span class="sig-price-val gain">${F.usd(s.tp)}</span></div>
+    ${checks?'<div class="sig-checks">'+checks+'</div>':''}
+    <ul class="sig-reasons">${s.reasons.slice(0,2).map(r=>'<li>'+simplifyReason(r)+'</li>').join('')}</ul>
+    <div class="sig-entry">
+      <div><div class="label">Mua</div><div class="val">${F.usd(s.entry)}</div></div>
+      <div><div class="label">Cắt lỗ</div><div class="val r">${F.usd(s.sl)}</div></div>
+      <div><div class="label">Chốt lời</div><div class="val g">${F.usd(s.tp)}</div></div>
     </div>
-    <div class="sig-rr">R:R = 1:${s.rr} ${parseFloat(s.rr)>=2.5?'⭐ Rất tốt':parseFloat(s.rr)>=2?'✅ Tốt':'⚠️ Bình thường'}</div>
   </div>`;
 }
 

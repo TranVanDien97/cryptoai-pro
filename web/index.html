@@ -66,7 +66,16 @@
         <div class="advisor-body" id="advisorBody">Đang phân tích...</div>
       </div>
 
-      <!-- Portfolio Holdings -->
+      <!-- AI Phân tích coin đang giữ -->
+      <div class="card" style="border-left:3px solid var(--yellow)">
+        <div class="card-h"><h2>🎯 AI Tư vấn coin của bạn</h2></div>
+        <div class="card-body">
+          <p style="font-size:11px;color:var(--t4);margin-bottom:8px">Gemini AI phân tích từng coin bạn đang giữ → Nên bán/mua thêm/DCA, giá mục tiêu, dự đoán tương lai.</p>
+          <button class="btn btn-yellow" style="width:100%" onclick="analyzeMyHoldings()">🎯 Phân tích danh mục của tôi</button>
+          <div id="myHoldingsAI" style="margin-top:10px"></div>
+        </div>
+      </div>
+
       <div class="card">
         <div class="card-h">
           <h2>Danh mục</h2>
