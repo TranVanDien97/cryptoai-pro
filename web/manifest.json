@@ -1,15 +1,14 @@
 {
   "name": "CryptoAI Pro",
   "short_name": "CryptoAI",
-  "description": "AI Trading Assistant — Phân tích crypto chuyên nghiệp với dữ liệu thật từ Binance",
+  "description": "AI Trading Assistant — Binance",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0A0E17",
-  "theme_color": "#0A0E17",
+  "background_color": "#181A20",
+  "theme_color": "#181A20",
   "icons": [
     { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ],
-  "categories": ["finance", "utilities"],
   "lang": "vi"
 }

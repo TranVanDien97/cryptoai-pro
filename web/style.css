@@ -1,490 +1,325 @@
 /* ═══════════════════════════════════════════════════════ */
-/* CryptoAI Pro v5 — Mobile-First Professional UI        */
+/* CryptoAI v6 — Binance-Style Dark Theme                */
 /* ═══════════════════════════════════════════════════════ */
-
-/* --- Reset & Variables --- */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0B0F1A;--bg2:#111827;--card:#1A1F2E;--card2:#232839;
-  --border:#2A2F3F;--border2:#353B4F;
-  --t1:#F1F5F9;--t2:#94A3B8;--t3:#64748B;--t4:#475569;
-  --blue:#3B82F6;--blue2:#60A5FA;--blueA:rgba(59,130,246,.12);
-  --green:#22C55E;--green2:#4ADE80;--greenA:rgba(34,197,94,.1);
-  --red:#EF4444;--red2:#F87171;--redA:rgba(239,68,68,.1);
-  --gold:#F59E0B;--gold2:#FBBF24;--goldA:rgba(245,158,11,.1);
-  --purple:#A855F7;--purpleA:rgba(168,85,247,.1);
-  --radius:14px;--radius-sm:10px;
-  --nav-h:60px;--header-h:56px;
-  --font:'Inter',system-ui,-apple-system,sans-serif;
-  --mono:'JetBrains Mono',monospace;
+  --bg:#181A20;--bg2:#1E2026;--bg3:#2B2F36;--bg4:#0B0E11;
+  --border:#2B2F36;--border2:#363A45;
+  --t1:#EAECEF;--t2:#B7BDC6;--t3:#848E9C;--t4:#5E6673;
+  --yellow:#F0B90B;--yellowA:rgba(240,185,11,.1);
+  --green:#0ECB81;--greenA:rgba(14,203,129,.1);
+  --red:#F6465D;--redA:rgba(246,70,93,.1);
+  --blue:#1E80FF;--blueA:rgba(30,128,255,.1);
+  --r:8px;--rs:6px;
+  --font:-apple-system,'SF Pro Text','Helvetica Neue',sans-serif;
+  --mono:'SF Mono','Menlo','Roboto Mono',monospace;
+  --nav:56px;
 }
 html{font-size:14px;-webkit-text-size-adjust:100%}
 body{font-family:var(--font);background:var(--bg);color:var(--t1);
-  min-height:100vh;min-height:100dvh;overflow-x:hidden;
-  padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px));
-  padding-top:env(safe-area-inset-top,0px)}
-a{color:var(--blue);text-decoration:none}
-input,select,textarea{font-family:var(--font);font-size:14px;background:var(--bg2);
-  color:var(--t1);border:1px solid var(--border);border-radius:var(--radius-sm);
-  padding:10px 12px;outline:none;width:100%;transition:border .2s}
-input:focus,select:focus{border-color:var(--blue)}
+  min-height:100dvh;overflow-x:hidden;
+  padding-bottom:calc(var(--nav) + env(safe-area-inset-bottom,0px))}
+a{color:var(--yellow);text-decoration:none}
+input,select{font-family:var(--font);font-size:13px;background:var(--bg3);
+  color:var(--t1);border:1px solid var(--border);border-radius:var(--rs);
+  padding:10px 12px;outline:none;width:100%}
+input:focus{border-color:var(--yellow)}
 input::placeholder{color:var(--t4)}
-button{cursor:pointer;font-family:var(--font);border:none;outline:none}
+button{cursor:pointer;font-family:var(--font);border:none;outline:none;
+  -webkit-tap-highlight-color:transparent}
 ::-webkit-scrollbar{width:0;height:0}
+img{display:block}
 
-/* --- Bottom Navigation --- */
-#sidebar{position:fixed;bottom:0;left:0;right:0;z-index:1000;
-  height:var(--nav-h);background:rgba(11,15,26,.92);
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  border-top:1px solid var(--border);display:flex;align-items:stretch;
+/* ═══ BOTTOM NAV ═══ */
+#sidebar{position:fixed;bottom:0;left:0;right:0;z-index:100;height:var(--nav);
+  background:var(--bg4);border-top:1px solid var(--border);display:flex;
   padding-bottom:env(safe-area-inset-bottom,0px)}
 .sidebar-logo{display:none}
-.nav-menu{display:flex;width:100%;list-style:none;padding:0;margin:0}
+.nav-menu{display:flex;width:100%;list-style:none}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:3px;color:var(--t3);font-size:10px;
-  font-weight:500;transition:color .2s;user-select:none;
-  -webkit-tap-highlight-color:transparent;position:relative}
-.nav-icon{font-size:20px;line-height:1}
-.nav-label{font-size:10px;line-height:1;white-space:nowrap}
-.nav-item.active{color:var(--blue)}
-.nav-item.active::before{content:'';position:absolute;top:0;left:20%;right:20%;
-  height:2px;background:var(--blue);border-radius:0 0 2px 2px}
-.nav-item-signal.active{color:var(--gold)}
-.nav-item-signal.active::before{background:var(--gold)}
-.nav-badge{position:absolute;top:4px;right:calc(50% - 18px);
-  background:var(--red);color:#fff;font-size:9px;font-weight:700;
-  padding:1px 5px;border-radius:8px;min-width:16px;text-align:center;
-  line-height:14px}
+  justify-content:center;gap:2px;color:var(--t4);font-size:10px;font-weight:500;
+  transition:color .15s;user-select:none}
+.nav-icon{font-size:18px;line-height:1}
+.nav-label{font-size:10px;line-height:1}
+.nav-item.active{color:var(--yellow)}
+.nav-badge{position:absolute;top:4px;right:calc(50% - 16px);
+  background:var(--red);color:#fff;font-size:8px;font-weight:700;
+  padding:1px 4px;border-radius:6px;min-width:14px;text-align:center}
 .nav-badge:empty{display:none}
+.nav-item{position:relative}
 
-/* --- Header --- */
-.hdr{position:sticky;top:0;z-index:100;background:rgba(11,15,26,.88);
-  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-  padding:12px 16px;display:flex;align-items:center;justify-content:space-between;
-  border-bottom:1px solid var(--border);gap:8px}
-.hdr h1{font-size:18px;font-weight:800;letter-spacing:-.3px;
-  background:linear-gradient(135deg,var(--blue),var(--purple));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hdr-right{display:flex;align-items:center;gap:8px}
-.hdr-time{font-size:10px;color:var(--t3);font-family:var(--mono)}
-.hdr-actions{display:flex;gap:6px;flex-wrap:wrap}
-.hdr-actions button{background:var(--card);color:var(--t2);border:1px solid var(--border);
-  border-radius:8px;padding:6px 10px;font-size:11px;font-weight:500;
-  display:flex;align-items:center;gap:4px;white-space:nowrap;transition:all .2s}
-.hdr-actions button:active{transform:scale(.96);background:var(--card2)}
+/* ═══ TABS ═══ */
+main{padding:0}
+.tab{display:none}
+.tab.on{display:block;animation:tabIn .2s ease}
+@keyframes tabIn{from{opacity:0}to{opacity:1}}
 
-/* --- Status Bar --- */
-.conn-bar{display:flex;gap:8px;padding:8px 16px;overflow-x:auto;
-  -webkit-overflow-scrolling:touch}
-.conn-item{display:flex;align-items:center;gap:5px;font-size:11px;
-  color:var(--t3);white-space:nowrap;flex-shrink:0;
-  background:var(--card);padding:4px 10px;border-radius:20px}
-.status-dot{width:7px;height:7px;border-radius:50%;background:var(--t4);flex-shrink:0}
-.status-dot.on{background:var(--green);box-shadow:0 0 6px var(--green)}
-.status-dot.off{background:var(--red)}
+/* ═══ HEADER ═══ */
+.hdr{padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between}
+.hdr h1{font-size:18px;font-weight:700;color:var(--t1)}
+.hdr-right{display:flex;align-items:center;gap:6px}
+.hdr-btn{background:var(--bg3);color:var(--t2);border-radius:var(--rs);
+  padding:6px 10px;font-size:11px;font-weight:600;display:flex;align-items:center;gap:3px}
+.hdr-btn:active{opacity:.7}
 
-/* --- Main Content --- */
-main{padding:0 0 16px}
-.tab{display:none;padding:0 12px}
-.tab.on{display:block;animation:fadeUp .25s ease}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+/* ═══ PRICE BANNER ═══ */
+.price-banner{padding:0 16px 16px}
+.pb-main{font-size:28px;font-weight:700;font-family:var(--mono);letter-spacing:-.5px}
+.pb-sub{font-size:12px;font-family:var(--mono);font-weight:600;margin-top:2px}
+.pb-row{display:flex;gap:16px;margin-top:8px}
+.pb-item{font-size:11px;color:var(--t3)}
+.pb-item span{color:var(--t1);font-weight:600;font-family:var(--mono)}
 
-/* --- Cards --- */
-.card{background:var(--card);border-radius:var(--radius);
-  border:1px solid var(--border);margin-bottom:12px;overflow:hidden}
-.glass{background:rgba(26,31,46,.8);backdrop-filter:blur(8px)}
-.card-hdr{padding:14px 16px 10px;display:flex;align-items:center;
-  justify-content:space-between;gap:8px}
-.card-hdr h2{font-size:14px;font-weight:700;color:var(--t1);display:flex;align-items:center;gap:6px}
+/* ═══ STAT CARDS ═══ */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);
+  margin:0 16px 16px;border-radius:var(--r);overflow:hidden}
+.stat{background:var(--bg2);padding:14px;text-align:center}
+.stat-label{font-size:10px;color:var(--t4);text-transform:uppercase;letter-spacing:.3px}
+.stat-val{font-size:16px;font-weight:700;font-family:var(--mono);margin-top:4px}
+.stat-sub{font-size:10px;font-family:var(--mono);margin-top:2px}
+
+/* ═══ CARDS ═══ */
+.card{background:var(--bg2);margin:0 16px 12px;border-radius:var(--r);overflow:hidden}
+.card-h{padding:14px 16px 8px;display:flex;align-items:center;justify-content:space-between}
+.card-h h2{font-size:13px;font-weight:600;color:var(--t2)}
+.card-h .tag{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600}
 .card-body{padding:0 16px 14px}
 
-/* --- Dashboard Cards --- */
-.dash-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 12px;margin-bottom:12px}
-.dash-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
-  padding:14px;display:flex;flex-direction:column;gap:4px}
-.dc-label{font-size:11px;color:var(--t3);font-weight:500}
-.dc-value{font-size:20px;font-weight:800;font-family:var(--mono);letter-spacing:-.5px}
-.dc-sub{font-size:11px;font-family:var(--mono);font-weight:600}
-.dc-binance{font-size:16px;color:var(--gold)}
+/* ═══ SECTION DIVIDER ═══ */
+.divider{height:8px;background:var(--bg4)}
 
-/* --- Advisor Card --- */
-.advisor-card{margin:0 12px 12px;background:linear-gradient(135deg,rgba(59,130,246,.08),rgba(168,85,247,.06));
-  border:1px solid rgba(59,130,246,.2);border-radius:var(--radius);padding:16px;overflow:hidden}
-.advisor-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:13px;font-weight:700}
-.advisor-icon{font-size:22px}
-.advisor-time{margin-left:auto;font-size:10px;color:var(--t3);font-family:var(--mono)}
-.advisor-body{font-size:12px;line-height:1.7;color:var(--t2)}
-.advisor-body .buy{color:var(--green2);font-weight:700}
-.advisor-body .sell{color:var(--red2);font-weight:700}
+/* ═══ TABLE ═══ */
+.tbl-w{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{text-align:left;padding:8px 8px;color:var(--t4);font-weight:500;
+  font-size:10px;text-transform:uppercase;letter-spacing:.2px}
+.tbl td{padding:10px 8px;border-top:1px solid var(--border);vertical-align:middle}
+.tbl tr:active{background:rgba(240,185,11,.03)}
+.coin-cell{display:flex;align-items:center;gap:8px;cursor:pointer}
+.coin-cell img{width:24px;height:24px;border-radius:50%}
+.coin-sym{font-weight:600;font-size:13px}
+.coin-name{font-size:10px;color:var(--t4)}
+.gain{color:var(--green)}
+.loss{color:var(--red)}
+.ld{text-align:center;color:var(--t4);padding:20px 8px!important}
+
+/* ═══ PORTFOLIO ═══ */
+.port-header{padding:20px 16px;text-align:center;
+  background:linear-gradient(180deg,var(--bg2),var(--bg))}
+.port-label{font-size:11px;color:var(--t3)}
+.port-total{font-size:32px;font-weight:700;font-family:var(--mono);letter-spacing:-1px;margin:4px 0}
+.port-pnl{font-size:14px;font-weight:600;font-family:var(--mono)}
+.port-stats{display:flex;justify-content:center;gap:20px;margin-top:8px}
+.port-stats .ps{text-align:center}
+.port-stats .ps-l{font-size:10px;color:var(--t4)}
+.port-stats .ps-v{font-size:12px;font-weight:600;font-family:var(--mono)}
+.port-chart-row{display:flex;align-items:center;justify-content:center;gap:16px;padding:12px 16px}
+.port-legend{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.port-actions{display:flex;gap:8px;padding:0 16px 16px}
+.port-actions button{flex:1}
+
+/* ═══ BUTTONS ═══ */
+.btn{padding:10px 16px;border-radius:var(--rs);font-size:13px;font-weight:600;
+  min-height:40px;display:flex;align-items:center;justify-content:center;gap:4px;transition:opacity .15s}
+.btn:active{opacity:.8}
+.btn-yellow{background:var(--yellow);color:#181A20}
+.btn-green{background:var(--green);color:#fff}
+.btn-red{background:var(--red);color:#fff}
+.btn-ghost{background:transparent;color:var(--t2);border:1px solid var(--border)}
+.btn-sm{padding:6px 10px;font-size:11px;min-height:30px}
+.btn-danger{background:transparent;color:var(--red);border:1px solid rgba(246,70,93,.3);
+  border-radius:var(--rs);padding:6px 10px;font-size:11px;font-weight:600}
+.btn-del{background:transparent;color:var(--red);border:none;font-size:14px;padding:4px 6px}
+
+/* ═══ AI ADVISOR ═══ */
+.advisor{margin:0 16px 12px;background:var(--bg2);border-radius:var(--r);
+  border-left:3px solid var(--yellow);padding:14px 16px;overflow:hidden}
+.advisor-h{display:flex;align-items:center;gap:6px;margin-bottom:6px;font-size:12px;font-weight:600;color:var(--yellow)}
+.advisor-time{margin-left:auto;font-size:10px;color:var(--t4);font-family:var(--mono)}
+.advisor-body{font-size:12px;line-height:1.65;color:var(--t2)}
+.advisor-body .buy{color:var(--green);font-weight:700}
+.advisor-body .sell{color:var(--red);font-weight:700}
 .advisor-body strong{color:var(--t1)}
 
-/* --- Market Health --- */
-.market-health{display:flex;gap:6px;padding:0 12px 8px;overflow-x:auto}
-.mh-pill{display:flex;align-items:center;gap:5px;padding:6px 12px;
-  border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;flex-shrink:0}
-.mh-pill.bull{background:var(--greenA);color:var(--green2);border:1px solid rgba(34,197,94,.2)}
-.mh-pill.bear{background:var(--redA);color:var(--red2);border:1px solid rgba(239,68,68,.2)}
-.mh-pill.neutral{background:var(--blueA);color:var(--blue2);border:1px solid rgba(59,130,246,.2)}
-
-/* --- Gemini AI --- */
-.gemini-card{border:1px solid rgba(168,85,247,.2);
-  background:linear-gradient(135deg,rgba(168,85,247,.06),rgba(59,130,246,.04))}
-.gemini-desc{font-size:12px;color:var(--t3);margin-bottom:12px;line-height:1.5}
-.gemini-btn{width:100%;padding:12px;font-size:14px;font-weight:700;
-  background:linear-gradient(135deg,var(--purple),var(--blue));color:#fff;
-  border-radius:var(--radius-sm);border:none;transition:opacity .2s}
-.gemini-btn:active{opacity:.85}
-.gemini-badge{font-size:10px;padding:3px 8px;border-radius:6px;
-  background:var(--purpleA);color:var(--purple)}
-.gemini-result{margin-top:12px;font-size:12px;line-height:1.7;color:var(--t2)}
-.gemini-answer{padding:12px;background:var(--bg2);border-radius:var(--radius-sm);border:1px solid var(--border)}
-.gemini-meta{margin-top:8px;font-size:10px;color:var(--t4)}
-.gemini-error{color:var(--red2);padding:8px;background:var(--redA);border-radius:8px}
+/* ═══ GEMINI AI ═══ */
+.gemini-card{border-left:3px solid var(--blue)}
+.gemini-desc{font-size:11px;color:var(--t4);margin-bottom:10px;line-height:1.5}
+.gemini-btn{width:100%;padding:10px;font-size:13px;font-weight:700;
+  background:var(--blue);color:#fff;border-radius:var(--rs);border:none}
+.gemini-btn:active{opacity:.8}
+.gemini-badge{font-size:10px;padding:2px 8px;border-radius:4px;background:var(--blueA);color:var(--blue)}
+.gemini-result{margin-top:10px;font-size:12px;line-height:1.65;color:var(--t2)}
+.gemini-answer{padding:12px;background:var(--bg);border-radius:var(--rs);border:1px solid var(--border)}
+.gemini-meta{margin-top:6px;font-size:10px;color:var(--t4)}
+.gemini-error{color:var(--red);padding:8px;background:var(--redA);border-radius:var(--rs)}
 .gemini-loading{text-align:center;padding:16px;color:var(--t3)}
-.ai-buy{color:var(--green2);font-weight:700}
-.ai-sell{color:var(--red2);font-weight:700}
+.ai-buy{color:var(--green);font-weight:700}.ai-sell{color:var(--red);font-weight:700}
 .gemini-setup{padding:4px 0}
 
-/* --- Buttons --- */
-.btn-buy{background:var(--green);color:#000;font-weight:700;
-  border-radius:var(--radius-sm);padding:10px 16px;font-size:13px;
-  border:none;transition:all .2s;min-height:40px}
-.btn-buy:active{transform:scale(.97);opacity:.9}
-.btn-sell{background:var(--red);color:#fff;font-weight:700;
-  border-radius:var(--radius-sm);padding:10px 16px;font-size:13px;
-  border:none;transition:all .2s;min-height:40px}
-.btn-sell:active{transform:scale(.97);opacity:.9}
-.btn-sm{padding:8px 12px;font-size:12px;min-height:34px}
-.btn-danger{background:transparent;color:var(--red2);border:1px solid var(--red);
-  border-radius:var(--radius-sm);padding:8px 12px;font-size:12px;font-weight:600}
-
-/* --- Signal Cards --- */
-.signal-grid{display:flex;flex-direction:column;gap:10px;padding:0 4px 8px}
-.sig-card{background:var(--card);border:1px solid var(--border);
-  border-radius:var(--radius);padding:14px;transition:border-color .2s}
+/* ═══ SIGNAL CARDS ═══ */
+.signal-grid{display:flex;flex-direction:column;gap:8px}
+.sig-card{background:var(--bg2);border-radius:var(--r);padding:14px;border:1px solid var(--border)}
 .sig-card.buy-card{border-left:3px solid var(--green)}
 .sig-card.sell-card{border-left:3px solid var(--red)}
-.sig-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.sig-img{width:32px;height:32px;border-radius:50%}
+.sig-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.sig-img{width:28px;height:28px;border-radius:50%}
 .sig-name{flex:1}
-.sig-name .sym{font-size:15px;font-weight:800}
-.sig-name .name{font-size:11px;color:var(--t3)}
-.sig-badge{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:800}
-.sig-badge.STRONG_BUY,.sig-badge.BUY{background:var(--greenA);color:var(--green2)}
-.sig-badge.SELL,.sig-badge.STRONG_SELL{background:var(--redA);color:var(--red2)}
-.sig-badge.HOLD{background:var(--blueA);color:var(--blue2)}
-.sig-conf{margin:8px 0}
-.sig-conf-bar{height:4px;background:var(--bg2);border-radius:2px;overflow:hidden}
-.sig-conf-fill{height:100%;border-radius:2px;transition:width .5s ease}
-.sig-conf-text{font-size:10px;color:var(--t3);margin-top:3px;text-align:right;font-family:var(--mono)}
-.sig-tf{display:flex;gap:4px;margin:8px 0}
-.sig-tf-item{flex:1;text-align:center;padding:4px;background:var(--bg2);
-  border-radius:6px;font-size:10px;font-weight:600;font-family:var(--mono)}
-.sig-reasons{margin:8px 0 0;padding:0;list-style:none}
-.sig-reasons li{font-size:11px;color:var(--t2);padding:3px 0;padding-left:14px;
-  position:relative;line-height:1.4}
-.sig-reasons li::before{content:'•';position:absolute;left:0;color:var(--t3)}
-.sig-checks{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0}
-.sig-check{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600}
-.sig-check.good{background:var(--greenA);color:var(--green2)}
-.sig-check.bad{background:var(--redA);color:var(--red2)}
-.sig-check.neutral{background:var(--blueA);color:var(--blue2)}
-.sig-entry{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;
-  margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.sig-name .sym{font-size:14px;font-weight:700}
+.sig-name .name{font-size:10px;color:var(--t4)}
+.sig-badge{padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700}
+.sig-badge.STRONG_BUY,.sig-badge.BUY{background:var(--greenA);color:var(--green)}
+.sig-badge.SELL,.sig-badge.STRONG_SELL{background:var(--redA);color:var(--red)}
+.sig-badge.HOLD{background:var(--blueA);color:var(--blue)}
+.sig-conf{margin:6px 0}
+.sig-conf-bar{height:3px;background:var(--bg);border-radius:2px;overflow:hidden}
+.sig-conf-fill{height:100%;border-radius:2px;transition:width .4s}
+.sig-conf-text{font-size:10px;color:var(--t4);margin-top:2px;text-align:right;font-family:var(--mono)}
+.sig-reasons{margin:6px 0 0;padding:0;list-style:none}
+.sig-reasons li{font-size:11px;color:var(--t3);padding:2px 0 2px 12px;position:relative;line-height:1.4}
+.sig-reasons li::before{content:'•';position:absolute;left:0;color:var(--t4)}
+.sig-entry{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;
+  margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
 .sig-entry div{text-align:center}
-.sig-entry .label{font-size:9px;color:var(--t4);text-transform:uppercase;letter-spacing:.3px}
-.sig-entry .val{font-size:12px;font-weight:700;font-family:var(--mono);margin-top:2px}
-.sig-entry .val.g{color:var(--green2)}
-.sig-entry .val.r{color:var(--red2)}
-.sig-indicators{display:flex;gap:6px;margin:6px 0;flex-wrap:wrap}
-.sig-ind{font-size:10px;padding:2px 6px;background:var(--bg2);border-radius:4px;
-  font-family:var(--mono);color:var(--t2)}
-.sig-source{font-size:9px;color:var(--t4);margin-top:6px;text-align:right}
+.sig-entry .label{font-size:9px;color:var(--t4);text-transform:uppercase}
+.sig-entry .val{font-size:11px;font-weight:700;font-family:var(--mono);margin-top:1px}
+.sig-entry .val.g{color:var(--green)}
+.sig-entry .val.r{color:var(--red)}
+.sig-checks{display:flex;flex-wrap:wrap;gap:3px;margin:6px 0}
+.sig-check{font-size:9px;padding:2px 6px;border-radius:3px;font-weight:600}
+.sig-check.good{background:var(--greenA);color:var(--green)}
+.sig-check.bad{background:var(--redA);color:var(--red)}
+.sig-check.neutral{background:var(--blueA);color:var(--blue)}
+.sig-indicators,.sig-tf{display:flex;gap:4px;margin:4px 0;flex-wrap:wrap}
+.sig-ind,.sig-tf-item{font-size:9px;padding:2px 5px;background:var(--bg);border-radius:3px;font-family:var(--mono);color:var(--t3)}
+.sig-source{font-size:9px;color:var(--t4);margin-top:4px;text-align:right}
+.scan-progress{padding:16px;text-align:center}
+.scan-bar{height:3px;background:var(--bg);border-radius:2px;overflow:hidden;margin:6px 0}
+.scan-fill{height:100%;background:var(--yellow);border-radius:2px;transition:width .3s}
+.scan-text{font-size:11px;color:var(--t4)}
+.empty-msg{text-align:center;padding:24px;color:var(--t4);font-size:12px}
 
-/* --- Scan Progress --- */
-.scan-progress{padding:20px;text-align:center}
-.scan-bar{height:4px;background:var(--bg2);border-radius:2px;overflow:hidden;margin:8px 0}
-.scan-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));
-  border-radius:2px;transition:width .3s}
-.scan-text{font-size:11px;color:var(--t3)}
+/* ═══ FILTER CHIPS ═══ */
+.filter-bar{display:flex;gap:6px;padding:8px 16px;overflow-x:auto}
+.chip{padding:6px 12px;border-radius:4px;font-size:11px;font-weight:600;
+  background:var(--bg3);color:var(--t4);white-space:nowrap}
+.chip.on{background:var(--yellowA);color:var(--yellow)}
+.chip:active{opacity:.7}
 
-/* --- Filter Chips --- */
-.filter-row{padding:0 12px 8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
-.chips{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:2px 0}
-.chip{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;
-  background:var(--card);color:var(--t3);border:1px solid var(--border);
-  white-space:nowrap;transition:all .2s;flex-shrink:0}
-.chip.on{background:var(--blueA);color:var(--blue2);border-color:rgba(59,130,246,.3)}
-.chip:active{transform:scale(.96)}
-.sig-summary{font-size:11px;color:var(--t3);white-space:nowrap}
+/* ═══ MARKET SEARCH ═══ */
+.mkt-search{padding:8px 16px}
+.mkt-search input{background:var(--bg3);border:none;border-radius:var(--rs);padding:10px 14px}
 
-/* --- Tables --- */
-.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.tbl{width:100%;border-collapse:collapse;font-size:12px}
-.tbl th{text-align:left;padding:8px 6px;color:var(--t3);font-weight:600;
-  font-size:10px;text-transform:uppercase;letter-spacing:.3px;
-  border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--card)}
-.tbl td{padding:10px 6px;border-bottom:1px solid rgba(42,47,63,.4);vertical-align:middle}
-.tbl tr:active{background:rgba(59,130,246,.04)}
-.coin-cell{display:flex;align-items:center;gap:8px}
-.coin-cell img{width:22px;height:22px;border-radius:50%}
-.coin-sym{font-weight:700;font-size:12px}
-.coin-name{font-size:10px;color:var(--t3)}
-.gain{color:var(--green2)}
-.loss{color:var(--red2)}
-.ld{text-align:center;color:var(--t3);padding:24px!important}
+/* ═══ BINANCE ═══ */
+.bn-connect{padding:40px 16px;text-align:center}
+.bn-connect p{color:var(--t4);font-size:12px;margin-bottom:16px;line-height:1.6}
+.bn-total{text-align:center;padding:20px 16px}
+.bn-total-label{font-size:11px;color:var(--t4)}
+.bn-total-val{font-size:28px;font-weight:700;font-family:var(--mono);color:var(--yellow);margin-top:4px}
 
-/* --- Market Search --- */
-.mkt-search{padding:0 16px 10px}
-.mkt-search input{background:var(--bg2);border:1px solid var(--border);
-  border-radius:var(--radius-sm);padding:10px 14px;width:100%;font-size:13px}
+/* ═══ FORM FIELDS ═══ */
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+.field label{font-size:11px;color:var(--t4);font-weight:500}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 
-/* --- Portfolio --- */
-.port-summary{display:grid;grid-template-columns:1fr 1fr;gap:8px;
-  padding:12px;margin-bottom:4px}
-.port-total{grid-column:1/-1;text-align:center;padding:16px;
-  background:linear-gradient(135deg,rgba(59,130,246,.08),rgba(168,85,247,.06));
-  border-radius:var(--radius);border:1px solid rgba(59,130,246,.15)}
-.port-total .label{font-size:11px;color:var(--t3);font-weight:500}
-.port-total .value{font-size:28px;font-weight:900;font-family:var(--mono);
-  letter-spacing:-1px;margin:4px 0 2px}
-.port-total .pnl{font-size:14px;font-weight:700;font-family:var(--mono)}
-.port-stat{background:var(--card);border-radius:var(--radius-sm);padding:12px;
-  border:1px solid var(--border);text-align:center}
-.port-stat .label{font-size:10px;color:var(--t3)}
-.port-stat .value{font-size:16px;font-weight:800;font-family:var(--mono);margin-top:2px}
-.port-actions{display:flex;gap:8px;padding:0 12px 12px}
-.port-actions button{flex:1}
-.port-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 4px}
-
-/* --- Donut Chart --- */
-.port-chart{text-align:center;padding:8px}
-
-/* --- Holdings Form --- */
-.holding-form{padding:4px 0}
-.hf-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
-.hf-row.full{grid-template-columns:1fr}
-.bf-field{display:flex;flex-direction:column;gap:4px}
-.bf-field label{font-size:11px;color:var(--t3);font-weight:600}
-
-/* --- Alerts --- */
-.alert-list{display:flex;flex-direction:column}
-.alert-item{display:flex;align-items:flex-start;gap:10px;padding:14px 16px;
-  border-bottom:1px solid rgba(42,47,63,.3)}
-.alert-icon{font-size:20px;flex-shrink:0;margin-top:2px}
-.alert-body{flex:1;min-width:0}
-.alert-title{font-size:13px;font-weight:700;margin-bottom:2px}
-.alert-desc{font-size:11px;color:var(--t2);line-height:1.5}
-.alert-time{font-size:10px;color:var(--t4);margin-top:4px;font-family:var(--mono)}
-.alert-type-buy .alert-title{color:var(--green2)}
-.alert-type-sell .alert-title{color:var(--red2)}
-.empty-msg{text-align:center;padding:32px 16px;color:var(--t3);font-size:13px}
-
-/* --- Price Alerts --- */
-.pa-item{display:flex;align-items:center;gap:8px;padding:10px 16px;
-  border-bottom:1px solid rgba(42,47,63,.3);font-size:12px}
-.pa-item .pa-del{color:var(--red2);font-size:16px;cursor:pointer;padding:4px}
-
-/* --- Binance Tab --- */
-.bn-connect{padding:16px;text-align:center}
-.bn-connect p{color:var(--t3);font-size:12px;margin-bottom:12px;line-height:1.5}
-.bn-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px}
-.bn-card{background:var(--bg2);border-radius:var(--radius-sm);padding:12px;text-align:center;
-  border:1px solid var(--border)}
-.bn-card .bn-label{font-size:10px;color:var(--t3)}
-.bn-card .bn-val{font-size:18px;font-weight:800;font-family:var(--mono);margin-top:4px}
-.bn-bal-list{padding:8px}
-.bn-bal-item{display:flex;align-items:center;justify-content:space-between;
-  padding:10px 12px;border-bottom:1px solid rgba(42,47,63,.3)}
-.bn-bal-asset{font-weight:700;font-size:13px}
-.bn-bal-amount{font-family:var(--mono);font-size:12px;color:var(--t2);text-align:right}
-.bn-bal-usd{font-size:10px;color:var(--t3)}
-
-/* --- Risk Calculator --- */
-.risk-calc{padding:0 16px 16px}
-.rc-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
-.rc-field{display:flex;flex-direction:column;gap:4px}
-.rc-field label{font-size:11px;color:var(--t3);font-weight:600}
-.rc-result{margin-top:10px;padding:12px;background:var(--bg2);border-radius:var(--radius-sm);
-  font-size:12px;line-height:1.7;border:1px solid var(--border)}
-
-/* --- Settings --- */
-.settings-grid{display:flex;flex-direction:column;gap:0}
-.as-item{display:flex;align-items:center;justify-content:space-between;
-  padding:14px 16px;border-bottom:1px solid rgba(42,47,63,.3)}
-.as-item span{font-size:13px}
-
-/* Toggle Switch */
-.toggle{position:relative;width:44px;height:24px;flex-shrink:0}
+/* ═══ SETTINGS ═══ */
+.set-item{display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px;border-bottom:1px solid var(--border)}
+.set-item span{font-size:13px}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--t4);flex-shrink:0}
+.status-dot.on{background:var(--green);box-shadow:0 0 4px var(--green)}
+.status-dot.off{background:var(--red)}
+.toggle{position:relative;width:40px;height:22px;flex-shrink:0}
 .toggle input{opacity:0;width:0;height:0}
-.tslider{position:absolute;inset:0;background:var(--t4);border-radius:12px;
-  transition:.2s;cursor:pointer}
-.tslider::before{content:'';position:absolute;width:18px;height:18px;
-  left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s}
-.toggle input:checked+.tslider{background:var(--blue)}
-.toggle input:checked+.tslider::before{transform:translateX(20px)}
+.tslider{position:absolute;inset:0;background:var(--bg3);border-radius:11px;transition:.2s;cursor:pointer}
+.tslider::before{content:'';position:absolute;width:16px;height:16px;
+  left:3px;bottom:3px;background:var(--t3);border-radius:50%;transition:.2s}
+.toggle input:checked+.tslider{background:var(--yellow)}
+.toggle input:checked+.tslider::before{transform:translateX(18px);background:#181A20}
 
-/* --- Modal --- */
-.modal-bg{display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.6);
-  align-items:flex-end;justify-content:center;padding:0}
+/* ═══ MODAL ═══ */
+.modal-bg{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.7);
+  align-items:flex-end;justify-content:center}
 .modal-bg.open{display:flex}
-.modal{background:var(--card);border-radius:var(--radius) var(--radius) 0 0;
-  width:100%;max-width:480px;max-height:85vh;overflow-y:auto;
-  border:1px solid var(--border);border-bottom:none;
-  animation:slideUp .25s ease}
+.modal{background:var(--bg2);border-radius:var(--r) var(--r) 0 0;width:100%;max-height:80vh;
+  overflow-y:auto;animation:slideUp .2s ease}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:none}}
 .modal-hdr{display:flex;align-items:center;justify-content:space-between;
-  padding:16px;border-bottom:1px solid var(--border);position:sticky;top:0;
-  background:var(--card);z-index:1}
-.modal-hdr h2{font-size:16px;font-weight:700}
-.modal-x{background:var(--bg2);color:var(--t2);border:none;width:32px;height:32px;
-  border-radius:50%;font-size:18px;display:flex;align-items:center;justify-content:center}
+  padding:14px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2)}
+.modal-hdr h2{font-size:15px;font-weight:600}
+.modal-x{background:var(--bg3);color:var(--t3);border:none;width:28px;height:28px;
+  border-radius:50%;font-size:16px;display:flex;align-items:center;justify-content:center}
 #mBody{padding:16px}
 
-/* --- Toasts --- */
-#toasts{position:fixed;top:env(safe-area-inset-top,12px);left:50%;
-  transform:translateX(-50%);z-index:3000;display:flex;flex-direction:column;
-  gap:6px;width:90%;max-width:380px;pointer-events:none}
-.toast{padding:12px 16px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;
-  color:#fff;pointer-events:auto;animation:toastIn .3s ease;backdrop-filter:blur(8px)}
-.toast.info{background:rgba(59,130,246,.9)}
-.toast.success{background:rgba(34,197,94,.9)}
-.toast.error{background:rgba(239,68,68,.9)}
-.toast.warn{background:rgba(245,158,11,.9)}
-@keyframes toastIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+/* ═══ TOAST ═══ */
+#toasts{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:300;
+  display:flex;flex-direction:column;gap:4px;width:90%;max-width:360px;pointer-events:none}
+.toast{padding:10px 14px;border-radius:var(--rs);font-size:12px;font-weight:600;
+  color:#fff;pointer-events:auto;animation:toastIn .2s ease}
+.toast.info{background:rgba(30,128,255,.9)}.toast.success{background:rgba(14,203,129,.9)}
+.toast.error{background:rgba(246,70,93,.9)}.toast.warn{background:rgba(240,185,11,.9);color:#181A20}
+@keyframes toastIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
 
-/* --- FNG Canvas --- */
-canvas{display:block}
+/* ═══ PORTFOLIO EXTRA ═══ */
+.ph-pnl{font-family:var(--mono);font-weight:600}
+.ph-stat{display:flex;justify-content:space-between;padding:4px 16px;font-size:12px}
+.ph-stat-l{color:var(--t4)}.ph-stat-v{font-weight:600;font-family:var(--mono)}
+.leg-item{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--t3)}
+.leg-dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+.sl-warn{color:var(--red);font-weight:700;font-size:10px}
+.tp-ok{color:var(--green);font-weight:700;font-size:10px}
+.holding-ok{color:var(--t4);font-size:10px}
+.triggered{opacity:.5}
+.pa-coin{font-weight:700;margin-right:4px}
+.pa-dir{margin:0 4px;color:var(--t4)}.pa-price{font-family:var(--mono);font-weight:600}
+.pa-price.above{color:var(--green)}.pa-price.below{color:var(--red)}
+.alloc-summary{padding:10px;background:var(--bg);border-radius:var(--rs);margin-bottom:10px;font-size:11px;line-height:1.6;color:var(--t3)}
+.alloc-table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:10px}
+.alloc-table th{text-align:left;padding:6px;color:var(--t4);font-size:10px;border-bottom:1px solid var(--border)}
+.alloc-table td{padding:6px;border-bottom:1px solid var(--border)}
+.alloc-coin{display:flex;align-items:center;gap:6px}.alloc-coin img{width:18px;height:18px;border-radius:50%}
+.alloc-pct{font-weight:700;color:var(--yellow);font-family:var(--mono)}
+.alloc-bar-wrap{height:4px;background:var(--bg);border-radius:2px;overflow:hidden;min-width:40px}
+.alloc-bar{height:100%;border-radius:2px}
+.alloc-amount{font-weight:600;font-family:var(--mono)}.alloc-reason{font-size:10px;color:var(--t4)}
+.alloc-actions{display:flex;gap:6px;margin-top:6px}
+.btn-apply{background:var(--green);color:#fff;font-weight:600;padding:8px;border-radius:var(--rs);border:none;font-size:11px;flex:1}
+.btn-copy{background:var(--bg3);color:var(--t2);border:none;padding:8px;border-radius:var(--rs);font-size:11px;flex:1}
+.coin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:12px}
+.coin-item{background:var(--bg);border-radius:var(--rs);padding:6px;text-align:center}
+.coin-item-l{display:block;font-size:9px;color:var(--t4)}
+.coin-item-v{display:block;font-size:11px;font-weight:600;font-family:var(--mono);margin-top:1px}
+.sig-reason{list-style:none;padding:0}.sig-reason li{font-size:11px;color:var(--t3);padding:2px 0 2px 10px;position:relative}
+.sig-reason li::before{content:'•';position:absolute;left:0;color:var(--t4)}
+.sig-prices{display:flex;gap:6px;margin-top:6px}
+.sig-price{flex:1;text-align:center;padding:4px;background:var(--bg);border-radius:var(--rs)}
+.sig-price-label{display:block;font-size:8px;color:var(--t4);text-transform:uppercase}
+.sig-price-val{display:block;font-size:11px;font-weight:600;font-family:var(--mono);margin-top:1px}
+.trade-btn{flex:1;min-height:36px}
+.mca-item{padding:10px 16px;border-bottom:1px solid var(--border)}
+.mca-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px}
+.mca-coin{font-weight:600;font-size:13px}.mca-pnl{font-family:var(--mono);font-weight:600;font-size:12px}
+.mca-body{font-size:11px;color:var(--t3);line-height:1.5}
+.mca-action{font-weight:600}.mca-action.buy{color:var(--green)}.mca-action.sell{color:var(--red)}.mca-action.hold{color:var(--blue)}
+.market-health{display:flex;gap:4px;padding:4px 16px;overflow-x:auto}
+.mh-pill{display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:4px;font-size:10px;font-weight:600;white-space:nowrap;flex-shrink:0}
+.mh-pill.bull{background:var(--greenA);color:var(--green)}.mh-pill.bear{background:var(--redA);color:var(--red)}.mh-pill.neutral{background:var(--blueA);color:var(--blue)}
+.sig-summary{font-size:11px;color:var(--t4);white-space:nowrap}
+canvas.sparkline{width:60px;height:24px}
+.conn-bar{display:none}
 
-/* --- Trending --- */
-.trending-row{display:flex;gap:8px;padding:0 12px 12px;overflow-x:auto;
-  -webkit-overflow-scrolling:touch}
-.trend-chip{display:flex;align-items:center;gap:6px;padding:8px 12px;
-  background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);
-  font-size:12px;font-weight:600;white-space:nowrap;flex-shrink:0}
-.trend-chip img{width:18px;height:18px;border-radius:50%}
-
-/* --- Sparkline --- */
-canvas.sparkline{width:80px;height:28px}
-
-/* --- Binance Trade Form --- */
-.trade-form{padding:16px}
-.trade-form .tf-tabs{display:flex;margin-bottom:12px;border-radius:var(--radius-sm);overflow:hidden}
-.trade-form .tf-tab{flex:1;padding:10px;text-align:center;font-weight:700;font-size:13px;
-  background:var(--bg2);color:var(--t3);transition:all .2s}
-.trade-form .tf-tab.active-buy{background:var(--green);color:#000}
-.trade-form .tf-tab.active-sell{background:var(--red);color:#fff}
-
-/* --- Notification Button --- */
-#btnNotif{background:var(--card);color:var(--t2);border:1px solid var(--border);
-  border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600}
-#btnNotif.granted{background:var(--greenA);color:var(--green2);border-color:rgba(34,197,94,.3)}
-
-/* --- Dark utility --- */
-.text-gain{color:var(--green2)!important}
-.text-loss{color:var(--red2)!important}
-.text-muted{color:var(--t3)!important}
-.text-center{text-align:center}
-.fw-bold{font-weight:700}
-.mono{font-family:var(--mono)}
-
-/* --- Desktop Enhancement (>768px) --- */
+/* ═══ DESKTOP ═══ */
 @media(min-width:769px){
   body{padding-bottom:0;display:flex}
-  #sidebar{position:fixed;left:0;top:0;bottom:0;right:auto;
-    width:200px;height:100vh;flex-direction:column;border-top:none;
-    border-right:1px solid var(--border);padding:16px 8px}
-  .sidebar-logo{display:flex;align-items:center;gap:8px;padding:8px 12px;margin-bottom:16px}
-  .logo-mark{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;
-    font-weight:900;font-size:14px;padding:6px 8px;border-radius:8px}
-  .logo-text{font-size:16px;font-weight:700;color:var(--t1)}
-  .logo-ai{color:var(--blue)}
-  .nav-menu{flex-direction:column;gap:2px}
-  .nav-item{flex-direction:row;justify-content:flex-start;padding:10px 14px;
-    border-radius:var(--radius-sm);gap:10px;font-size:13px}
-  .nav-item.active::before{display:none}
-  .nav-item.active{background:var(--blueA)}
-  .nav-label{font-size:13px}
-  .nav-icon{font-size:18px}
+  #sidebar{position:fixed;left:0;top:0;bottom:0;right:auto;width:180px;height:100vh;
+    flex-direction:column;border-top:none;border-right:1px solid var(--border);padding:12px 6px}
+  .sidebar-logo{display:flex;align-items:center;gap:6px;padding:8px 10px;margin-bottom:12px}
+  .logo-mark{background:var(--yellow);color:#181A20;font-weight:900;font-size:12px;padding:4px 6px;border-radius:4px}
+  .logo-text{font-size:14px;font-weight:700;color:var(--t1)}.logo-ai{color:var(--yellow)}
+  .nav-menu{flex-direction:column;gap:1px}
+  .nav-item{flex-direction:row;justify-content:flex-start;padding:8px 12px;border-radius:var(--rs);gap:8px;font-size:12px}
+  .nav-item.active{background:var(--yellowA)}
+  .nav-label{font-size:12px}.nav-icon{font-size:16px}
   .nav-badge{position:static;margin-left:auto}
-  main{margin-left:200px;flex:1;max-width:900px}
-  .dash-row{grid-template-columns:repeat(4,1fr)}
-  .modal{border-radius:var(--radius);max-height:80vh;border-bottom:1px solid var(--border)}
-  .modal-bg{align-items:center;padding:16px}
-  @keyframes slideUp{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:none}}
+  main{margin-left:180px;flex:1;max-width:800px}
+  .stats{grid-template-columns:repeat(4,1fr)}
 }
-
-/* ═══════════════════════════════════════════════════════ */
-/* Additional styles for JS render functions              */
-/* ═══════════════════════════════════════════════════════ */
-
-/* --- Portfolio Stats --- */
-.ph-pnl{font-family:var(--mono);font-weight:700}
-.ph-stat{display:flex;justify-content:space-between;padding:6px 4px;font-size:12px}
-.ph-stat-l{color:var(--t3)}
-.ph-stat-v{font-weight:700;font-family:var(--mono)}
-
-/* --- Legend (donut chart) --- */
-.leg-item{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--t2)}
-.leg-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
-
-/* --- Allocation Table --- */
-.alloc-summary{padding:12px;background:var(--bg2);border-radius:var(--radius-sm);
-  border:1px solid var(--border);margin-bottom:12px;font-size:12px;line-height:1.7;color:var(--t2)}
-.alloc-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:12px}
-.alloc-table th{text-align:left;padding:8px 6px;color:var(--t3);font-size:10px;
-  text-transform:uppercase;border-bottom:1px solid var(--border)}
-.alloc-table td{padding:8px 6px;border-bottom:1px solid rgba(42,47,63,.3);vertical-align:middle}
-.alloc-coin{display:flex;align-items:center;gap:8px}
-.alloc-coin img{width:20px;height:20px;border-radius:50%}
-.alloc-pct{font-weight:800;color:var(--blue2);font-family:var(--mono)}
-.alloc-bar-wrap{height:6px;background:var(--bg2);border-radius:3px;overflow:hidden;min-width:60px}
-.alloc-bar{height:100%;border-radius:3px}
-.alloc-amount{font-weight:700;font-family:var(--mono);color:var(--t1)}
-.alloc-reason{font-size:11px;color:var(--t3)}
-.alloc-actions{display:flex;gap:8px;margin-top:8px}
-.btn-apply{background:var(--green);color:#000;font-weight:700;padding:10px 16px;
-  border-radius:var(--radius-sm);border:none;font-size:12px;flex:1;cursor:pointer}
-.btn-copy{background:var(--card);color:var(--t2);border:1px solid var(--border);
-  padding:10px 16px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;flex:1;cursor:pointer}
-
-/* --- Coin Modal --- */
-.coin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:14px}
-.coin-item{background:var(--bg2);border-radius:8px;padding:8px;text-align:center}
-.coin-item-l{display:block;font-size:10px;color:var(--t3)}
-.coin-item-v{display:block;font-size:12px;font-weight:700;font-family:var(--mono);margin-top:2px}
-.sig-reason{list-style:none;padding:0}
-.sig-reason li{font-size:11px;color:var(--t2);padding:3px 0 3px 12px;position:relative;line-height:1.4}
-.sig-reason li::before{content:'•';position:absolute;left:0;color:var(--t3)}
-.sig-prices{display:flex;gap:8px;margin-top:8px}
-.sig-price{flex:1;text-align:center;padding:6px;background:var(--bg);border-radius:6px}
-.sig-price-label{display:block;font-size:9px;color:var(--t4);text-transform:uppercase}
-.sig-price-val{display:block;font-size:12px;font-weight:700;font-family:var(--mono);margin-top:2px}
-.trade-btn{flex:1;min-height:38px}
-
-/* --- Alerts Styles --- */
-.sl-warn{color:var(--red2);font-weight:700;font-size:11px}
-.tp-ok{color:var(--green2);font-weight:700;font-size:11px}
-.holding-ok{color:var(--t3);font-size:11px}
-.triggered{opacity:.6}
-.pa-coin{font-weight:700;margin-right:4px}
-.pa-dir{margin:0 4px;color:var(--t3)}
-.pa-price{font-family:var(--mono);font-weight:700}
-.pa-price.above{color:var(--green2)}
-.pa-price.below{color:var(--red2)}
-
-/* --- Delete button --- */
-.btn-del{background:transparent;color:var(--red2);border:1px solid rgba(239,68,68,.3);
-  border-radius:6px;padding:4px 8px;font-size:12px;cursor:pointer;transition:all .2s}
-.btn-del:active{background:var(--redA);transform:scale(.95)}
-
-/* --- My coins alerts --- */
-.mca-item{padding:12px 16px;border-bottom:1px solid rgba(42,47,63,.3)}
-.mca-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
-.mca-coin{font-weight:700;font-size:14px}
-.mca-pnl{font-family:var(--mono);font-weight:700;font-size:13px}
-.mca-body{font-size:11px;color:var(--t2);line-height:1.6}
-.mca-action{font-weight:700}
-.mca-action.buy{color:var(--green2)}
-.mca-action.sell{color:var(--red2)}
-.mca-action.hold{color:var(--blue2)}
