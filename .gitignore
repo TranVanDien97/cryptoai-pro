@@ -1,0 +1,13 @@
+node_modules/
+server/data/credentials.json
+.env
+
+# Old projects not needed for cloud deploy
+backend/
+mobile/
+*.pyc
+__pycache__/
+venv/
+.expo/
+package-lock.json
+server/package-lock.json

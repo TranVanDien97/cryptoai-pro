@@ -1,0 +1,17 @@
+{
+  "name": "cryptoai-pro",
+  "version": "5.0.0",
+  "description": "CryptoAI Pro — AI Trading Assistant with Binance Integration",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "node server/server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
