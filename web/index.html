@@ -34,13 +34,12 @@
   <main>
     <!-- ==================== TÀI SẢN ==================== -->
     <section class="tab on" id="tab-portfolio">
-      <!-- Header -->
       <div class="hdr">
         <h1>CryptoAI Pro</h1>
         <div class="hdr-right">
           <span class="hdr-time" id="clock">--:--</span>
           <div class="hdr-actions">
-            <button id="btnNotif">🔔 Bật</button>
+            <button id="btnNotif">🔔</button>
             <button id="btnRefresh">🔄</button>
           </div>
         </div>
@@ -76,16 +75,44 @@
         </div>
       </div>
 
-      <!-- Portfolio -->
+      <!-- Portfolio Summary -->
       <div class="card" style="margin:0 12px 12px">
         <div class="card-hdr"><h2>💰 Danh mục đầu tư</h2></div>
-        <div id="portSummary"></div>
-        <div class="port-chart"><canvas id="portDonut" width="120" height="120"></canvas></div>
+        <div class="port-summary">
+          <div class="port-total">
+            <div class="label">Tổng giá trị</div>
+            <div class="value" id="pTotal">$0</div>
+            <div class="pnl" id="pPnl">--</div>
+          </div>
+        </div>
+        <div id="pStats" style="padding:0 12px"></div>
+        <div class="port-chart"><canvas id="pChart" width="120" height="120"></canvas></div>
+        <div id="pLegend" style="display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 8px;font-size:11px"></div>
         <div class="port-actions">
           <button class="btn-buy btn-sm" id="btnAddHolding">+ Thêm coin</button>
           <button class="btn-sm btn-danger" id="btnSyncBinance" style="display:none">🔄 Sync Binance</button>
         </div>
-        <div class="port-table-wrap"><div id="portBody"></div></div>
+        <div class="port-table-wrap">
+          <table class="tbl"><thead><tr>
+            <th>Coin</th><th>SL</th><th>Giá mua</th><th>Giá hiện tại</th><th>Giá trị</th><th>Lãi/Lỗ</th><th>SL%</th><th>TP%</th><th>Trạng thái</th><th></th>
+          </tr></thead><tbody id="portTbody"><tr><td colspan="10" class="ld empty-msg">Chưa có tài sản</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- AI Phân bổ -->
+      <div class="card" style="margin:0 12px 12px">
+        <div class="card-hdr"><h2>🤖 AI Phân bổ vốn</h2></div>
+        <div style="padding:0 16px 14px">
+          <div class="rc-row">
+            <div class="rc-field"><label>Số tiền đầu tư</label><input id="allocBudget" type="number" placeholder="10000000" step="any"></div>
+            <div class="rc-field"><label>Đơn vị</label><select id="allocCurrency"><option value="vnd">VND</option><option value="usd">USD</option></select></div>
+          </div>
+          <div class="rc-row">
+            <div class="rc-field"><label>Mức rủi ro</label><select id="allocRisk"><option value="low">🛡️ An toàn</option><option value="mid" selected>⚖️ Cân bằng</option><option value="high">🔥 Mạo hiểm</option></select></div>
+            <div class="rc-field" style="justify-content:flex-end"><button class="btn-buy" style="width:100%" onclick="aiAllocate()">🤖 Phân bổ</button></div>
+          </div>
+          <div id="allocResult"></div>
+        </div>
       </div>
 
       <!-- Market Table -->
@@ -144,16 +171,67 @@
     <!-- ==================== BINANCE ==================== -->
     <section class="tab" id="tab-binance">
       <div class="hdr"><h1>💎 Binance</h1></div>
-      <div id="binanceContent">
-        <div class="bn-connect" style="padding:32px 16px;text-align:center">
-          <div style="font-size:48px;margin-bottom:16px">💎</div>
-          <h3 style="margin-bottom:8px">Kết nối Binance</h3>
-          <p style="color:var(--t3);font-size:12px;margin-bottom:16px;line-height:1.6">Nhập API Key Binance để xem số dư, giao dịch và đặt lệnh trực tiếp.</p>
-          <div style="max-width:320px;margin:0 auto">
-            <div class="bf-field" style="margin-bottom:8px"><label>API Key</label><input id="bnApiKey" type="password" placeholder="Paste API Key..." autocomplete="off"></div>
-            <div class="bf-field" style="margin-bottom:12px"><label>API Secret</label><input id="bnApiSecret" type="password" placeholder="Paste API Secret..." autocomplete="off"></div>
-            <button class="btn-buy" id="btnBnConnect" style="width:100%">🔗 Kết nối</button>
+
+      <!-- Connect Form -->
+      <div id="bnConnectForm" style="padding:32px 16px;text-align:center">
+        <div style="font-size:48px;margin-bottom:16px">💎</div>
+        <h3 style="margin-bottom:8px;color:var(--t1)">Kết nối Binance</h3>
+        <p style="color:var(--t3);font-size:12px;margin-bottom:16px;line-height:1.6">Nhập API Key để xem số dư, giao dịch và đặt lệnh trực tiếp.</p>
+        <div style="max-width:320px;margin:0 auto">
+          <div class="bf-field" style="margin-bottom:8px"><label>API Key</label><input id="bnApiKey" type="password" placeholder="Paste API Key..." autocomplete="off"></div>
+          <div class="bf-field" style="margin-bottom:12px"><label>API Secret</label><input id="bnApiSecret" type="password" placeholder="Paste API Secret..." autocomplete="off"></div>
+          <button class="btn-buy" id="btnBnConnect" style="width:100%">🔗 Kết nối Binance</button>
+        </div>
+      </div>
+
+      <!-- Connected Status -->
+      <div id="bnStatusMsg" style="display:none;padding:12px;align-items:center;gap:8px;background:var(--greenA);margin:12px;border-radius:var(--radius-sm);font-size:12px;color:var(--green2)">
+        ✅ Binance đã kết nối
+      </div>
+
+      <!-- Balance Card -->
+      <div id="bnBalanceCard" class="card" style="display:none;margin:0 12px 12px">
+        <div class="card-hdr"><h2>💰 Số dư</h2><span class="mono" style="font-size:18px;font-weight:800;color:var(--gold)" id="bnTotalValue">$0</span></div>
+        <div class="tbl-wrap">
+          <table class="tbl"><thead><tr><th>Coin</th><th>Khả dụng</th><th>Đang khoá</th><th>Tổng</th><th>≈ USD</th></tr></thead>
+          <tbody id="bnBalanceTbody"><tr><td colspan="5" class="ld">Đang tải...</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- Trade Card -->
+      <div id="bnTradeCard" class="card" style="display:none;margin:0 12px 12px">
+        <div class="card-hdr"><h2>📈 Đặt lệnh</h2></div>
+        <div style="padding:0 16px 14px">
+          <div class="rc-row">
+            <div class="rc-field"><label>Cặp giao dịch</label><input id="tradeSymbol" placeholder="BTCUSDT" autocomplete="off"></div>
+            <div class="rc-field"><label>Loại lệnh</label><select id="tradeType"><option value="MARKET">Market</option><option value="LIMIT">Limit</option></select></div>
           </div>
+          <div class="rc-row">
+            <div class="rc-field"><label>Giá (Limit)</label><input id="tradePrice" type="number" placeholder="Auto" step="any"></div>
+            <div class="rc-field"><label>Số tiền (USDT)</label><input id="tradeQuoteQty" type="number" placeholder="10" step="any"></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn-buy" style="flex:1" onclick="placeBinanceOrder('BUY')">🟢 MUA</button>
+            <button class="btn-sell" style="flex:1" onclick="placeBinanceOrder('SELL')">🔴 BÁN</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Orders Card -->
+      <div id="bnOrderCard" class="card" style="display:none;margin:0 12px 12px">
+        <div class="card-hdr"><h2>📋 Lệnh mở</h2><span class="gemini-badge" id="bnOrderCount">0</span></div>
+        <div class="tbl-wrap">
+          <table class="tbl"><thead><tr><th>Cặp</th><th>Loại</th><th>Hướng</th><th>Giá</th><th>SL</th><th>Đã khớp</th><th>Thời gian</th><th></th></tr></thead>
+          <tbody id="bnOrdersTbody"><tr><td colspan="8" class="ld">Không có lệnh mở</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- History Card -->
+      <div id="bnHistoryCard" class="card" style="display:none;margin:0 12px 12px">
+        <div class="card-hdr"><h2>📜 Lịch sử</h2></div>
+        <div class="tbl-wrap">
+          <table class="tbl"><thead><tr><th>Thời gian</th><th>Cặp</th><th>Hướng</th><th>Giá</th><th>SL</th><th>Giá trị</th><th>Phí</th></tr></thead>
+          <tbody id="bnHistoryTbody"><tr><td colspan="7" class="ld">Không có lịch sử</td></tr></tbody></table>
         </div>
       </div>
     </section>
@@ -163,80 +241,81 @@
       <div class="hdr">
         <h1>🔔 Cảnh báo</h1>
         <div class="hdr-actions">
-          <button id="btnClearAlerts">🗑️ Xoá</button>
+          <button id="btnClearAlerts">🗑️</button>
           <button id="btnAddPriceAlert">+ Đặt giá</button>
         </div>
       </div>
-      <!-- Price alerts list -->
-      <div id="priceAlertList"></div>
-      <!-- Alert history -->
-      <div id="alertList"><div class="empty-msg">Chưa có cảnh báo nào</div></div>
+
+      <!-- Price Alerts -->
+      <div class="card" style="margin:12px">
+        <div class="card-hdr"><h2>🎯 Cảnh báo giá</h2></div>
+        <div id="paList"><div class="empty-msg" style="padding:8px;font-size:12px">Chưa có cảnh báo giá</div></div>
+      </div>
+
+      <!-- My Coins Alerts -->
+      <div class="card" style="margin:0 12px 12px">
+        <div class="card-hdr"><h2>📊 Cảnh báo coin đang giữ</h2></div>
+        <div id="myCoinsAlerts"><div class="empty-msg">Thêm coin vào tab 💰 Tài sản để xem</div></div>
+      </div>
+
+      <!-- Alert History -->
+      <div class="card" style="margin:0 12px 12px">
+        <div class="card-hdr"><h2>📝 Lịch sử cảnh báo</h2></div>
+        <div class="alert-list" id="alertHistory"><div class="empty-msg">Chưa có cảnh báo nào</div></div>
+      </div>
     </section>
 
     <!-- ==================== CÀI ĐẶT ==================== -->
     <section class="tab" id="tab-settings">
       <div class="hdr"><h1>⚙️ Cài đặt</h1></div>
       <div class="settings-grid">
-        <!-- Notifications -->
-        <div class="card" style="margin:0 12px 12px">
+        <div class="card" style="margin:12px 12px 0">
           <div class="card-hdr"><h2>🔔 Thông báo</h2></div>
           <div class="as-item"><span>Browser Notification</span><span class="status-dot" id="notifDot"></span></div>
           <div class="as-item"><span>Âm thanh cảnh báo</span><label class="toggle"><input type="checkbox" id="togSound" checked><span class="tslider"></span></label></div>
         </div>
-
-        <!-- Scanner -->
-        <div class="card" style="margin:0 12px 12px">
+        <div class="card" style="margin:12px 12px 0">
           <div class="card-hdr"><h2>🔍 Scanner</h2></div>
           <div class="as-item"><span>Tự quét mỗi 5 phút</span><label class="toggle"><input type="checkbox" id="togAutoScan" checked><span class="tslider"></span></label></div>
-          <div class="as-item"><span>Chỉ tín hiệu >70%</span><label class="toggle"><input type="checkbox" id="togHighConf" checked><span class="tslider"></span></label></div>
+          <div class="as-item"><span>Chỉ tín hiệu &gt;70%</span><label class="toggle"><input type="checkbox" id="togHighConf" checked><span class="tslider"></span></label></div>
         </div>
-
-        <!-- Alert Settings -->
-        <div class="card" style="margin:0 12px 12px">
+        <div class="card" style="margin:12px 12px 0">
           <div class="card-hdr"><h2>⚠️ Cảnh báo tự động</h2></div>
-          <div class="as-item"><span>Biến động mạnh (>8%)</span><label class="toggle"><input type="checkbox" id="togVolatile" checked><span class="tslider"></span></label></div>
-          <div class="as-item"><span>Fear & Greed cực đoan</span><label class="toggle"><input type="checkbox" id="togFng" checked><span class="tslider"></span></label></div>
+          <div class="as-item"><span>Biến động mạnh (&gt;8%)</span><label class="toggle"><input type="checkbox" id="togVolatile" checked><span class="tslider"></span></label></div>
+          <div class="as-item"><span>Fear &amp; Greed cực đoan</span><label class="toggle"><input type="checkbox" id="togFng" checked><span class="tslider"></span></label></div>
           <div class="as-item"><span>Stop-Loss</span><label class="toggle"><input type="checkbox" id="togSL" checked><span class="tslider"></span></label></div>
           <div class="as-item"><span>Take-Profit</span><label class="toggle"><input type="checkbox" id="togTP" checked><span class="tslider"></span></label></div>
           <div class="as-item"><span>Trailing Stop-Loss</span><label class="toggle"><input type="checkbox" id="togTrailSL" checked><span class="tslider"></span></label></div>
           <div class="as-item"><span>Trailing % mặc định</span><input id="togTrailPct" type="number" value="5" min="1" max="20" step="0.5" style="width:70px;text-align:center"></div>
         </div>
-
-        <!-- Connection Status -->
-        <div class="card" style="margin:0 12px 12px">
+        <div class="card" style="margin:12px 12px 0">
           <div class="card-hdr"><h2>📡 Kết nối</h2></div>
           <div class="as-item"><span>Backend Server</span><span class="status-dot" id="sBackendDot"></span></div>
           <div class="as-item"><span>Binance API</span><span class="status-dot" id="sBinanceDot"></span></div>
           <div class="as-item"><span>CoinGecko</span><span class="status-dot" id="sCgDot"></span></div>
-          <div class="as-item"><span>Fear & Greed</span><span class="status-dot" id="sFngDot"></span></div>
+          <div class="as-item"><span>Fear &amp; Greed</span><span class="status-dot" id="sFngDot"></span></div>
           <div class="as-item"><button class="btn-sm btn-danger" id="btnBnDisconnect">🔌 Ngắt Binance</button></div>
         </div>
-
-        <!-- Gemini -->
-        <div class="card" style="margin:0 12px 12px">
+        <div class="card" style="margin:12px 12px 0">
           <div class="card-hdr"><h2>🧠 Gemini AI</h2><span class="status-dot" id="sGeminiDot"></span></div>
           <div style="padding:0 16px 14px">
-            <p style="font-size:11px;color:var(--t3);line-height:1.5;margin:0 0 8px">Lấy API Key miễn phí tại <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a></p>
+            <p style="font-size:11px;color:var(--t3);line-height:1.5;margin:0 0 8px">Lấy API Key tại <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--blue)">aistudio.google.com/apikey</a></p>
             <div class="bf-field" style="margin-bottom:8px"><label>Gemini API Key</label><input id="geminiApiKey" type="password" placeholder="AIza..." autocomplete="off"></div>
             <button class="btn-buy btn-sm" id="btnGeminiConnect">🔗 Kết nối Gemini</button>
           </div>
         </div>
-
-        <!-- Backend URL -->
-        <div class="card" style="margin:0 12px 12px">
+        <div class="card" style="margin:12px 12px 0">
           <div class="card-hdr"><h2>📱 Server</h2></div>
           <div style="padding:0 16px 14px">
-            <p style="font-size:11px;color:var(--t3);line-height:1.5;margin:0 0 8px">Đổi URL server nếu cần (VD khi dùng trên mạng LAN)</p>
+            <p style="font-size:11px;color:var(--t3);line-height:1.5;margin:0 0 8px">Đổi URL server khi dùng trên LAN hoặc cloud</p>
             <div class="bf-field" style="margin-bottom:8px"><label>Backend URL</label><input id="backendUrl" type="url" placeholder="https://xxx.onrender.com" autocomplete="off"></div>
-            <button class="btn-buy btn-sm" id="btnSaveBackend">💾 Lưu & kết nối lại</button>
+            <button class="btn-buy btn-sm" id="btnSaveBackend">💾 Lưu &amp; kết nối lại</button>
             <div id="backendTestResult" style="margin-top:6px;font-size:11px"></div>
           </div>
         </div>
-
-        <!-- Info -->
-        <div class="card" style="margin:0 12px 24px">
+        <div class="card" style="margin:12px 12px 24px">
           <div class="card-hdr"><h2>ℹ️ Thông tin</h2></div>
-          <div class="as-item"><span>CryptoAI v5.0 — PWA Android</span></div>
+          <div class="as-item"><span>CryptoAI v5.1 — PWA Android</span></div>
           <div class="as-item"><span style="color:var(--t3);font-size:11px">Dữ liệu thật từ Binance. Chỉ mang tính tham khảo.</span></div>
           <div class="as-item"><span style="color:var(--t3);font-size:11px" id="backendInfo">Server: --</span></div>
         </div>
@@ -246,10 +325,8 @@
 
   <!-- Modal -->
   <div class="modal-bg" id="modal"><div class="modal"><div class="modal-hdr"><h2 id="mTitle">--</h2><button class="modal-x" id="mClose">✕</button></div><div id="mBody"></div></div></div>
-
   <!-- Toast -->
   <div id="toasts"></div>
-
   <script src="app.js"></script>
 </body>
 </html>

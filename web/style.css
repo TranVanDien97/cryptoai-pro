@@ -413,3 +413,78 @@ canvas.sparkline{width:80px;height:28px}
   .modal-bg{align-items:center;padding:16px}
   @keyframes slideUp{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:none}}
 }
+
+/* ═══════════════════════════════════════════════════════ */
+/* Additional styles for JS render functions              */
+/* ═══════════════════════════════════════════════════════ */
+
+/* --- Portfolio Stats --- */
+.ph-pnl{font-family:var(--mono);font-weight:700}
+.ph-stat{display:flex;justify-content:space-between;padding:6px 4px;font-size:12px}
+.ph-stat-l{color:var(--t3)}
+.ph-stat-v{font-weight:700;font-family:var(--mono)}
+
+/* --- Legend (donut chart) --- */
+.leg-item{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--t2)}
+.leg-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+
+/* --- Allocation Table --- */
+.alloc-summary{padding:12px;background:var(--bg2);border-radius:var(--radius-sm);
+  border:1px solid var(--border);margin-bottom:12px;font-size:12px;line-height:1.7;color:var(--t2)}
+.alloc-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:12px}
+.alloc-table th{text-align:left;padding:8px 6px;color:var(--t3);font-size:10px;
+  text-transform:uppercase;border-bottom:1px solid var(--border)}
+.alloc-table td{padding:8px 6px;border-bottom:1px solid rgba(42,47,63,.3);vertical-align:middle}
+.alloc-coin{display:flex;align-items:center;gap:8px}
+.alloc-coin img{width:20px;height:20px;border-radius:50%}
+.alloc-pct{font-weight:800;color:var(--blue2);font-family:var(--mono)}
+.alloc-bar-wrap{height:6px;background:var(--bg2);border-radius:3px;overflow:hidden;min-width:60px}
+.alloc-bar{height:100%;border-radius:3px}
+.alloc-amount{font-weight:700;font-family:var(--mono);color:var(--t1)}
+.alloc-reason{font-size:11px;color:var(--t3)}
+.alloc-actions{display:flex;gap:8px;margin-top:8px}
+.btn-apply{background:var(--green);color:#000;font-weight:700;padding:10px 16px;
+  border-radius:var(--radius-sm);border:none;font-size:12px;flex:1;cursor:pointer}
+.btn-copy{background:var(--card);color:var(--t2);border:1px solid var(--border);
+  padding:10px 16px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;flex:1;cursor:pointer}
+
+/* --- Coin Modal --- */
+.coin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:14px}
+.coin-item{background:var(--bg2);border-radius:8px;padding:8px;text-align:center}
+.coin-item-l{display:block;font-size:10px;color:var(--t3)}
+.coin-item-v{display:block;font-size:12px;font-weight:700;font-family:var(--mono);margin-top:2px}
+.sig-reason{list-style:none;padding:0}
+.sig-reason li{font-size:11px;color:var(--t2);padding:3px 0 3px 12px;position:relative;line-height:1.4}
+.sig-reason li::before{content:'•';position:absolute;left:0;color:var(--t3)}
+.sig-prices{display:flex;gap:8px;margin-top:8px}
+.sig-price{flex:1;text-align:center;padding:6px;background:var(--bg);border-radius:6px}
+.sig-price-label{display:block;font-size:9px;color:var(--t4);text-transform:uppercase}
+.sig-price-val{display:block;font-size:12px;font-weight:700;font-family:var(--mono);margin-top:2px}
+.trade-btn{flex:1;min-height:38px}
+
+/* --- Alerts Styles --- */
+.sl-warn{color:var(--red2);font-weight:700;font-size:11px}
+.tp-ok{color:var(--green2);font-weight:700;font-size:11px}
+.holding-ok{color:var(--t3);font-size:11px}
+.triggered{opacity:.6}
+.pa-coin{font-weight:700;margin-right:4px}
+.pa-dir{margin:0 4px;color:var(--t3)}
+.pa-price{font-family:var(--mono);font-weight:700}
+.pa-price.above{color:var(--green2)}
+.pa-price.below{color:var(--red2)}
+
+/* --- Delete button --- */
+.btn-del{background:transparent;color:var(--red2);border:1px solid rgba(239,68,68,.3);
+  border-radius:6px;padding:4px 8px;font-size:12px;cursor:pointer;transition:all .2s}
+.btn-del:active{background:var(--redA);transform:scale(.95)}
+
+/* --- My coins alerts --- */
+.mca-item{padding:12px 16px;border-bottom:1px solid rgba(42,47,63,.3)}
+.mca-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.mca-coin{font-weight:700;font-size:14px}
+.mca-pnl{font-family:var(--mono);font-weight:700;font-size:13px}
+.mca-body{font-size:11px;color:var(--t2);line-height:1.6}
+.mca-action{font-weight:700}
+.mca-action.buy{color:var(--green2)}
+.mca-action.sell{color:var(--red2)}
+.mca-action.hold{color:var(--blue2)}
