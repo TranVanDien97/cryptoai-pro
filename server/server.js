@@ -209,6 +209,36 @@ app.get('/api/binance/account', async (req, res) => {
   }
 });
 
+// Portfolio — balance + live prices in one call
+app.get('/api/binance/portfolio', async (req, res) => {
+  try {
+    const account = await binanceRequest('GET', '/api/v3/account');
+    const allPrices = await getAllBinancePrices();
+    const balances = account.balances
+      .filter(b => parseFloat(b.free) > 0 || parseFloat(b.locked) > 0)
+      .map(b => {
+        const asset = b.asset;
+        const free = parseFloat(b.free);
+        const locked = parseFloat(b.locked);
+        const total = free + locked;
+        let usdValue = 0;
+        let price = 0;
+        if (['USDT','BUSD','USDC','FDUSD','DAI'].includes(asset)) { price = 1; usdValue = total; }
+        else if (allPrices[asset + 'USDT']) { price = allPrices[asset + 'USDT']; usdValue = total * price; }
+        else if (allPrices[asset + 'BUSD']) { price = allPrices[asset + 'BUSD']; usdValue = total * price; }
+        else if (allPrices[asset + 'FDUSD']) { price = allPrices[asset + 'FDUSD']; usdValue = total * price; }
+        else if (allPrices[asset + 'BTC'] && allPrices['BTCUSDT']) { price = allPrices[asset + 'BTC'] * allPrices['BTCUSDT']; usdValue = total * price; }
+        return { asset, free, locked, total, price, usdValue };
+      })
+      .filter(b => b.usdValue >= 0.01)
+      .sort((a, b) => b.usdValue - a.usdValue);
+    const totalUSD = balances.reduce((s, b) => s + b.usdValue, 0);
+    res.json({ success: true, balances, totalUSD, timestamp: Date.now() });
+  } catch (err) {
+    res.json({ success: false, error: err.message });
+  }
+});
+
 // Open Orders
 app.get('/api/binance/orders', async (req, res) => {
   try {
@@ -583,8 +613,57 @@ FORMAT: Trả lời ngắn gọn, dùng emoji, chia thành các mục rõ ràng.
   }
 
   // All models failed
-  res.json({ success: false, error: 'Tất cả model Gemini đều bị giới hạn. Đợi 1 phút rồi thử lại, hoặc tạo API Key mới tại aistudio.google.com/apikey' });
+  res.json({ success: false, error: 'Tất cả model Gemini đều bị giới hạn. Đợi 1 phút rồi thử lại.' });
 });
+
+// Gemini Chat — multi-turn with portfolio context
+app.post('/api/ai/chat', async (req, res) => {
+  if (!geminiKey) return res.json({ success: false, error: 'Chưa kết nối Gemini AI. Vào Cài đặt nhập API Key.' });
+  const { message, portfolioContext, history } = req.body;
+  if (!message) return res.json({ success: false, error: 'Tin nhắn trống' });
+
+  // Build system context
+  const systemPrompt = `Bạn là CryptoAI — trợ lý đầu tư crypto chuyên nghiệp, nói tiếng Việt.
+Bạn có quyền truy cập vào dữ liệu THẬT từ ví Binance của người dùng.
+Trả lời ngắn gọn, cụ thể, có số liệu. Dùng emoji cho sinh động.
+Khi khuyên mua/bán, luôn kèm giá vào lệnh, cắt lỗ, chốt lời cụ thể.
+
+${portfolioContext || 'Chưa có dữ liệu portfolio.'}`;
+
+  // Build conversation
+  const contents = [];
+  contents.push({ role: 'user', parts: [{ text: systemPrompt }] });
+  contents.push({ role: 'model', parts: [{ text: 'Tôi đã đọc dữ liệu ví Binance của bạn. Hỏi tôi bất cứ điều gì về danh mục đầu tư!' }] });
+
+  // Add history
+  if (history && history.length) {
+    history.forEach(h => {
+      contents.push({ role: h.role === 'user' ? 'user' : 'model', parts: [{ text: h.text }] });
+    });
+  }
+  contents.push({ role: 'user', parts: [{ text: message }] });
+
+  const body = JSON.stringify({
+    contents,
+    generationConfig: { temperature: 0.7, maxOutputTokens: 1500 }
+  });
+
+  const models = ['gemini-2.0-flash-lite', 'gemini-1.5-flash', 'gemini-2.0-flash'];
+  for (const model of models) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`;
+      const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+      if (response.status === 429 || response.status === 404) continue;
+      if (!response.ok) continue;
+      const data = await response.json();
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) continue;
+      return res.json({ success: true, reply: text, model, timestamp: Date.now() });
+    } catch { continue; }
+  }
+  res.json({ success: false, error: 'Gemini đang bận. Thử lại sau.' });
+});
+
 
 // ═══════════════════════════════════════════════════════
 // START

@@ -307,6 +307,13 @@ main{padding:0}
 canvas.sparkline{width:60px;height:24px}
 .conn-bar{display:none}
 
+/* ═══ CHAT ═══ */
+.chat-msg{padding:8px 12px;border-radius:var(--rs);margin-bottom:6px;max-width:85%;word-wrap:break-word}
+.chat-user{background:var(--yellowA);color:var(--t1);margin-left:auto;border:1px solid rgba(240,185,11,.2)}
+.chat-ai{background:var(--bg);color:var(--t2);border:1px solid var(--border)}
+.chat-ai .ai-buy{color:var(--green);font-weight:700}
+.chat-ai .ai-sell{color:var(--red);font-weight:700}
+
 /* ═══ DESKTOP ═══ */
 @media(min-width:769px){
   body{padding-bottom:0;display:flex}

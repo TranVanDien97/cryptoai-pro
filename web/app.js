@@ -1598,6 +1598,125 @@ window.addEventListener('unhandledrejection',e=>{
   console.error('Promise error:',e.reason);
 });
 
+// ═══════════════════════════════════════════════════════
+// GEMINI CHAT
+// ═══════════════════════════════════════════════════════
+const chatHistory=[];
+
+function buildPortfolioContext(){
+  let ctx='DỮ LIỆU VÍ BINANCE THẬT:\n';
+  if(S.binance.balances.length){
+    let total=0;
+    S.binance.balances.forEach(b=>{
+      const p=S.tickerMap[b.asset+'USDT']||0;
+      const usd=['USDT','BUSD','USDC'].includes(b.asset)?b.total:b.total*p;
+      if(usd>=0.01){
+        ctx+=`${b.asset}: ${b.total} (≈$${usd.toFixed(2)}, giá $${p||1})\n`;
+        total+=usd;
+      }
+    });
+    ctx+=`Tổng ví Binance: $${total.toFixed(2)}\n`;
+  }
+  if(S.holdings.length){
+    ctx+='\nDANH MỤC THEO DÕI:\n';
+    S.holdings.forEach(h=>{
+      const cp=getCurPrice(h);
+      const val=cp*h.qty,cost=h.cost*h.qty;
+      const pnl=cost>0?((val-cost)/cost*100):0;
+      ctx+=`${h.name}: ${h.qty} x mua $${h.cost} → hiện $${cp} (P/L: ${pnl.toFixed(1)}%)\n`;
+    });
+  }
+  const btc=S.crypto.find(c=>c.id==='bitcoin');
+  if(btc)ctx+=`\nBTC: $${btc.current_price} (24h: ${btc.price_change_percentage_24h?.toFixed(1)}%)\n`;
+  if(S.fng)ctx+=`Fear&Greed: ${S.fng.value} (${S.fng.value_classification})\n`;
+  return ctx;
+}
+
+async function sendChat(){
+  const input=$('chatInput');
+  const msg=input.value.trim();
+  if(!msg)return;
+  input.value='';
+
+  // Add user message
+  appendChat('user',msg);
+  chatHistory.push({role:'user',text:msg});
+
+  // Show typing
+  const typingId='typing_'+Date.now();
+  appendChat('ai','💬 Đang suy nghĩ...',typingId);
+
+  try{
+    const r=await fetch(BACKEND+'/api/ai/chat',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({message:msg,portfolioContext:buildPortfolioContext(),history:chatHistory.slice(-10)})
+    });
+    const j=await r.json();
+    const el=document.getElementById(typingId);
+    if(j.success){
+      const html=j.reply.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')
+        .replace(/(NÊN MUA|MUA|DCA|STRONG_BUY)/gi,'<span class="ai-buy">$1</span>')
+        .replace(/(NÊN BÁN|BÁN|CẮT LỖ|TRÁNH)/gi,'<span class="ai-sell">$1</span>');
+      if(el)el.innerHTML=html;
+      chatHistory.push({role:'model',text:j.reply});
+    }else{
+      if(el)el.innerHTML=`<span style="color:var(--red)">❌ ${j.error}</span>`;
+    }
+  }catch(e){
+    const el=document.getElementById(typingId);
+    if(el)el.innerHTML=`<span style="color:var(--red)">❌ ${e.message}</span>`;
+  }
+  const box=$('chatMessages');
+  if(box)box.scrollTop=box.scrollHeight;
+}
+
+function appendChat(role,text,id){
+  const box=$('chatMessages');if(!box)return;
+  const div=document.createElement('div');
+  div.className='chat-msg chat-'+role;
+  if(id)div.id=id;
+  div.innerHTML=text;
+  box.appendChild(div);
+  box.scrollTop=box.scrollHeight;
+}
+
+// Sync portfolio from Binance wallet
+async function syncBinancePortfolio(){
+  if(!S.binanceOn){toast('Kết nối Binance trước','warn');return}
+  toast('🔄 Đang đồng bộ từ ví Binance...','info');
+  try{
+    const r=await fetch(BACKEND+'/api/binance/portfolio');
+    const j=await r.json();
+    if(!j.success){toast('❌ '+j.error,'error');return}
+    // Update holdings from Binance
+    let added=0;
+    j.balances.forEach(b=>{
+      if(['USDT','BUSD','USDC','FDUSD','DAI'].includes(b.asset))return;
+      if(b.usdValue<1)return;
+      // Check if already in holdings
+      const existing=S.holdings.find(h=>(h.symbolLower||'').toUpperCase()===b.asset||(h.symbol||'').toUpperCase()===b.asset);
+      if(existing){
+        // Update qty and current price
+        existing.qty=b.total;
+        existing.currentPrice=b.price;
+      }else{
+        // Add new
+        S.holdings.push({
+          id:Date.now().toString()+added,type:'crypto',
+          symbol:b.asset.toLowerCase(),symbolLower:b.asset.toLowerCase(),
+          name:b.asset,qty:b.total,cost:b.price,
+          sl:7,tp:20
+        });
+        added++;
+      }
+    });
+    // Update binance data
+    S.binance.totalUSDT=j.totalUSD;
+    saveH();renderPortfolio();
+    toast(`✅ Đã đồng bộ! ${j.balances.length} coin, tổng $${j.totalUSD.toFixed(2)}`,'success');
+  }catch(e){toast('❌ Lỗi: '+e.message,'error')}
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
   try{init()}catch(e){
     console.error('Init crash:',e);
