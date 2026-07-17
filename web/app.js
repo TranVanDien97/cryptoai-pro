@@ -1375,12 +1375,12 @@ function renderPortfolio(){
     return`<tr>
       <td>🪙 <strong>${hh.name}</strong></td>
       <td class="r" style="font-family:var(--mono)">${hh.qty}</td>
-      <td class="r" style="font-family:var(--mono)">${F.usd(hh.cost)}</td>
+      <td class="r" style="font-family:var(--mono);cursor:pointer;color:var(--yellow)" onclick="editCost('${hh.id}')" title="Bấm để sửa giá vốn">${F.usd(hh.cost)} ✏️</td>
       <td class="r" style="font-family:var(--mono)">${F.usd(cp)}</td>
       <td class="r" style="font-family:var(--mono);font-weight:600">${F.usd(val)}</td>
       <td class="r ${cc}" style="font-family:var(--mono)">${pnl>=0?'+':''}${F.usd(Math.abs(pnl))} (${F.pct(pp)})</td>
-      <td class="r" style="font-family:var(--mono)">${hh.sl||'--'}%</td>
-      <td class="r" style="font-family:var(--mono)">${hh.tp||'--'}%</td>
+      <td class="r" style="font-family:var(--mono);cursor:pointer" onclick="editSLTP('${hh.id}','sl')">${hh.sl||'--'}% ✏️</td>
+      <td class="r" style="font-family:var(--mono);cursor:pointer" onclick="editSLTP('${hh.id}','tp')">${hh.tp||'--'}% ✏️</td>
       <td class="c">${status}</td>
       <td class="c"><button class="btn-del" onclick="delHolding('${hh.id}')">✕</button></td>
     </tr>`;
@@ -1392,6 +1392,31 @@ function renderPortfolio(){
   const chartData=h.map((hh,i)=>({l:hh.name,v:getCurPrice(hh)*hh.qty,c:COLORS[i%COLORS.length]}));
   drawDonut($('pChart'),chartData);
   $('pLegend').innerHTML=chartData.map(d=>`<div class="leg-item"><span class="leg-dot" style="background:${d.c}"></span>${d.l}</div>`).join('');
+}
+
+function editCost(id){
+  const h = S.holdings.find(x=>x.id===id);
+  if(!h)return;
+  const newCost = prompt(`Nhập Giá vốn (Average Buy Price) cho ${h.symbol.toUpperCase()}:\nVí dụ: 0.37`, h.cost);
+  if(newCost!==null && !isNaN(parseFloat(newCost)) && parseFloat(newCost)>=0){
+    h.cost = parseFloat(newCost);
+    saveH();
+    renderPortfolio();
+    toast('✅ Đã cập nhật giá vốn','success');
+  }
+}
+
+function editSLTP(id, type){
+  const h = S.holdings.find(x=>x.id===id);
+  if(!h)return;
+  const label = type==='sl'?'Cắt lỗ (Stop-loss %)':'Chốt lời (Take-profit %)';
+  const val = prompt(`Nhập mức ${label} cho ${h.symbol.toUpperCase()}:\n(Nhập số %, ví dụ: 7)`, h[type]||'');
+  if(val!==null && !isNaN(parseFloat(val)) && parseFloat(val)>=0){
+    h[type] = parseFloat(val);
+    saveH();
+    renderPortfolio();
+    toast('✅ Đã cập nhật ' + label,'success');
+  }
 }
 
 // ═══════════════════════════════════════════════════════
