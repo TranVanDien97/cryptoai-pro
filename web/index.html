@@ -77,27 +77,38 @@
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-h">
-          <h2>Danh mục</h2>
-          <div style="display:flex;gap:4px">
-            <button class="btn btn-ghost btn-sm" onclick="syncBinancePortfolio()">🔄 Sync</button>
-            <button class="btn btn-yellow btn-sm" id="btnAddHolding">+ Thêm</button>
+      <div class="card binance-port">
+        <div class="bp-header">
+          <div class="bp-title">Tổng giá trị ước tính <span style="opacity:0.5">👁️</span></div>
+          <div class="bp-total-usd" id="pTotal">0.00000000 <span class="bp-currency">USDT</span><i class="bp-dropdown"></i></div>
+          <div class="bp-total-fiat" id="pTotalFiat">≈ 0.00 USD</div>
+          <div class="bp-pnl" id="pPnl">PNL hôm nay --</div>
+          <div class="bp-actions">
+            <button class="btn btn-ghost btn-sm" onclick="syncBinancePortfolio()">Nạp / Sync</button>
+            <button class="btn btn-ghost btn-sm" id="btnAddHolding">+ Thêm</button>
+          </div>
+          <div class="bp-chart-mini">
+            <canvas id="pChart" width="80" height="40" style="display:none"></canvas>
+            <svg viewBox="0 0 100 30" class="bp-sparkline"><path d="M0 25 L10 25 L20 10 L30 15 L40 5 L50 20 L60 25 L70 10 L80 15 L90 5 L100 10" stroke="var(--yellow)" stroke-width="2" fill="none"/></svg>
           </div>
         </div>
-        <div style="text-align:center;padding:4px 0">
-          <span class="port-total" id="pTotal">$0</span>
-          <div class="port-pnl" id="pPnl">--</div>
-        </div>
-        <div id="pStats"></div>
-        <div class="port-chart-row">
-          <canvas id="pChart" width="80" height="80"></canvas>
-          <div class="port-legend" id="pLegend"></div>
-        </div>
-        <div class="tbl-w">
-          <table class="tbl"><thead><tr>
-            <th>Coin</th><th class="r">SL</th><th class="r">Mua</th><th class="r">Hiện tại</th><th class="r">GT</th><th class="r">P/L</th><th class="r">SL%</th><th class="r">TP%</th><th class="c"></th><th class="c"></th>
-          </tr></thead><tbody id="portTbody"><tr><td colspan="10" class="ld">Chưa có coin</td></tr></tbody></table>
+        <div class="bp-table-section">
+          <div class="bp-table-header">
+            <div class="bp-tabs"><span class="on">Xem tài sản</span><span>Chế độ xem tài khoản</span></div>
+            <div class="bp-tools">🔍 Quy đổi tài sản nhỏ 🔲 Ẩn tài sản <1 USD</div>
+          </div>
+          <div class="tbl-w">
+            <table class="tbl binance-tbl">
+              <thead><tr>
+                <th>Tài sản</th>
+                <th class="r">Số lượng</th>
+                <th class="r">Giá tài sản / Giá vốn ✏️</th>
+                <th class="r">PNL thả nổi</th>
+                <th class="c"></th>
+              </tr></thead>
+              <tbody id="portTbody"><tr><td colspan="5" class="ld">Chưa có tài sản</td></tr></tbody>
+            </table>
+          </div>
         </div>
       </div>
 

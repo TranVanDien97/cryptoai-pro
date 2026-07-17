@@ -1362,36 +1362,38 @@ function renderPortfolio(){
   const tb=$('portTbody');
   const h=S.holdings;
   if(!h.length){
-    tb.innerHTML='<tr><td colspan="10" class="ld empty-msg">Chưa có tài sản — thêm ở form trên hoặc đồng bộ Binance</td></tr>';
-    $('pTotal').textContent='$0';$('pPnl').textContent='--';$('pPnl').className='ph-pnl';$('pStats').innerHTML='';$('pLegend').innerHTML='';drawDonut($('pChart'),[]);return;
+    tb.innerHTML='<tr><td colspan="5" class="ld empty-msg" style="padding:40px 0;text-align:center;color:var(--t4)">Chưa có tài sản</td></tr>';
+    $('pTotal').innerHTML=`0.00000000 <span class="bp-currency">USDT</span><i class="bp-dropdown"></i>`;
+    $('pTotalFiat').textContent=`≈ 0.00 USD`;
+    $('pPnl').innerHTML=`PNL hôm nay <span style="color:var(--t4)">--</span>`;
+    return;
   }
   let tv=0,tc=0;
   tb.innerHTML=h.map((hh,i)=>{
     const cp=getCurPrice(hh);const val=cp*hh.qty,cost=hh.cost*hh.qty;
     const pnl=val-cost,pp=cost>0?((val-cost)/cost)*100:0;tv+=val;tc+=cost;
     const cc=F.cc(pnl);
-    const slHit=hh.sl&&pp<=-hh.sl;const tpHit=hh.tp&&pp>=hh.tp;
-    const status=slHit?'<span class="sl-warn">⚠️ STOP-LOSS</span>':tpHit?'<span class="tp-ok">🎯 CHỐT LỜI</span>':'<span class="holding-ok">Giữ</span>';
+    
+    const assetHtml = `<div class="b-asset"><img src="${hh.image||'https://cdn-icons-png.flaticon.com/512/8043/8043026.png'}"><div class="b-asset-info"><div class="b-asset-sym">${(hh.symbol||hh.name).toUpperCase()}</div><div class="b-asset-name">${hh.name}</div></div></div>`;
+    const qtyText = (hh.qty % 1 !== 0) ? hh.qty.toFixed(5) : hh.qty;
+    const qtyHtml = `<div class="b-val">${qtyText}</div><div class="b-sub">${F.usd(val)} USD</div>`;
+    const priceHtml = `<div class="b-val">${F.usd(cp)} USD</div><div class="b-sub b-editable" onclick="editCost('${hh.id}')" title="Sửa giá vốn">${F.usd(hh.cost)} USD ✏️</div>`;
+    const pnlHtml = `<div class="b-pnl ${cc}">${pnl>=0?'+':''}${F.usd(Math.abs(pnl))}</div>`;
+    const actionHtml = `<div class="b-actions"><span onclick="editSLTP('${hh.id}','sl')" title="Cắt lỗ ${hh.sl||'--'}%">SL</span><span onclick="editSLTP('${hh.id}','tp')" title="Chốt lời ${hh.tp||'--'}%">TP</span><span class="b-del" onclick="delHolding('${hh.id}')" title="Xóa">✕</span></div>`;
+
     return`<tr>
-      <td>🪙 <strong>${hh.name}</strong></td>
-      <td class="r" style="font-family:var(--mono)">${hh.qty}</td>
-      <td class="r" style="font-family:var(--mono);cursor:pointer;color:var(--yellow)" onclick="editCost('${hh.id}')" title="Bấm để sửa giá vốn">${F.usd(hh.cost)} ✏️</td>
-      <td class="r" style="font-family:var(--mono)">${F.usd(cp)}</td>
-      <td class="r" style="font-family:var(--mono);font-weight:600">${F.usd(val)}</td>
-      <td class="r ${cc}" style="font-family:var(--mono)">${pnl>=0?'+':''}${F.usd(Math.abs(pnl))} (${F.pct(pp)})</td>
-      <td class="r" style="font-family:var(--mono);cursor:pointer" onclick="editSLTP('${hh.id}','sl')">${hh.sl||'--'}% ✏️</td>
-      <td class="r" style="font-family:var(--mono);cursor:pointer" onclick="editSLTP('${hh.id}','tp')">${hh.tp||'--'}% ✏️</td>
-      <td class="c">${status}</td>
-      <td class="c"><button class="btn-del" onclick="delHolding('${hh.id}')">✕</button></td>
+      <td>${assetHtml}</td>
+      <td class="r">${qtyHtml}</td>
+      <td class="r">${priceHtml}</td>
+      <td class="r">${pnlHtml}</td>
+      <td class="r">${actionHtml}</td>
     </tr>`;
   }).join('');
+  
   const tp=tv-tc,tpp=tc>0?((tv-tc)/tc)*100:0;
-  $('pTotal').textContent=F.usd(tv);
-  const pe=$('pPnl');pe.textContent=`${tp>=0?'+':''}${F.usd(Math.abs(tp))} (${F.pct(tpp)})`;pe.className='ph-pnl '+(tp>=0?'gain':'loss');
-  $('pStats').innerHTML=`<div class="ph-stat"><span class="ph-stat-l">Vốn đầu tư</span><span class="ph-stat-v">${F.usd(tc)}</span></div><div class="ph-stat"><span class="ph-stat-l">Số mã</span><span class="ph-stat-v">${h.length}</span></div>`;
-  const chartData=h.map((hh,i)=>({l:hh.name,v:getCurPrice(hh)*hh.qty,c:COLORS[i%COLORS.length]}));
-  drawDonut($('pChart'),chartData);
-  $('pLegend').innerHTML=chartData.map(d=>`<div class="leg-item"><span class="leg-dot" style="background:${d.c}"></span>${d.l}</div>`).join('');
+  $('pTotal').innerHTML=`${tv.toFixed(8)} <span class="bp-currency">USDT</span><i class="bp-dropdown"></i>`;
+  $('pTotalFiat').textContent=`≈ ${F.usd(tv)} USD`;
+  $('pPnl').innerHTML=`PNL hôm nay <span class="${tp>=0?'gain':'loss'}">${tp>=0?'+ ':''}${F.usd(Math.abs(tp))} USD (${F.pct(tpp)})</span>`;
 }
 
 function editCost(id){
