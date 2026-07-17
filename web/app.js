@@ -78,6 +78,16 @@ function calcEMA(data,period){
   for(let i=period;i<data.length;i++)ema.push(data[i]*k+ema[ema.length-1]*(1-k));
   return ema;
 }
+function calcSMA(data,period){
+  if(!data||data.length<period)return[];
+  const out=[];
+  for(let i=period-1;i<data.length;i++){
+    let sum=0;
+    for(let j=i-period+1;j<=i;j++)sum+=data[j];
+    out.push(sum/period);
+  }
+  return out;
+}
 function calcRSI(data,period=14){
   if(!data||data.length<period+1)return null;
   let gains=0,losses=0;
@@ -262,10 +272,15 @@ function analyzeTF(candles){
   const lows=candles.map(c=>c.l);
 
   const rsi=calcRSI(closes,14);
+  const rsi6=calcRSI(closes,6); // RSI(6) — dùng riêng cho quy tắc setup MUA (nhạy hơn, bắt vùng quá bán ngắn hạn)
   const macd=calcMACD(closes,12,26,9);
   const bb=calcBollinger(closes,20,2);
   const ema12=calcEMA(closes,12);
   const ema26=calcEMA(closes,26);
+  const sma25=calcSMA(closes,25);
+  const sma99=calcSMA(closes,99);
+  const ma25=sma25.length?sma25[sma25.length-1]:null;
+  const ma99=sma99.length?sma99[sma99.length-1]:null;
 
   // Volume trend: avg of last 5 vs avg of prev 20
   const recentVol=volumes.slice(-5).reduce((a,b)=>a+b,0)/5;
@@ -275,24 +290,41 @@ function analyzeTF(candles){
   // Price position in range
   const last20H=Math.max(...highs.slice(-20));
   const last20L=Math.min(...lows.slice(-20));
-  const pricePos=(closes[closes.length-1]-last20L)/(last20H-last20L||1);
+  const curPrice=closes[closes.length-1];
+  const pricePos=(curPrice-last20L)/(last20H-last20L||1);
 
   // Trend: price vs EMA
-  const curPrice=closes[closes.length-1];
   const emaUp=ema12.length>=2&&ema26.length>=2?ema12[ema12.length-1]>ema26[ema26.length-1]:null;
   const emaCrossUp=ema12.length>=2&&ema26.length>=2?ema12[ema12.length-2]<=ema26[ema26.length-2]&&ema12[ema12.length-1]>ema26[ema26.length-1]:false;
   const emaCrossDown=ema12.length>=2&&ema26.length>=2?ema12[ema12.length-2]>=ema26[ema26.length-2]&&ema12[ema12.length-1]<ema26[ema26.length-1]:false;
 
-  // Support/Resistance from recent pivots
+  // Support/Resistance từ đỉnh/đáy cũ (pivot) — dùng để đặt Target 1 / Target 2
   const pivotHighs=[],pivotLows=[];
   for(let i=2;i<candles.length-2;i++){
     if(highs[i]>highs[i-1]&&highs[i]>highs[i-2]&&highs[i]>highs[i+1]&&highs[i]>highs[i+2])pivotHighs.push(highs[i]);
     if(lows[i]<lows[i-1]&&lows[i]<lows[i-2]&&lows[i]<lows[i+1]&&lows[i]<lows[i+2])pivotLows.push(lows[i]);
   }
-  const nearSupport=pivotLows.length?Math.max(...pivotLows.filter(l=>l<curPrice).slice(-3)):null;
-  const nearResist=pivotHighs.length?Math.min(...pivotHighs.filter(h=>h>curPrice).slice(-3)):null;
+  // Sắp xếp tăng dần các đỉnh cũ nằm TRÊN giá hiện tại → cái gần nhất = Target 1, cái kế tiếp = Target 2
+  const resAbove=[...new Set(pivotHighs)].filter(h=>h>curPrice*1.001).sort((a,b)=>a-b);
+  const supBelow=[...new Set(pivotLows)].filter(l=>l<curPrice*0.999).sort((a,b)=>b-a);
+  const nearResist=resAbove[0]||null;   // Đỉnh cũ gần nhất → dùng cho Target 1
+  const nextResist=resAbove[1]||null;   // Kháng cự mạnh tiếp theo → dùng cho Target 2 (nếu có)
+  const nearSupport=supBelow[0]||null;
 
-  return{rsi,macd,bb,emaUp,emaCrossUp,emaCrossDown,volRatio,pricePos,nearSupport,nearResist,curPrice};
+  // ═══ SETUP MUA CHUẨN: giá sát/dưới MA(25) (lệch tối đa 1.5%) VÀ RSI(6) < 40 (quá bán) ═══
+  let buySetup=false,buySetupDeep=false,distMA25Pct=null;
+  if(ma25&&curPrice){
+    distMA25Pct=((curPrice-ma25)/ma25)*100; // dương = giá đang trên MA25, âm = dưới MA25
+    const nearMA25=distMA25Pct<=1.5; // dưới MA25 bao nhiêu cũng tính, trên MA25 tối đa 1.5%
+    if(nearMA25&&rsi6!==null&&rsi6<40){
+      buySetup=true;
+      if(rsi6<30)buySetupDeep=true; // quá bán sâu → có thể mua thẳng giá thị trường
+    }
+  }
+
+  return{rsi,rsi6,macd,bb,emaUp,emaCrossUp,emaCrossDown,volRatio,pricePos,
+    ma25,ma99,distMA25Pct,buySetup,buySetupDeep,
+    nearSupport,nearResist,nextResist,curPrice};
 }
 
 // Score a single timeframe
@@ -307,6 +339,13 @@ function scoreTF(tf,weight=1){
     else if(tf.rsi>=75){score-=20;reasons.push('Giá đang RẤT ĐẮT (bị mua quá mức)');checks.push({label:'Giá đắt',good:false})}
     else if(tf.rsi>=65){score-=8;reasons.push('Giá đang cao');checks.push({label:'Giá cao',good:false})}
     else checks.push({label:'Giá bình thường',neutral:true});
+  }
+
+  // ═══ Setup MUA chuẩn: giá sát/dưới MA(25) + RSI(6) quá bán ═══
+  if(tf.buySetup){
+    score+=tf.buySetupDeep?25:15;
+    reasons.push('Giá đang ở vùng hỗ trợ tốt + RSI quá bán, thích hợp gom Spot');
+    checks.push({label:tf.buySetupDeep?'Setup MUA chuẩn (RSI6<30) ✅':'Setup MUA chuẩn (MA25+RSI6) ✅',good:true});
   }
 
   // MACD
@@ -398,30 +437,76 @@ async function aiScanPro(){
 
       if(reasons.length<2){showProgress();continue}
 
+      // Khung thời gian tham chiếu để lấy MA25/MA99/RSI6 dùng tính điểm vào lệnh — ưu tiên 4H, sau đó 1D, cuối cùng 1H
+      const ref=(tf4h&&tf4h.ma25)?tf4h:((tf1d&&tf1d.ma25)?tf1d:tf1h);
+
+      let baseSignal;
+      if(score>=25)baseSignal='STRONG_BUY';
+      else if(score>=12)baseSignal='BUY';
+      else if(score>=-10)baseSignal='HOLD';
+      else if(score>=-25)baseSignal='SELL';
+      else baseSignal='STRONG_SELL';
+
       let signal,conf;
-      if(score>=25){signal='STRONG_BUY';conf=Math.min(95,70+Math.round(score*0.5))}
-      else if(score>=12){signal='BUY';conf=Math.min(88,60+Math.round(score*0.6))}
-      else if(score>=-10){signal='HOLD';conf=50}
-      else if(score>=-25){signal='SELL';conf=Math.min(85,60+Math.round(Math.abs(score)*0.5))}
-      else{signal='STRONG_SELL';conf=Math.min(93,65+Math.round(Math.abs(score)*0.4))}
+      if(baseSignal==='BUY'||baseSignal==='STRONG_BUY'){
+        // Quy tắc bắt buộc: CHỈ xác nhận tín hiệu MUA khi giá sát/dưới MA(25) (lệch ≤1.5%) VÀ RSI(6) < 40
+        // Nếu không thỏa → giá đang "lơ lửng", không ở vùng hỗ trợ hợp lệ → hạ về HOLD, không khuyến nghị mua
+        if(!ref||!ref.buySetup){
+          signal='HOLD';conf=50;
+        }else{
+          signal=baseSignal;
+          conf=signal==='STRONG_BUY'?Math.min(96,75+Math.round(score*0.4)):Math.min(90,62+Math.round(score*0.6));
+          if(ref.buySetupDeep)conf=Math.min(97,conf+5); // RSI(6) < 30: quá bán sâu → tăng độ tin cậy
+        }
+      }else if(baseSignal==='SELL'){
+        signal='SELL';conf=Math.min(85,60+Math.round(Math.abs(score)*0.5));
+      }else if(baseSignal==='STRONG_SELL'){
+        signal='STRONG_SELL';conf=Math.min(93,65+Math.round(Math.abs(score)*0.4));
+      }else{
+        signal='HOLD';conf=50;
+      }
 
       if(signal==='HOLD'){showProgress();continue}
       if(S.settings.highConf&&conf<70){showProgress();continue}
 
-      const entry=c.current_price;
-      const atrPct=tf4h&&tf4h.bb?((tf4h.bb.upper-tf4h.bb.lower)/tf4h.bb.sma)*100:7;
-      const slPct=Math.max(3,Math.min(10,atrPct*0.7));
-      const tpPct=Math.max(slPct*2,Math.min(30,atrPct*2));
-      const sl=signal.includes('BUY')?entry*(1-slPct/100):entry*(1+slPct/100);
-      const tp=signal.includes('BUY')?entry*(1+tpPct/100):entry*(1-tpPct/100);
+      const curPrice=c.current_price;
+      let entry,sl,tp,tp2;
+
+      if(signal.includes('BUY')){
+        const ma25=ref.ma25,ma99=ref.ma99,rsi6=ref.rsi6;
+        // ĐIỂM MUA: RSI(6) < 30 → mua trực tiếp giá thị trường; ngược lại đặt lệnh chờ tại MA25 (hoặc MA99 nếu thiếu MA25)
+        entry=(rsi6!==null&&rsi6<30)?curPrice:(ma25||ma99||curPrice);
+        // CẮT LỖ: đặt dưới MA(99) khoảng 3% để tránh bị quét râu nến oan
+        sl=ma99?ma99*0.97:entry*0.93;
+        if(sl>=entry)sl=entry*0.95; // an toàn: chặn trường hợp công thức MA99 lệch bất thường khiến SL cao hơn entry
+        // MỤC TIÊU 1 (chốt 50%): đỉnh cũ (kháng cự) gần nhất
+        tp=(ref.nearResist&&ref.nearResist>entry)?ref.nearResist:entry*1.15;
+        // MỤC TIÊU 2 (chốt 50% còn lại): cao hơn Target 1 từ 10–15%, hoặc kháng cự mạnh tiếp theo nếu có
+        tp2=(ref.nextResist&&ref.nextResist>tp)?ref.nextResist:tp*1.125;
+      }else{
+        // SELL / STRONG_SELL — giữ nguyên logic biến động (ATR) cho chiều bán/short, không nằm trong quy tắc MUA của bạn
+        const atrPct=tf4h&&tf4h.bb?((tf4h.bb.upper-tf4h.bb.lower)/tf4h.bb.sma)*100:7;
+        const slPct=Math.max(3,Math.min(10,atrPct*0.7));
+        const tpPct=Math.max(slPct*2,Math.min(30,atrPct*2));
+        entry=curPrice;
+        sl=entry*(1+slPct/100);
+        tp=entry*(1-tpPct/100);
+        tp2=null;
+      }
       const rr=Math.abs(tp-entry)/Math.abs(entry-sl);
+      const slPct=(Math.abs(entry-sl)/entry*100).toFixed(1);
+      const tpPct=(Math.abs(tp-entry)/entry*100).toFixed(1);
 
       const indicators={};
-      if(tf4h){
-        indicators.rsi=tf4h.rsi!==null?Math.round(tf4h.rsi):null;
-        indicators.macd=tf4h.macd?tf4h.macd.histogram>0?'BULL':'BEAR':null;
-        indicators.bbPctB=tf4h.bb?Math.round(tf4h.bb.pctB*100):null;
-        indicators.emaUp=tf4h.emaUp;
+      if(ref){
+        indicators.rsi=ref.rsi!==null?Math.round(ref.rsi):null;
+        indicators.rsi6=ref.rsi6!==null?Math.round(ref.rsi6):null;
+        indicators.macd=ref.macd?ref.macd.histogram>0?'BULL':'BEAR':null;
+        indicators.bbPctB=ref.bb?Math.round(ref.bb.pctB*100):null;
+        indicators.emaUp=ref.emaUp;
+        indicators.ma25=ref.ma25?Math.round(ref.ma25*10000)/10000:null;
+        indicators.ma99=ref.ma99?Math.round(ref.ma99*10000)/10000:null;
+        indicators.buySetup=!!ref.buySetup;
       }
 
       const tfScores={
@@ -434,8 +519,9 @@ async function aiScanPro(){
         id:c.id,name:c.name,symbol:c.symbol.toUpperCase(),image:c.image,
         signal,confidence:Math.round(conf),score,indicators,
         reasons,checks:checks.slice(0,6),tfScores,
-        entry,sl:Math.round(sl*100)/100,tp:Math.round(tp*100)/100,rr:rr.toFixed(1),
-        slPct:slPct.toFixed(1),tpPct:tpPct.toFixed(1),
+        entry,sl:Math.round(sl*100)/100,tp:Math.round(tp*100)/100,
+        tp2:tp2?Math.round(tp2*100)/100:null,rr:rr.toFixed(1),
+        slPct,tpPct,
         c24:c.price_change_percentage_24h||0,
         c7d:c.price_change_percentage_7d_in_currency||0,
         mcap:c.market_cap,rank:c.market_cap_rank,
@@ -454,19 +540,51 @@ async function aiScanPro(){
     if(!tf)return;
     const s=scoreTF(tf,1);
     if(s.reasons.length<2||Math.abs(s.score)<12)return;
-    const signal=s.score>=20?'STRONG_BUY':s.score>=10?'BUY':s.score<=-20?'STRONG_SELL':s.score<=-10?'SELL':'HOLD';
-    if(signal==='HOLD')return;
-    const conf=Math.min(75,55+Math.abs(s.score));
+    const baseSignal=s.score>=20?'STRONG_BUY':s.score>=10?'BUY':s.score<=-20?'STRONG_SELL':s.score<=-10?'SELL':'HOLD';
+    if(baseSignal==='HOLD')return;
+
+    let signal,conf;
+    if(baseSignal.includes('BUY')){
+      // Cùng quy tắc bắt buộc: chỉ nhận tín hiệu MUA khi có setup MA25 + RSI(6) quá bán
+      if(!tf.buySetup)return;
+      signal=baseSignal;
+      conf=Math.min(78,55+Math.abs(s.score));
+      if(tf.buySetupDeep)conf=Math.min(85,conf+5);
+    }else{
+      signal=baseSignal;
+      conf=Math.min(75,55+Math.abs(s.score));
+    }
     if(S.settings.highConf&&conf<70)return;
-    const entry=c.current_price;
-    const sl=signal.includes('BUY')?entry*0.93:entry*1.07;
-    const tp=signal.includes('BUY')?entry*1.20:entry*0.85;
+
+    const curPrice=c.current_price;
+    let entry,sl,tp,tp2;
+    if(signal.includes('BUY')){
+      entry=(tf.rsi6!==null&&tf.rsi6<30)?curPrice:(tf.ma25||tf.ma99||curPrice);
+      sl=tf.ma99?tf.ma99*0.97:entry*0.93;
+      if(sl>=entry)sl=entry*0.95;
+      tp=(tf.nearResist&&tf.nearResist>entry)?tf.nearResist:entry*1.15;
+      tp2=(tf.nextResist&&tf.nextResist>tp)?tf.nextResist:tp*1.125;
+    }else{
+      entry=curPrice;
+      sl=entry*1.07;
+      tp=entry*0.85;
+      tp2=null;
+    }
+    const slPct=(Math.abs(entry-sl)/entry*100).toFixed(1);
+    const tpPct=(Math.abs(tp-entry)/entry*100).toFixed(1);
     S.signals.push({
       id:c.id,name:c.name,symbol:c.symbol.toUpperCase(),image:c.image,
-      signal,confidence:Math.round(conf),score:s.score,indicators:{},
+      signal,confidence:Math.round(conf),score:s.score,
+      indicators:{
+        rsi:tf.rsi!==null?Math.round(tf.rsi):null,rsi6:tf.rsi6!==null?Math.round(tf.rsi6):null,
+        ma25:tf.ma25?Math.round(tf.ma25*10000)/10000:null,ma99:tf.ma99?Math.round(tf.ma99*10000)/10000:null,
+        buySetup:!!tf.buySetup
+      },
       reasons:s.reasons.slice(0,3),checks:s.checks.slice(0,4),tfScores:null,
-      entry,sl,tp,rr:((Math.abs(tp-entry)/Math.abs(entry-sl))).toFixed(1),
-      slPct:'7.0',tpPct:'20.0',
+      entry,sl:Math.round(sl*100)/100,tp:Math.round(tp*100)/100,
+      tp2:tp2?Math.round(tp2*100)/100:null,
+      rr:((Math.abs(tp-entry)/Math.abs(entry-sl))).toFixed(1),
+      slPct,tpPct,
       c24:c.price_change_percentage_24h||0,c7d:c.price_change_percentage_7d_in_currency||0,
       mcap:c.market_cap,rank:c.market_cap_rank,
       dataSource:'coingecko',time:Date.now()
@@ -916,7 +1034,7 @@ function sigCardHTML(s){
     <div class="sig-entry">
       <div><div class="label">Mua</div><div class="val">${F.usd(s.entry)}</div></div>
       <div><div class="label">Cắt lỗ</div><div class="val r">${F.usd(s.sl)}</div></div>
-      <div><div class="label">Chốt lời</div><div class="val g">${F.usd(s.tp)}</div></div>
+      <div><div class="label">${s.tp2?'Mục tiêu 1':'Chốt lời'}</div><div class="val g">${F.usd(s.tp)}</div>${s.tp2?`<div class="val2">T2: ${F.usd(s.tp2)}</div>`:''}</div>
     </div>
   </div>`;
 }
@@ -1202,7 +1320,7 @@ window.openCoinModal=function(id){
   $('mTitle').textContent=c.name+' ('+c.symbol.toUpperCase()+')';
   const c24=c.price_change_percentage_24h||0;
   const sig=S.signals.find(s=>s.id===id);
-  const sigHTML=sig?`<div style="margin-top:16px;padding:12px;background:var(--bg2);border-radius:var(--r);border-left:3px solid ${sig.signal.includes('BUY')?'var(--green)':'var(--red)'}"><div style="display:flex;justify-content:space-between;align-items:center"><span class="sig-badge ${sig.signal}">${F.sig(sig.signal)}</span><span style="color:var(--t3);font-size:12px">Tin cậy: ${sig.confidence}%</span></div><ul class="sig-reason" style="margin:8px 0">${sig.reasons.map(r=>'<li>'+r+'</li>').join('')}</ul><div class="sig-prices"><div class="sig-price"><span class="sig-price-label">Vào lệnh</span><span class="sig-price-val">${F.usd(sig.entry)}</span></div><div class="sig-price"><span class="sig-price-label">Cắt lỗ</span><span class="sig-price-val loss">${F.usd(sig.sl)}</span></div><div class="sig-price"><span class="sig-price-label">Mục tiêu</span><span class="sig-price-val gain">${F.usd(sig.tp)}</span></div></div></div>`:'';
+  const sigHTML=sig?`<div style="margin-top:16px;padding:12px;background:var(--bg2);border-radius:var(--r);border-left:3px solid ${sig.signal.includes('BUY')?'var(--green)':'var(--red)'}"><div style="display:flex;justify-content:space-between;align-items:center"><span class="sig-badge ${sig.signal}">${F.sig(sig.signal)}</span><span style="color:var(--t3);font-size:12px">Tin cậy: ${sig.confidence}%</span></div><ul class="sig-reason" style="margin:8px 0">${sig.reasons.map(r=>'<li>'+r+'</li>').join('')}</ul><div class="sig-prices"><div class="sig-price"><span class="sig-price-label">Vào lệnh</span><span class="sig-price-val">${F.usd(sig.entry)}</span></div><div class="sig-price"><span class="sig-price-label">Cắt lỗ</span><span class="sig-price-val loss">${F.usd(sig.sl)}</span></div><div class="sig-price"><span class="sig-price-label">${sig.tp2?'Mục tiêu 1':'Mục tiêu'}</span><span class="sig-price-val gain">${F.usd(sig.tp)}</span></div>${sig.tp2?`<div class="sig-price"><span class="sig-price-label">Mục tiêu 2</span><span class="sig-price-val gain">${F.usd(sig.tp2)}</span></div>`:''}</div></div>`:'';
 
   // Binance quick trade button
   const bnTradeHTML=S.binanceOn?`<div style="margin-top:12px;display:flex;gap:8px"><button class="btn-buy trade-btn" onclick="quickTrade('${c.symbol.toUpperCase()}USDT','BUY')">🟢 MUA trên Binance</button><button class="btn-sell trade-btn" onclick="quickTrade('${c.symbol.toUpperCase()}USDT','SELL')">🔴 BÁN trên Binance</button></div>`:'';

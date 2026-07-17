@@ -184,6 +184,7 @@ main{padding:0}
 .sig-entry .val{font-size:11px;font-weight:700;font-family:var(--mono);margin-top:1px}
 .sig-entry .val.g{color:var(--green)}
 .sig-entry .val.r{color:var(--red)}
+.sig-entry .val2{font-size:9px;color:var(--t3);font-family:var(--mono);margin-top:1px}
 .sig-checks{display:flex;flex-wrap:wrap;gap:3px;margin:6px 0}
 .sig-check{font-size:9px;padding:2px 6px;border-radius:3px;font-weight:600}
 .sig-check.good{background:var(--greenA);color:var(--green)}

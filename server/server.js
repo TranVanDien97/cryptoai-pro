@@ -479,10 +479,11 @@ app.get('/api/market/movers', async (req, res) => {
 app.get('/api/market/analyze', async (req, res) => {
   try {
     const { symbol = 'BTCUSDT' } = req.query;
+    // limit >=150 để đủ dữ liệu tính MA(99) (cần tối thiểu 99 nến) trên cả 3 khung thời gian
     const [h1, h4, d1] = await Promise.all([
-      fetch(`${BINANCE_BASE}/api/v3/klines?symbol=${symbol}&interval=1h&limit=100`).then(r => r.json()),
-      fetch(`${BINANCE_BASE}/api/v3/klines?symbol=${symbol}&interval=4h&limit=100`).then(r => r.json()),
-      fetch(`${BINANCE_BASE}/api/v3/klines?symbol=${symbol}&interval=1d&limit=60`).then(r => r.json())
+      fetch(`${BINANCE_BASE}/api/v3/klines?symbol=${symbol}&interval=1h&limit=150`).then(r => r.json()),
+      fetch(`${BINANCE_BASE}/api/v3/klines?symbol=${symbol}&interval=4h&limit=150`).then(r => r.json()),
+      fetch(`${BINANCE_BASE}/api/v3/klines?symbol=${symbol}&interval=1d&limit=150`).then(r => r.json())
     ]);
     const parse = arr => (Array.isArray(arr) ? arr : []).map(k => ({
       t: k[0], o: parseFloat(k[1]), h: parseFloat(k[2]), l: parseFloat(k[3]),
