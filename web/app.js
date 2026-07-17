@@ -1370,6 +1370,7 @@ function renderPortfolio(){
       <td class="c"><button class="btn-del" onclick="delHolding('${hh.id}')">✕</button></td>
     </tr>`;
   }).join('');
+  const tp=tv-tc,tpp=tc>0?((tv-tc)/tc)*100:0;
   $('pTotal').textContent=F.usd(tv);
   const pe=$('pPnl');pe.textContent=`${tp>=0?'+':''}${F.usd(Math.abs(tp))} (${F.pct(tpp)})`;pe.className='ph-pnl '+(tp>=0?'gain':'loss');
   $('pStats').innerHTML=`<div class="ph-stat"><span class="ph-stat-l">Vốn đầu tư</span><span class="ph-stat-v">${F.usd(tc)}</span></div><div class="ph-stat"><span class="ph-stat-l">Số mã</span><span class="ph-stat-v">${h.length}</span></div>`;
