@@ -1024,7 +1024,7 @@ function getCurPrice(h){
   const c=S.crypto.find(x=>x.id===lo||x.symbol===lo||x.id===h.symbol);
   if(c)return c.current_price;
   // 3. Binance balance prices
-  if(S.binance.prices&&S.binance.prices[ticker+'USDT'])return parseFloat(S.binance.prices[ticker+'USDT']);
+  if(S.tickerMap&&S.tickerMap[ticker+'USDT'])return parseFloat(S.tickerMap[ticker+'USDT']);
   // 4. Fallback
   return h.cost;
 }
@@ -1106,13 +1106,14 @@ function scheduleWsReconnect(){
 // để không lãng phí công sức vẽ lại tab người dùng không nhìn thấy
 function scheduleWsRender(){
   if(wsRenderPending)return;
+  const now=Date.now();
+  const timeToWait = Math.max(0, WS_RENDER_MIN_GAP - (now - wsLastRender));
   wsRenderPending=true;
-  requestAnimationFrame(function tick(){
-    const now=Date.now();
-    if(now-wsLastRender<WS_RENDER_MIN_GAP){requestAnimationFrame(tick);return}
-    wsRenderPending=false;wsLastRender=now;
+  setTimeout(() => {
+    wsRenderPending=false;
+    wsLastRender=Date.now();
     renderLiveTick();
-  });
+  }, timeToWait);
 }
 
 function renderLiveTick(){
@@ -1356,9 +1357,19 @@ function renderPortfolio(){
     const cc=F.cc(pnl);
     const slHit=hh.sl&&pp<=-hh.sl;const tpHit=hh.tp&&pp>=hh.tp;
     const status=slHit?'<span class="sl-warn">⚠️ STOP-LOSS</span>':tpHit?'<span class="tp-ok">🎯 CHỐT LỜI</span>':'<span class="holding-ok">Giữ</span>';
-    return`<tr><td>🪙 ${hh.name}</td><td>${hh.qty}</td><td>${F.usd(hh.cost)}</td><td>${F.usd(cp)}</td><td>${F.usd(val)}</td><td class="${cc}">${pnl>=0?'+':''}${F.usd(Math.abs(pnl))} (${F.pct(pp)})</td><td>${hh.sl||'--'}%</td><td>${hh.tp||'--'}%</td><td>${status}</td><td><button class="btn-del" onclick="delHolding('${hh.id}')">✕</button></td></tr>`;
+    return`<tr>
+      <td>🪙 <strong>${hh.name}</strong></td>
+      <td class="r" style="font-family:var(--mono)">${hh.qty}</td>
+      <td class="r" style="font-family:var(--mono)">${F.usd(hh.cost)}</td>
+      <td class="r" style="font-family:var(--mono)">${F.usd(cp)}</td>
+      <td class="r" style="font-family:var(--mono);font-weight:600">${F.usd(val)}</td>
+      <td class="r ${cc}" style="font-family:var(--mono)">${pnl>=0?'+':''}${F.usd(Math.abs(pnl))} (${F.pct(pp)})</td>
+      <td class="r" style="font-family:var(--mono)">${hh.sl||'--'}%</td>
+      <td class="r" style="font-family:var(--mono)">${hh.tp||'--'}%</td>
+      <td class="c">${status}</td>
+      <td class="c"><button class="btn-del" onclick="delHolding('${hh.id}')">✕</button></td>
+    </tr>`;
   }).join('');
-  const tp=tv-tc,tpp=tc>0?((tv-tc)/tc)*100:0;
   $('pTotal').textContent=F.usd(tv);
   const pe=$('pPnl');pe.textContent=`${tp>=0?'+':''}${F.usd(Math.abs(tp))} (${F.pct(tpp)})`;pe.className='ph-pnl '+(tp>=0?'gain':'loss');
   $('pStats').innerHTML=`<div class="ph-stat"><span class="ph-stat-l">Vốn đầu tư</span><span class="ph-stat-v">${F.usd(tc)}</span></div><div class="ph-stat"><span class="ph-stat-l">Số mã</span><span class="ph-stat-v">${h.length}</span></div>`;
