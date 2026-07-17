@@ -179,7 +179,7 @@ main{padding:0}
 .sig-reasons{margin:6px 0 0;padding:0;list-style:none}
 .sig-reasons li{font-size:11px;color:var(--t3);padding:2px 0 2px 12px;position:relative;line-height:1.4}
 .sig-reasons li::before{content:'•';position:absolute;left:0;color:var(--t4)}
-.sig-entry{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;
+.sig-entry{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;
   margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
 .sig-entry div{text-align:center}
 .sig-entry .label{font-size:9px;color:var(--t4);text-transform:uppercase}

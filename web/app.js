@@ -636,6 +636,19 @@ async function aiScanPro(){
   updateBadges();
 }
 
+async function manualScan(){
+  const btn = $('btnScan');
+  if(btn){btn.disabled=true;btn.textContent='Đang quét...'}
+  try {
+    await aiScanPro();
+    renderSignals();
+  } catch(e) {
+    console.error('Scan error', e);
+  } finally {
+    if(btn){btn.disabled=false;btn.textContent='🔄 Quét'}
+  }
+}
+
 // ═══════════════════════════════════════════════════════
 // GEMINI AI INTEGRATION
 // ═══════════════════════════════════════════════════════
@@ -1188,6 +1201,7 @@ function sigCardHTML(s){
   if(s.checks&&s.checks.length){
     checks=s.checks.slice(0,6).map(c=>`<span class="sig-check ${c.good?'good':c.neutral?'neutral':'bad'}">${c.good?'✓':c.neutral?'~':'✗'} ${c.label}</span>`).join('');
   }
+  const liveP = livePrices[s.symbol.toUpperCase()+'USDT']?.p || (S.tickerMap && S.tickerMap[s.symbol.toUpperCase()+'USDT']) || s.entry;
   return`<div class="sig-card ${cls}" onclick="openCoinModal('${s.id}')">
     <div class="sig-top">
       <img class="sig-img" src="${s.image}" alt="">
@@ -1197,7 +1211,8 @@ function sigCardHTML(s){
     ${checks?'<div class="sig-checks">'+checks+'</div>':''}
     <ul class="sig-reasons">${s.reasons.slice(0,2).map(r=>'<li>'+simplifyReason(r)+'</li>').join('')}</ul>
     <div class="sig-entry">
-      <div><div class="label">Mua</div><div class="val">${F.usd(s.entry)}</div></div>
+      <div><div class="label">Giá Live</div><div class="val" style="color:var(--yellow)">${F.usd(liveP)}</div></div>
+      <div><div class="label">Vào lệnh</div><div class="val">${F.usd(s.entry)}</div></div>
       <div><div class="label">Cắt lỗ</div><div class="val r">${F.usd(s.sl)}</div></div>
       <div><div class="label">${s.tp2?'Mục tiêu 1':'Chốt lời'}</div><div class="val g">${F.usd(s.tp)}</div>${s.tp2?`<div class="val2">T2: ${F.usd(s.tp2)}</div>`:''}</div>
     </div>
@@ -1708,6 +1723,7 @@ function init(){
   $$('.nav-item').forEach(n=>n.addEventListener('click',()=>switchTab(n.dataset.tab)));
   $$('[data-goto]').forEach(l=>l.addEventListener('click',()=>switchTab(l.dataset.goto)));
   on('btnRefresh','click',fullScan);
+  on('btnScan','click',manualScan);
   on('btnNotif','click',requestNotif);
   on('mClose','click',()=>$('modal').classList.remove('open'));
   on('modal','click',e=>{if(e.target===$('modal'))$('modal').classList.remove('open')});
