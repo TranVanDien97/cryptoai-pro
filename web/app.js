@@ -35,7 +35,7 @@ const S={
   tab:'portfolio',crypto:[],signals:[],alerts:[],holdings:[],
   favs:[],fng:null,cglobal:null,trending:[],
   mktSearch:'',sigFilter:'ALL',
-  cgOn:false,backendOn:false,binanceOn:false,scanTimer:null,
+  cgOn:false,backendOn:false,binanceOn:false,wsOn:false,scanTimer:null,
   binance:{balances:[],orders:[],trades:[],canTrade:false,totalUSDT:0},
   tickerMap:{},
   customPriceAlerts:[],trailHighs:{},
@@ -62,9 +62,21 @@ const F={
 // ═══════════════════════════════════════════════════════
 // UTILS
 // ═══════════════════════════════════════════════════════
-async function fetchJ(url){try{const r=await fetch(url);if(!r.ok)throw Error(r.status);return await r.json()}catch{return null}}
-async function postJ(url,body){try{const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});return await r.json()}catch{return null}}
-async function delJ(url){try{const r=await fetch(url,{method:'DELETE'});return await r.json()}catch{return null}}
+async function fetchJ(url,ms=10000){
+  const ctrl=new AbortController();const timer=setTimeout(()=>ctrl.abort(),ms);
+  try{const r=await fetch(url,{signal:ctrl.signal});clearTimeout(timer);if(!r.ok)throw Error(r.status);return await r.json()}
+  catch{clearTimeout(timer);return null}
+}
+async function postJ(url,body,ms=10000){
+  const ctrl=new AbortController();const timer=setTimeout(()=>ctrl.abort(),ms);
+  try{const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:ctrl.signal});clearTimeout(timer);return await r.json()}
+  catch{clearTimeout(timer);return null}
+}
+async function delJ(url,ms=10000){
+  const ctrl=new AbortController();const timer=setTimeout(()=>ctrl.abort(),ms);
+  try{const r=await fetch(url,{method:'DELETE',signal:ctrl.signal});clearTimeout(timer);return await r.json()}
+  catch{clearTimeout(timer);return null}
+}
 function toast(msg,type='info'){const c=$('toasts');const t=document.createElement('div');t.className='toast '+type;t.textContent=msg;c.appendChild(t);setTimeout(()=>t.remove(),4000)}
 function playSound(type){if(!S.settings.sound)return;try{const a=new AudioContext();const o=a.createOscillator();const g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=type==='buy'?800:type==='sell'?400:600;o.type='sine';g.gain.value=0.15;o.start();o.stop(a.currentTime+0.15);if(type==='buy'){setTimeout(()=>{const o2=a.createOscillator();const g2=a.createGain();o2.connect(g2);g2.connect(a.destination);o2.frequency.value=1000;o2.type='sine';g2.gain.value=0.15;o2.start();o2.stop(a.currentTime+0.15)},180)}}catch{}}
 
@@ -408,13 +420,27 @@ async function aiScanPro(){
     catch{clearTimeout(timer);return null}
   };
 
-  // Process coins one by one (show results immediately)
-  for(const c of topCoins){
+  // Throttle DOM updates — tránh dựng lại toàn bộ grid liên tục gây giật khi nhiều coin trả về gần như cùng lúc
+  let lastProgressRender=0,progressPending=false;
+  const throttledProgress=()=>{
+    if(progressPending)return;
+    progressPending=true;
+    requestAnimationFrame(()=>{
+      progressPending=false;
+      const now=Date.now();
+      if(now-lastProgressRender<250)return;
+      lastProgressRender=now;
+      showProgress();
+    });
+  };
+
+  // Xử lý 1 coin: fetch klines + tính toán tín hiệu — trả về object tín hiệu hoặc null
+  const processCoin=async(c)=>{
     const sym=c.symbol.toUpperCase()+'USDT';
     try{
       const j=await fetchWithTimeout(BACKEND+'/api/market/analyze?symbol='+sym,8000);
       done++;
-      if(!j||!j.success){showProgress();continue}
+      if(!j||!j.success){throttledProgress();return null}
 
       const tf1h=analyzeTF(j.data['1h']);
       const tf4h=analyzeTF(j.data['4h']);
@@ -435,7 +461,7 @@ async function aiScanPro(){
       if(allBull){score+=10;reasons.push('⭐ 3/3 khung thời gian đều TĂNG — tín hiệu mạnh!')}
       if(allBear){score-=10;reasons.push('⚠️ 3/3 khung thời gian đều GIẢM — nên tránh!')}
 
-      if(reasons.length<2){showProgress();continue}
+      if(reasons.length<2){throttledProgress();return null}
 
       // Khung thời gian tham chiếu để lấy MA25/MA99/RSI6 dùng tính điểm vào lệnh — ưu tiên 4H, sau đó 1D, cuối cùng 1H
       const ref=(tf4h&&tf4h.ma25)?tf4h:((tf1d&&tf1d.ma25)?tf1d:tf1h);
@@ -466,8 +492,8 @@ async function aiScanPro(){
         signal='HOLD';conf=50;
       }
 
-      if(signal==='HOLD'){showProgress();continue}
-      if(S.settings.highConf&&conf<70){showProgress();continue}
+      if(signal==='HOLD'){throttledProgress();return null}
+      if(S.settings.highConf&&conf<70){throttledProgress();return null}
 
       const curPrice=c.current_price;
       let entry,sl,tp,tp2;
@@ -515,7 +541,7 @@ async function aiScanPro(){
         '1d':{score:s1d.score,dir:s1d.score>3?'↑':s1d.score<-3?'↓':'→'}
       };
 
-      S.signals.push({
+      const result={
         id:c.id,name:c.name,symbol:c.symbol.toUpperCase(),image:c.image,
         signal,confidence:Math.round(conf),score,indicators,
         reasons,checks:checks.slice(0,6),tfScores,
@@ -526,10 +552,25 @@ async function aiScanPro(){
         c7d:c.price_change_percentage_7d_in_currency||0,
         mcap:c.market_cap,rank:c.market_cap_rank,
         dataSource:'binance',time:Date.now()
-      });
-      showProgress(); // Update UI immediately
-    }catch{done++;showProgress()}
-  }
+      };
+      S.signals.push(result);
+      throttledProgress();
+      return result;
+    }catch{done++;throttledProgress();return null}
+  };
+
+  // Chạy song song theo lô (concurrency pool) thay vì tuần tự từng coin — giảm thời gian quét từ ~vài chục giây xuống còn vài giây,
+  // đồng thời không tăng số lượng request thực tế (vẫn đúng 1 request/coin), chỉ đổi cách gửi.
+  const CONCURRENCY=5;
+  let cursor=0;
+  const worker=async()=>{
+    while(cursor<topCoins.length){
+      const c=topCoins[cursor++];
+      await processCoin(c);
+    }
+  };
+  await Promise.all(Array.from({length:Math.min(CONCURRENCY,topCoins.length)},worker));
+  showProgress(); // render kết quả cuối cùng chính xác (bỏ qua throttle)
 
   // Fallback: scan remaining coins with CoinGecko sparkline (fast, no API call)
   const scannedIds=new Set(S.signals.map(s=>s.id));
@@ -960,8 +1001,10 @@ function getTicker(h){
 async function fetchHoldingPrices(){
   if(!S.holdings.length)return;
   const tickers=[...new Set(S.holdings.map(h=>getTicker(h)).filter(Boolean))];
+  const ctrl=new AbortController();const timer=setTimeout(()=>ctrl.abort(),8000);
   try{
-    const r=await fetch(BACKEND+'/api/market/prices?symbols='+tickers.join(','));
+    const r=await fetch(BACKEND+'/api/market/prices?symbols='+tickers.join(','),{signal:ctrl.signal});
+    clearTimeout(timer);
     const j=await r.json();
     if(j.success&&j.prices){
       Object.entries(j.prices).forEach(([sym,price])=>{
@@ -969,7 +1012,7 @@ async function fetchHoldingPrices(){
       });
       console.log('💰 Live prices:',Object.entries(j.prices).map(([s,p])=>s+':$'+p).join(', '));
     }
-  }catch(e){console.error('fetchHoldingPrices error:',e)}
+  }catch(e){clearTimeout(timer);console.error('fetchHoldingPrices error:',e)}
 }
 
 function getCurPrice(h){
@@ -985,6 +1028,127 @@ function getCurPrice(h){
   // 4. Fallback
   return h.cost;
 }
+
+// ═══════════════════════════════════════════════════════
+// LIVE PRICE STREAM — Binance WebSocket (public, miễn phí, không giới hạn request,
+// không tốn "API token"). Chạy song song với fullScan() 5 phút/lần: WS lo phần
+// cập nhật giá liên tục theo thời gian thực, fullScan() chỉ lo phần tính tín hiệu
+// (RSI/MACD/MA...) vốn không cần refresh nhanh hơn vài phút một lần.
+// ═══════════════════════════════════════════════════════
+let liveWS=null,wsReconnectTimer=null,wsReconnectDelay=2000;
+let wsRenderPending=false,wsLastRender=0;
+const WS_RENDER_MIN_GAP=1200; // tối đa ~1 lần render/1.2s dù nhận bao nhiêu tick — giữ UI mượt, không giật
+
+function buildWsStreams(){
+  const syms=new Set();
+  S.crypto.forEach(c=>{
+    const t=ID_TO_TICKER[c.id]||(c.symbol||'').toUpperCase();
+    if(t&&/^[A-Z0-9]{2,15}$/.test(t))syms.add(t.toLowerCase()+'usdt');
+  });
+  S.holdings.forEach(h=>{
+    const t=getTicker(h);
+    if(t&&/^[A-Z0-9]{2,15}$/.test(t))syms.add(t.toLowerCase()+'usdt');
+  });
+  return[...syms].slice(0,120); // giới hạn hợp lý cho 1 kết nối combined-stream
+}
+
+function connectLiveWS(){
+  if(typeof WebSocket==='undefined')return; // môi trường không hỗ trợ WS (hiếm)
+  const streams=buildWsStreams();
+  if(!streams.length)return;
+  try{
+    if(liveWS){liveWS.onclose=null;liveWS.onerror=null;try{liveWS.close()}catch{}}
+    const url='wss://stream.binance.com:9443/stream?streams='+streams.map(s=>s+'@miniTicker').join('/');
+    liveWS=new WebSocket(url);
+
+    liveWS.onopen=()=>{
+      wsReconnectDelay=2000; // reset backoff khi kết nối thành công
+      S.wsOn=true;updateWsStatus();
+    };
+
+    liveWS.onmessage=(ev)=>{
+      try{
+        const msg=JSON.parse(ev.data);
+        const d=msg&&msg.data;
+        if(!d||!d.s||!d.s.endsWith('USDT'))return;
+        const sym=d.s.slice(0,-4); // "BTCUSDT" -> "BTC"
+        const price=parseFloat(d.c);
+        if(!price||isNaN(price))return;
+
+        livePrices[sym]={p:price,t:Date.now()};
+        S.tickerMap[d.s]=price;
+
+        const coin=S.crypto.find(c=>(ID_TO_TICKER[c.id]||(c.symbol||'').toUpperCase())===sym);
+        if(coin){
+          coin.current_price=price;
+          const openP=parseFloat(d.o);
+          if(openP>0)coin.price_change_percentage_24h=((price-openP)/openP)*100;
+        }
+        scheduleWsRender();
+      }catch{/* bỏ qua message lỗi, không làm gián đoạn luồng WS */}
+    };
+
+    liveWS.onerror=()=>{try{liveWS.close()}catch{}};
+    liveWS.onclose=()=>{S.wsOn=false;updateWsStatus();scheduleWsReconnect()};
+  }catch(e){
+    console.error('WS connect error:',e);
+    scheduleWsReconnect();
+  }
+}
+
+function scheduleWsReconnect(){
+  clearTimeout(wsReconnectTimer);
+  wsReconnectTimer=setTimeout(connectLiveWS,wsReconnectDelay);
+  wsReconnectDelay=Math.min(Math.round(wsReconnectDelay*1.5),30000); // backoff tăng dần, tối đa 30s giữa các lần thử lại
+}
+
+// Throttle: gom nhiều tick liên tiếp thành 1 lần render, và chỉ render tab đang mở
+// để không lãng phí công sức vẽ lại tab người dùng không nhìn thấy
+function scheduleWsRender(){
+  if(wsRenderPending)return;
+  wsRenderPending=true;
+  requestAnimationFrame(function tick(){
+    const now=Date.now();
+    if(now-wsLastRender<WS_RENDER_MIN_GAP){requestAnimationFrame(tick);return}
+    wsRenderPending=false;wsLastRender=now;
+    renderLiveTick();
+  });
+}
+
+function renderLiveTick(){
+  try{
+    if(S.tab==='market')renderMarket();
+    else if(S.tab==='portfolio'){renderDash();renderPortfolio()}
+    else if(S.tab==='research')renderSignals();
+    // BTC banner ở header hiển thị mọi tab nên luôn cập nhật riêng, rẻ (chỉ 1-2 phần tử DOM)
+    updateBtcBanner();
+  }catch(e){console.error('renderLiveTick error:',e)}
+}
+
+function updateBtcBanner(){
+  const btc=S.crypto.find(c=>c.id==='bitcoin');
+  if(!btc)return;
+  const pEl=$('dBtcPrice'),cEl=$('dBtcChange');
+  if(pEl)pEl.textContent=F.usd(btc.current_price);
+  if(cEl){const c24=btc.price_change_percentage_24h||0;cEl.textContent='BTC/USDT · '+F.pct(c24);cEl.className='pb-sub '+F.cc(c24)}
+}
+
+function updateWsStatus(){
+  const on=!!S.wsOn;
+  const d1=$('sLiveDot');if(d1)d1.className='status-dot '+(on?'on':'');
+  const d2=$('sLiveDot2');if(d2)d2.className='status-dot '+(on?'on':'');
+  const lbl=$('liveLabel');if(lbl)lbl.style.opacity=on?'1':'0.4';
+}
+
+// Đóng WS gọn gàng khi rời trang / ẩn tab lâu để tiết kiệm tài nguyên trình duyệt
+window.addEventListener('beforeunload',()=>{if(liveWS){liveWS.onclose=null;try{liveWS.close()}catch{}}});
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){
+    // Không đóng kết nối khi chuyển tab nền — WS rất nhẹ, việc đóng/mở lại liên tục lãng phí hơn là giữ nguyên
+  }else if(!liveWS||liveWS.readyState>1){
+    connectLiveWS(); // trang được active lại mà WS đã chết → kết nối lại ngay
+  }
+});
 
 
 // ═══════════════════════════════════════════════════════
@@ -1483,6 +1647,10 @@ async function fullScan(){
     await Promise.allSettled([fetchCrypto(),fetchGlobal(),fetchFNG()]);
     fetchTrending().catch(()=>{});
 
+    // Bật/refresh luồng giá real-time (WebSocket) theo danh sách coin mới nhất —
+    // không tốn thêm request REST, chỉ cập nhật danh sách symbol đang lắng nghe
+    connectLiveWS();
+
     // Fetch live prices for holdings from Binance
     try{await fetchHoldingPrices()}catch(e){console.error('fetchHoldingPrices:',e)}
 
@@ -1518,6 +1686,7 @@ async function fullScan(){
 }
 
 function init(){
+ try{
   // Safe event binder
   const on=(id,ev,fn)=>{const el=$(id);if(el)el.addEventListener(ev,fn);else console.warn('Missing:',id)};
 
@@ -1673,6 +1842,14 @@ function init(){
   // Start
   fullScan();
   if(S.settings.autoScan)S.scanTimer=setInterval(fullScan,300000);
+ }catch(e){
+  // Một phần UI (button/element) bị thiếu/lỗi không được phép chặn toàn bộ app —
+  // luôn cố tải dữ liệu thị trường + bật tự động quét, dù binding giao diện có lỗi
+  console.error('init() gặp lỗi khi gắn sự kiện UI, vẫn tiếp tục tải dữ liệu:',e);
+  try{loadLS()}catch{}
+  try{fullScan()}catch(e2){console.error('fullScan cũng lỗi:',e2)}
+  if(S.settings.autoScan&&!S.scanTimer)S.scanTimer=setInterval(fullScan,300000);
+ }
 }
 
 async function submitTrade(side){
