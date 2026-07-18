@@ -46,7 +46,7 @@ const S={
 // FORMATTERS
 // ═══════════════════════════════════════════════════════
 const F={
-  usd:n=>{if(n==null||isNaN(n))return'--';return n>=1?'$'+n.toLocaleString('en-US',{maximumFractionDigits:2}):'$'+n.toLocaleString('en-US',{maximumFractionDigits:6})},
+  usd:n=>{if(n==null||isNaN(n))return'--';return n>=1?'$'+n.toLocaleString('en-US',{maximumFractionDigits:2}):'$'+n.toLocaleString('en-US',{maximumFractionDigits:8})},
   vnd:n=>{if(n==null||isNaN(n))return'--';return n.toLocaleString('vi-VN',{maximumFractionDigits:0})+' ₫'},
   pct:n=>{if(n==null||isNaN(n))return'--';return(n>=0?'+':'')+n.toFixed(2)+'%'},
   mcap:n=>{if(n==null)return'--';if(n>=1e12)return'$'+(n/1e12).toFixed(2)+'T';if(n>=1e9)return'$'+(n/1e9).toFixed(1)+'B';if(n>=1e6)return'$'+(n/1e6).toFixed(1)+'M';return'$'+n.toLocaleString()},
@@ -622,8 +622,8 @@ async function aiScanPro(){
         buySetup:!!tf.buySetup
       },
       reasons:s.reasons.slice(0,3),checks:s.checks.slice(0,4),tfScores:null,
-      entry,sl:Math.round(sl*100)/100,tp:Math.round(tp*100)/100,
-      tp2:tp2?Math.round(tp2*100)/100:null,
+      entry,sl,tp,
+      tp2,
       rr:((Math.abs(tp-entry)/Math.abs(entry-sl))).toFixed(1),
       slPct,tpPct,
       c24:c.price_change_percentage_24h||0,c7d:c.price_change_percentage_7d_in_currency||0,
