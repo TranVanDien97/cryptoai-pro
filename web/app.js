@@ -1936,8 +1936,33 @@ function init(){
     const sym=$('addSymbol').value.trim().toUpperCase(),qty=+$('addQty').value,cost=+$('addCost').value,sl=+$('addSL').value||7,tp=+$('addTP').value||20;
     if(!sym||!qty||!cost){toast('Nhập đầy đủ thông tin','error');return}
     const name=sym;
-    S.holdings.push({id:Date.now().toString(),type:'crypto',symbol:sym,symbolLower:sym.toLowerCase(),name,qty,cost,sl,tp});
-    saveH();renderPortfolio();toast('✅ Đã thêm '+name,'success');
+    
+    const existing = S.holdings.find(h => h.symbol === sym || h.symbolLower === sym.toLowerCase());
+    if (existing) {
+      if (qty < 0) {
+        // Bán bớt (reduce qty, cost remains same)
+        existing.qty += qty;
+        if (existing.qty <= 0) {
+          S.holdings = S.holdings.filter(h => h.id !== existing.id);
+          toast(`Đã bán hết ${name}`,'info');
+        } else {
+          toast(`Đã giảm số lượng ${name}`,'info');
+        }
+      } else {
+        // Mua thêm (calculate average cost / DCA)
+        const oldTotalCost = existing.cost * existing.qty;
+        const newTotalCost = cost * qty;
+        existing.qty += qty;
+        existing.cost = (oldTotalCost + newTotalCost) / existing.qty;
+        toast(`Đã DCA ${name} - Giá vốn mới: ${F.usd(existing.cost)}`,'success');
+      }
+    } else {
+      if (qty <= 0) { toast('Số lượng ban đầu phải > 0', 'error'); return; }
+      S.holdings.push({id:Date.now().toString(),type:'crypto',symbol:sym,symbolLower:sym.toLowerCase(),name,qty,cost,sl,tp});
+      toast('✅ Đã thêm '+name,'success');
+    }
+    
+    saveH();renderPortfolio();
     $('addSymbol').value='';$('addQty').value='';$('addCost').value='';$('addSymbol').focus();
   });
   on('btnClearPort','click',()=>{if(!S.holdings.length)return;if(confirm('Xoá toàn bộ danh mục?')){S.holdings=[];saveH();renderPortfolio();toast('Đã xoá tất cả','info')}});
