@@ -20,6 +20,7 @@
     <div class="sidebar-logo"><div class="logo-mark">AI</div><span class="logo-text">Crypto<span class="logo-ai">AI</span></span></div>
     <ul class="nav-menu">
       <li class="nav-item active" data-tab="portfolio"><span class="nav-icon">💰</span><span class="nav-label">Tài sản</span></li>
+      <li class="nav-item" data-tab="market"><span class="nav-icon">📊</span><span class="nav-label">Thị trường</span></li>
       <li class="nav-item" data-tab="research"><span class="nav-icon">🤖</span><span class="nav-label">AI</span><span class="nav-badge" id="signalBadge"></span></li>
       <li class="nav-item" data-tab="binance"><span class="nav-icon">💎</span><span class="nav-label">Sàn</span></li>
       <li class="nav-item" data-tab="alerts"><span class="nav-icon">🔔</span><span class="nav-label">Báo</span><span class="nav-badge" id="alertBadge"></span></li>
@@ -29,20 +30,14 @@
 
   <main>
     <!-- ══════ TÀI SẢN ══════ -->
+    <!-- ══════ TÀI SẢN (PORTFOLIO) ══════ -->
     <section class="tab on" id="tab-portfolio">
       <div class="hdr">
-        <h1>CryptoAI</h1>
+        <h1>Tài sản</h1>
         <div class="hdr-right">
           <button class="hdr-btn" id="btnNotif">🔔</button>
           <button class="hdr-btn" id="btnRefresh">🔄</button>
         </div>
-      </div>
-
-      <!-- Connection -->
-      <div class="conn-bar">
-        <span class="status-dot" id="apiDot"></span><span id="apiLabel">CG</span>
-        <span class="status-dot" id="binanceDot"></span><span id="binanceLabel">BN</span>
-        <span class="status-dot" id="sLiveDot"></span><span id="liveLabel">LIVE</span>
       </div>
 
       <!-- BTC Banner -->
@@ -89,6 +84,55 @@
           </div>
         </div>
       </div>
+    </section>
+
+    <!-- ══════ THỊ TRƯỜNG (MARKET) ══════ -->
+    <section class="tab" id="tab-market">
+      <div class="hdr">
+        <h1>Thị trường</h1>
+      </div>
+      
+      <div class="cstat-row" id="cryptoStats"></div>
+      
+      <div class="card" style="margin-top:12px">
+        <div class="mkt-search"><input id="mktSearch" placeholder="Tìm coin..." autocomplete="off"></div>
+        <div class="tbl-w">
+          <table class="tbl tbl-market">
+            <thead><tr>
+              <th></th>
+              <th>#</th>
+              <th>Coin</th>
+              <th>Giá</th>
+              <th>24h</th>
+              <th>7d</th>
+              <th>MCap</th>
+              <th></th>
+            </tr></thead>
+            <tbody id="cryptoTbody"><tr><td colspan="8" class="ld">Đang tải...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════ TRỢ LÝ AI (AI ASSISTANT) ══════ -->
+    <section class="tab" id="tab-research">
+      <div class="hdr">
+        <h1>Trợ lý AI</h1>
+        <div class="hdr-right"><button class="hdr-btn" id="btnScan">🔍 Quét</button></div>
+      </div>
+
+      <div class="market-health" id="marketHealthRow"></div>
+
+      <!-- Signals Grid -->
+      <div class="filter-bar" id="sigChips" style="margin-top: 12px;">
+        <button class="chip on" data-sf="ALL">Tất cả</button>
+        <button class="chip" data-sf="BUY">Mua</button>
+        <button class="chip" data-sf="SELL">Bán</button>
+      </div>
+      <div class="sig-summary" id="sigSummary" style="padding:0 16px 4px"></div>
+      <div style="padding:0 16px 16px">
+        <div id="signalGrid" class="signal-grid"><div class="empty-msg">Nhấn "Quét" để phân tích</div></div>
+      </div>
 
       <!-- AI Advisor -->
       <div class="advisor" id="advisorCard" style="margin-top:12px;">
@@ -96,11 +140,21 @@
         <div class="advisor-body" id="advisorBody">Đang phân tích...</div>
       </div>
 
+      <!-- Gemini AI Market Analyzer -->
+      <div class="card gemini-card" style="margin-top: 12px;">
+        <div class="card-h"><h2>🧠 Gemini Market</h2><span class="gemini-badge" id="geminiStatus">--</span></div>
+        <div class="card-body">
+          <p class="gemini-desc">AI phân tích thị trường thật → gợi ý xu hướng cụ thể.</p>
+          <button class="gemini-btn" id="btnAskAI">Hỏi AI phân tích</button>
+          <div id="geminiResult"></div>
+        </div>
+      </div>
+
       <!-- AI Phân tích coin đang giữ -->
       <div class="card" style="border-left:3px solid var(--yellow); margin-top:12px;">
-        <div class="card-h"><h2>🎯 AI Tư vấn coin của bạn</h2></div>
+        <div class="card-h"><h2>🎯 AI Tư vấn danh mục</h2></div>
         <div class="card-body">
-          <p style="font-size:11px;color:var(--t4);margin-bottom:8px">Gemini AI phân tích từng coin bạn đang giữ → Nên bán/mua thêm/DCA, giá mục tiêu, dự đoán tương lai.</p>
+          <p style="font-size:11px;color:var(--t4);margin-bottom:8px">Gemini AI phân tích danh sách coin bạn đang nắm giữ.</p>
           <button class="btn btn-yellow" style="width:100%" onclick="analyzeMyHoldings()">🎯 Phân tích danh mục của tôi</button>
           <div id="myHoldingsAI" style="margin-top:10px"></div>
         </div>
@@ -114,44 +168,6 @@
           <input id="chatInput" placeholder="Hỏi AI về coin của bạn..." style="flex:1" onkeydown="if(event.key==='Enter')sendChat()">
           <button class="btn btn-yellow btn-sm" onclick="sendChat()">Gửi</button>
         </div>
-      </div>
-
-      <!-- Market -->
-
-      <div class="divider"></div>
-      <div class="card" style="margin-top:12px">
-        <div class="card-h"><h2>Thị trường</h2></div>
-        <div class="cstat-row" id="cryptoStats"></div>
-        <div class="mkt-search"><input id="mktSearch" placeholder="Tìm coin..." autocomplete="off"></div>
-        <div class="tbl-w"><table class="tbl tbl-market"><thead><tr><th></th><th>#</th><th>Coin</th><th>Giá</th><th>24h</th><th>7d</th><th>MCap</th><th></th></tr></thead><tbody id="cryptoTbody"><tr><td colspan="8" class="ld">Đang tải...</td></tr></tbody></table></div>
-      </div>
-    </section>
-
-    <!-- ══════ AI SCAN ══════ -->
-    <section class="tab" id="tab-research">
-      <div class="hdr"><h1>AI Scanner</h1><div class="hdr-right"><button class="hdr-btn" id="btnScan">🔍 Quét</button></div></div>
-
-      <div class="market-health" id="marketHealthRow"></div>
-
-      <!-- Gemini -->
-      <div class="card gemini-card">
-        <div class="card-h"><h2>🧠 Gemini AI</h2><span class="gemini-badge" id="geminiStatus">--</span></div>
-        <div class="card-body">
-          <p class="gemini-desc">AI phân tích thị trường thật → gợi ý mua/bán cụ thể.</p>
-          <button class="gemini-btn" id="btnAskAI">Hỏi AI phân tích</button>
-          <div id="geminiResult"></div>
-        </div>
-      </div>
-
-      <!-- Signals -->
-      <div class="filter-bar" id="sigChips">
-        <button class="chip on" data-sf="ALL">Tất cả</button>
-        <button class="chip" data-sf="BUY">Mua</button>
-        <button class="chip" data-sf="SELL">Bán</button>
-      </div>
-      <div class="sig-summary" id="sigSummary" style="padding:0 16px 4px"></div>
-      <div style="padding:0 16px 16px">
-        <div id="signalGrid" class="signal-grid"><div class="empty-msg">Nhấn "Quét" để phân tích</div></div>
       </div>
     </section>
 

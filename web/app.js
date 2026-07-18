@@ -1585,12 +1585,13 @@ window.quickTrade=function(symbol,side){
 // ═══════════════════════════════════════════════════════
 // NAV + EVENTS
 // ═══════════════════════════════════════════════════════
-const TITLES={portfolio:'Tài sản của tôi',alerts:'Cảnh báo',research:'Nghiên cứu & Tín hiệu',binance:'Binance',settings:'Cài đặt'};
+const TITLES={portfolio:'Tài sản của tôi',market:'Thị trường',alerts:'Cảnh báo',research:'Trợ lý AI & Tín hiệu',binance:'Binance',settings:'Cài đặt'};
 function switchTab(t){
   S.tab=t;$$('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.tab===t));
   $$('.tab').forEach(c=>c.classList.toggle('on',c.id==='tab-'+t));
   const pt=$('pageTitle');if(pt)pt.textContent=TITLES[t]||t;
   if(t==='portfolio'){renderPortfolio();if(S.binanceOn){fetchBinanceAccount().then(()=>{fetchBinancePrices()})}}
+  else if(t==='market'){renderMarket()}
   else if(t==='alerts'){renderAlerts();renderMyCoinsAlerts()}
   else if(t==='research'){renderDash();renderSignals()}
   else if(t==='binance'){renderBinanceTab();if(S.binanceOn){fetchBinanceAccount().then(()=>{fetchBinancePrices();renderBinanceBalance()});fetchBinanceOrders().then(renderBinanceOrders)}}
