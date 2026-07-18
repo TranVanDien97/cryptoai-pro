@@ -1383,10 +1383,11 @@ function renderPriceAlerts(){
 window.delPA=function(id){S.customPriceAlerts=S.customPriceAlerts.filter(p=>p.id!==id);savePA();renderPriceAlerts();toast('Đã xoá','info')};
 
 function renderPortfolio(){
-  const tb=$('portTbody');
+  const tb=$('portAssetsContainer');
+  if(!tb)return;
   const h=S.holdings;
   if(!h.length){
-    tb.innerHTML='<tr><td colspan="5" class="ld empty-msg" style="padding:40px 0;text-align:center;color:var(--t4)">Chưa có tài sản</td></tr>';
+    tb.innerHTML='<div class="ld empty-msg" style="padding:40px 0;text-align:center;color:var(--t4);grid-column:1/-1">Chưa có tài sản</div>';
     $('pTotal').innerHTML=`0.00000000 <span class="bp-currency">USDT</span><i class="bp-dropdown"></i>`;
     $('pTotalFiat').textContent=`≈ 0.00 USD`;
     $('pPnl').innerHTML=`PNL hôm nay <span style="color:var(--t4)">--</span>`;
@@ -1397,21 +1398,44 @@ function renderPortfolio(){
     const cp=getCurPrice(hh);const val=cp*hh.qty,cost=hh.cost*hh.qty;
     const pnl=val-cost,pp=cost>0?((val-cost)/cost)*100:0;tv+=val;tc+=cost;
     const cc=F.cc(pnl);
-    
-    const assetHtml = `<div class="b-asset"><img src="${hh.image||'https://cdn-icons-png.flaticon.com/512/8043/8043026.png'}"><div class="b-asset-info"><div class="b-asset-sym">${(hh.symbol||hh.name).toUpperCase()}</div><div class="b-asset-name">${hh.name}</div></div></div>`;
     const qtyText = (hh.qty % 1 !== 0) ? hh.qty.toFixed(5) : hh.qty;
-    const qtyHtml = `<div class="b-val">${qtyText}</div><div class="b-sub">${F.usd(val)} USD</div>`;
-    const priceHtml = `<div class="b-val">${F.usd(cp)} USD</div><div class="b-sub b-editable" onclick="editCost('${hh.id}')" title="Sửa giá vốn">${F.usd(hh.cost)} USD ✏️</div>`;
-    const pnlHtml = `<div class="b-pnl ${cc}">${pnl>=0?'+':''}${F.usd(Math.abs(pnl))}</div>`;
-    const actionHtml = `<div class="b-actions"><span onclick="editSLTP('${hh.id}','sl')" title="Cắt lỗ ${hh.sl||'--'}%">SL</span><span onclick="editSLTP('${hh.id}','tp')" title="Chốt lời ${hh.tp||'--'}%">TP</span><span class="b-del" onclick="delHolding('${hh.id}')" title="Xóa">✕</span></div>`;
 
-    return`<tr>
-      <td>${assetHtml}</td>
-      <td class="r">${qtyHtml}</td>
-      <td class="r">${priceHtml}</td>
-      <td class="r">${pnlHtml}</td>
-      <td class="r">${actionHtml}</td>
-    </tr>`;
+    return `<div class="asset-card">
+      <div class="ac-header">
+        <div class="ac-coin">
+          <img src="${hh.image||'https://cdn-icons-png.flaticon.com/512/8043/8043026.png'}">
+          <div>
+            <span class="ac-sym">${(hh.symbol||hh.name).toUpperCase()}</span>
+            <span class="ac-name">${hh.name}</span>
+          </div>
+        </div>
+        <div class="ac-actions">
+          <span onclick="editSLTP('${hh.id}','sl')" title="Cắt lỗ ${hh.sl||'--'}%">SL ${hh.sl?hh.sl+'%':''}</span>
+          <span onclick="editSLTP('${hh.id}','tp')" title="Chốt lời ${hh.tp||'--'}%">TP ${hh.tp?hh.tp+'%':''}</span>
+          <span class="ac-del" onclick="delHolding('${hh.id}')" title="Xóa">✕</span>
+        </div>
+      </div>
+      <div class="ac-body">
+        <div class="ac-row">
+          <div class="ac-col">
+            <div class="ac-label">Số lượng</div>
+            <div class="ac-val">${qtyText}</div>
+            <div class="ac-sub">${F.usd(val)} USD</div>
+          </div>
+          <div class="ac-col" style="align-items: flex-end; text-align: right;">
+            <div class="ac-label">Giá thị trường</div>
+            <div class="ac-val">${F.usd(cp)} USD</div>
+            <div class="ac-sub b-editable" onclick="editCost('${hh.id}')" title="Sửa giá vốn">Vốn: ${F.usd(hh.cost)} ✏️</div>
+          </div>
+        </div>
+        <div class="ac-row ac-pnl-row">
+          <div class="ac-col">
+            <div class="ac-label">PNL thả nổi</div>
+            <div class="ac-pnl ${cc}">${pnl>=0?'+':''}${F.usd(Math.abs(pnl))} USD (${F.pct(pp)})</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
   }).join('');
   
   const tp=tv-tc,tpp=tc>0?((tv-tc)/tc)*100:0;
