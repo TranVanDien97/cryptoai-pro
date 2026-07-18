@@ -551,23 +551,29 @@ app.post('/api/ai/analyze', async (req, res) => {
   const { marketData } = req.body;
   if (!marketData) return res.json({ success: false, error: 'Không có dữ liệu thị trường' });
 
-  const prompt = `Bạn là chuyên gia phân tích crypto hàng đầu. Phân tích dữ liệu thị trường thật dưới đây và đưa ra khuyến nghị đầu tư rõ ràng bằng tiếng Việt.
+  const prompt = `Bạn là chuyên gia phân tích kỹ thuật crypto (technical analyst), làm việc CHỈ dựa trên dữ liệu định lượng được cung cấp — không suy đoán, không bịa số liệu ngoài dữ liệu.
 
-DỮ LIỆU THỊ TRƯỜNG THẬT:
+DỮ LIỆU THỊ TRƯỜNG THẬT (tính từ nến Binance thật, đa khung 1H/4H/1D — RSI/MACD/MA/vùng hỗ trợ-kháng cự):
 ${marketData}
 
-YÊU CẦU:
-1. Phân tích xu hướng BTC (ngắn hạn 1-3 ngày, trung hạn 1-2 tuần)
-2. Chỉ ra TOP 3 coin NÊN MUA ngay bây giờ (kèm giá mua, giá cắt lỗ, giá chốt lời cụ thể)
-3. Chỉ ra coin NÊN TRÁNH hoặc NÊN BÁN
-4. Đánh giá mức độ rủi ro thị trường (1-10)
-5. Lời khuyên cho nhà đầu tư vốn nhỏ ($100-$1000)
+QUY TẮC BẮT BUỘC:
+1. TUYỆT ĐỐI KHÔNG tự đặt ra giá Entry/Stop-loss/Target mới. Nếu dữ liệu đã có sẵn Entry/SL/Target cho một coin, chỉ được giải thích/đánh giá lại các mức đó (hợp lý hay rủi ro), KHÔNG thay bằng con số khác.
+2. Nếu một coin không có tín hiệu MUA/BÁN rõ ràng trong dữ liệu, phải nói "chưa đủ điều kiện" — không tự suy diễn xu hướng khi thiếu dữ liệu.
+3. Luận điểm phải bám vào chỉ báo cụ thể: RSI (>70 quá mua, <30 quá bán), MACD (histogram dương/âm), vị trí giá so với MA25/MA99, Fear & Greed Index. Mỗi khuyến nghị phải nêu rõ ĐANG DỰA VÀO chỉ báo nào.
+4. Nếu 3 khung thời gian (1H/4H/1D) mâu thuẫn nhau, phải nói rõ mâu thuẫn đó thay vì chọn đại 1 phía.
+5. Luôn nhắc: đây là phân tích kỹ thuật tự động, không phải lời khuyên đầu tư, thị trường crypto rủi ro cao và có thể đảo chiều đột ngột.
 
-FORMAT: Trả lời ngắn gọn, dùng emoji, chia thành các mục rõ ràng. KHÔNG dùng markdown header (#).`;
+YÊU CẦU TRẢ LỜI:
+1. Nhận định xu hướng BTC (dựa trên chỉ báo cụ thể trong dữ liệu, không đoán mò)
+2. Điểm qua các tín hiệu MUA/BÁN đã có trong dữ liệu — giải thích NGẮN GỌN lý do hợp lý của từng mức Entry/SL/Target đã cho (không đổi số)
+3. Đánh giá mức độ rủi ro thị trường chung (1-10) dựa trên Fear&Greed + độ đồng thuận giữa các khung thời gian
+4. Lưu ý rủi ro cho nhà đầu tư vốn nhỏ ($100-$1000): ưu tiên quản trị rủi ro (không all-in, chia vốn) hơn là "chọn coin nào"
+
+FORMAT: Tiếng Việt, ngắn gọn, dùng emoji vừa phải, chia mục rõ ràng. KHÔNG dùng markdown header (#).`;
 
   const body = JSON.stringify({
     contents: [{ parts: [{ text: prompt }] }],
-    generationConfig: { temperature: 0.7, maxOutputTokens: 1200 }
+    generationConfig: { temperature: 0.35, maxOutputTokens: 1200 }
   });
 
   // Try models in order: flash-lite (30 RPM free) → 1.5-flash (15 RPM) → 2.0-flash (10 RPM)
@@ -624,10 +630,15 @@ app.post('/api/ai/chat', async (req, res) => {
   if (!message) return res.json({ success: false, error: 'Tin nhắn trống' });
 
   // Build system context
-  const systemPrompt = `Bạn là CryptoAI — trợ lý đầu tư crypto chuyên nghiệp, nói tiếng Việt.
-Bạn có quyền truy cập vào dữ liệu THẬT từ ví Binance của người dùng.
-Trả lời ngắn gọn, cụ thể, có số liệu. Dùng emoji cho sinh động.
-Khi khuyên mua/bán, luôn kèm giá vào lệnh, cắt lỗ, chốt lời cụ thể.
+  const systemPrompt = `Bạn là CryptoAI — trợ lý phân tích kỹ thuật crypto, nói tiếng Việt.
+Bạn có quyền truy cập dữ liệu THẬT từ ví Binance và các tín hiệu kỹ thuật (RSI/MACD/MA/Entry/SL/Target) đã được hệ thống tính toán sẵn từ nến thật, gửi kèm bên dưới.
+
+QUY TẮC BẮT BUỘC:
+- CHỈ dùng số liệu có trong dữ liệu được cung cấp. Nếu người dùng hỏi về giá vào lệnh/cắt lỗ/chốt lời của một coin đã có tín hiệu kèm số liệu cụ thể, hãy dùng ĐÚNG các con số đó, không tự đặt số khác.
+- Nếu coin không có tín hiệu/dữ liệu kỹ thuật trong context, phải nói rõ "chưa có đủ dữ liệu để đưa ra mức giá cụ thể" thay vì đoán bừa.
+- Mọi nhận định xu hướng phải nêu rõ dựa trên chỉ báo nào (RSI, MACD, vị trí so với MA25/MA99...).
+- Luôn nhắc đây là phân tích kỹ thuật tự động, không phải lời khuyên tài chính, thị trường rủi ro cao.
+Trả lời ngắn gọn, cụ thể, có số liệu thật. Dùng emoji vừa phải.
 
 ${portfolioContext || 'Chưa có dữ liệu portfolio.'}`;
 
@@ -646,7 +657,7 @@ ${portfolioContext || 'Chưa có dữ liệu portfolio.'}`;
 
   const body = JSON.stringify({
     contents,
-    generationConfig: { temperature: 0.7, maxOutputTokens: 1500 }
+    generationConfig: { temperature: 0.4, maxOutputTokens: 1500 }
   });
 
   const models = ['gemini-2.0-flash-lite', 'gemini-1.5-flash', 'gemini-2.0-flash'];

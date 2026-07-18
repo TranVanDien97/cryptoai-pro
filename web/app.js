@@ -1069,6 +1069,28 @@ function connectLiveWS(){
   if(typeof WebSocket==='undefined')return; // môi trường không hỗ trợ WS (hiếm)
   const streams=buildWsStreams();
   if(!streams.length)return;
+  function sigCardHTML(s){
+  let cls=s.signal.includes('BUY')?'buy-card':s.signal.includes('SELL')?'sell-card':'';
+  const src = s.source === 'Binance' ? '💎 Binance' : '🤖 API';
+  let checks='';
+  if(s.checks&&s.checks.length){
+    checks=s.checks.slice(0,6).map(c=>`<span class="sig-check ${c.good?'good':c.neutral?'neutral':'bad'}">${c.good?'✓':c.neutral?'~':'✗'} ${c.label}</span>`).join('');
+  }
+  return`<div class="sig-card ${cls}" onclick="openCoinModal('${s.id}')">
+    <div class="sig-top">
+      <img class="sig-img" src="${s.image}" alt="">
+      <div class="sig-name"><div class="sym">${s.symbol} <small style="color:var(--t4);font-weight:400">#${s.rank||''}</small></div><div class="name">${src} • ${s.confidence}%</div></div>
+      <span class="sig-badge ${s.signal}">${F.sig(s.signal)}</span>
+    </div>
+    ${checks?'<div class="sig-checks">'+checks+'</div>':''}
+    <ul class="sig-reasons">${s.reasons.slice(0,2).map(r=>'<li>'+simplifyReason(r)+'</li>').join('')}</ul>
+    <div class="sig-entry">
+      <div><div class="label">Mua</div><div class="val">${F.usd(s.entry)}</div></div>
+      <div><div class="label">Cắt lỗ</div><div class="val r">${F.usd(s.sl)}</div></div>
+      <div><div class="label">${s.tp2?'Mục tiêu 1':'Chốt lời'}</div><div class="val g">${F.usd(s.tp)}</div>${s.tp2?`<div class="val2">T2: ${F.usd(s.tp2)}</div>`:''}</div>
+    </div>
+  </div>`;
+}
   try{
     if(liveWS){liveWS.onclose=null;liveWS.onerror=null;try{liveWS.close()}catch{}}
     const url='wss://stream.binance.com:9443/stream?streams='+streams.map(s=>s+'@miniTicker').join('/');
@@ -1237,7 +1259,7 @@ function renderSignals(){
 
 function renderMarket(){
   const st=$('cryptoStats');
-  if(S.cglobal){
+  if(st&&S.cglobal){
     const g=S.cglobal;
     st.innerHTML=`<div class="cstat"><span class="cstat-l">Vốn hóa</span><span class="cstat-v">${F.mcap(g.total_market_cap?.usd)}</span></div>
       <div class="cstat"><span class="cstat-l">KL 24h</span><span class="cstat-v">${F.mcap(g.total_volume?.usd)}</span></div>
@@ -1247,18 +1269,20 @@ function renderMarket(){
   let coins=[...S.crypto];
   if(S.mktSearch){const q=S.mktSearch.toLowerCase();coins=coins.filter(c=>c.name.toLowerCase().includes(q)||c.symbol.toLowerCase().includes(q))}
   const tb=$('cryptoTbody');
+  if(!tb)return;
   if(!coins.length){tb.innerHTML='<tr><td colspan="8" class="ld">Không tìm thấy</td></tr>';return}
   tb.innerHTML=coins.map((c,i)=>{
     const c24=c.price_change_percentage_24h||0;const c7d=c.price_change_percentage_7d_in_currency||null;
     const isFav=S.favs.includes(c.id);const spId='sp_'+c.id.replace(/[^a-z0-9]/g,'');
     return`<tr onclick="openCoinModal('${c.id}')" style="cursor:pointer">
-      <td onclick="event.stopPropagation();togFav('${c.id}')"><button class="fav-btn ${isFav?'on':''}">${isFav?'⭐':'☆'}</button></td>
-      <td style="color:var(--t4)">${i+1}</td>
-      <td><div class="crypto-coin"><img src="${c.image}" alt="${c.symbol}"><div><span>${c.name}</span><br><span class="crypto-coin-sym">${c.symbol}</span></div></div></td>
-      <td>${F.usd(c.current_price)}</td><td class="${F.cc(c24)}">${F.pct(c24)}</td>
-      <td class="${c7d!=null?F.cc(c7d):''}">${c7d!=null?F.pct(c7d):'--'}</td>
-      <td>${F.mcap(c.market_cap)}</td>
-      <td><canvas class="sparkline" id="${spId}" width="80" height="28"></canvas></td>
+      <td class="td-fav" onclick="event.stopPropagation();togFav('${c.id}')"><button class="fav-btn ${isFav?'on':''}">${isFav?'⭐':'☆'}</button></td>
+      <td class="td-rank" style="color:var(--t4)">${i+1}</td>
+      <td class="td-coin" data-label="Coin"><div class="crypto-coin"><img src="${c.image}" alt="${c.symbol}" loading="lazy"><div><span>${c.name}</span><br><span class="crypto-coin-sym">${c.symbol}</span></div></div></td>
+      <td class="td-price" data-label="Giá">${F.usd(c.current_price)}</td>
+      <td class="td-24h ${F.cc(c24)}" data-label="24h">${F.pct(c24)}</td>
+      <td class="td-7d ${c7d!=null?F.cc(c7d):''}" data-label="7d">${c7d!=null?F.pct(c7d):'--'}</td>
+      <td class="td-mcap" data-label="Vốn hóa">${F.mcap(c.market_cap)}</td>
+      <td class="td-spark"><canvas class="sparkline" id="${spId}" width="80" height="28"></canvas></td>
     </tr>`}).join('');
   requestAnimationFrame(()=>{coins.forEach(c=>{const cv=document.getElementById('sp_'+c.id.replace(/[^a-z0-9]/g,''));const d=c.sparkline_in_7d?.price;if(cv&&d&&d.length>1)drawSparkline(cv,d,d[d.length-1]>=d[0])})});
 }
@@ -1979,6 +2003,12 @@ function buildPortfolioContext(){
   const btc=S.crypto.find(c=>c.id==='bitcoin');
   if(btc)ctx+=`\nBTC: $${btc.current_price} (24h: ${btc.price_change_percentage_24h?.toFixed(1)}%)\n`;
   if(S.fng)ctx+=`Fear&Greed: ${S.fng.value} (${S.fng.value_classification})\n`;
+  if(S.signals.length){
+    ctx+='\nTÍN HIỆU KỸ THUẬT ĐÃ TÍNH SẴN (dùng đúng số này khi được hỏi, không tự bịa số khác):\n';
+    S.signals.slice(0,10).forEach(s=>{
+      ctx+=`${s.symbol}: ${s.signal} (tin cậy ${s.confidence}%) — RSI6:${s.indicators?.rsi6??'?'} MA25:${s.indicators?.ma25?F.usd(s.indicators.ma25):'?'} | Entry:${F.usd(s.entry)} SL:${F.usd(s.sl)} Target1:${F.usd(s.tp)}${s.tp2?' Target2:'+F.usd(s.tp2):''}\n`;
+    });
+  }
   return ctx;
 }
 
