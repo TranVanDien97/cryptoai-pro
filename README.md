@@ -1,188 +1,66 @@
-# 📈 StockAI — AI-Powered Vietnamese Stock Investment App
+# 📈 CryptoAI Pro — AI Trading Assistant with Binance Integration
 
-> Ứng dụng đầu tư chứng khoán thông minh, sử dụng AI tự động phân tích kỹ thuật + cơ bản + sentiment, và gửi tín hiệu mua/bán kịp thời.
+> Ứng dụng giao dịch tiền điện tử thông minh, tích hợp Binance API để quản lý tài khoản và giao dịch, cùng với Gemini AI để phân tích kỹ thuật và hỗ trợ ra quyết định.
 
-## 🏗️ Architecture
+## 🚀 Tính năng chính
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    📱 React Native Mobile App                    │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌────────┐ ┌────────┐  │
-│  │   Home   │ │  Market  │ │    AI    │ │Portfol.│ │Settings│  │
-│  │Dashboard │ │  Screen  │ │ Signals  │ │ Screen │ │ Screen │  │
-│  └──────────┘ └──────────┘ └──────────┘ └────────┘ └────────┘  │
-│       │              │            │                              │
-│  ┌────▼──────────────▼────────────▼────────────────────────┐    │
-│  │           Zustand Store + WebSocket Client               │    │
-│  └──────────────────────┬──────────────────────────────────┘    │
-└─────────────────────────┼──────────────────────────────────────┘
-                          │ Socket.IO
-┌─────────────────────────┼──────────────────────────────────────┐
-│                    Backend Services                              │
-│                          │                                       │
-│  ┌───────────────────────▼───────────────────────────────────┐  │
-│  │          ⚡ Real-time WebSocket Service (Node.js)          │  │
-│  │  Socket.IO Server │ VN Stock Feed │ Alert Engine           │  │
-│  └───────────┬───────────────────────────────┬───────────────┘  │
-│              │                               │                   │
-│  ┌───────────▼───────────┐    ┌──────────────▼──────────────┐  │
-│  │  🧠 AI Engine (Python) │    │  🔔 Notification Service    │  │
-│  │  FastAPI + vnstock     │    │  FCM Push + History + Prefs │  │
-│  │  Technical Analysis    │    └─────────────────────────────┘  │
-│  │  Fundamental Analysis  │                                      │
-│  │  Signal Generator      │              ┌───────────────────┐  │
-│  └────────────────────────┘              │  Redis (Cache)     │  │
-│                                          └───────────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
-```
+*   **Quản lý Binance:** Kết nối an toàn với tài khoản Binance của bạn để xem số dư, lệnh mở, lịch sử giao dịch và đặt lệnh mua/bán.
+*   **Phân tích kỹ thuật AI:** Sử dụng Gemini AI để phân tích dữ liệu thị trường theo thời gian thực, đưa ra các tín hiệu mua/bán dựa trên các chỉ báo kỹ thuật (RSI, MACD, Bollinger Bands, EMA, SMA) trên nhiều khung thời gian (1H, 4H, 1D).
+*   **Hệ thống cảnh báo thông minh:** Thiết lập các cảnh báo giá tùy chỉnh, Stop-Loss, Take-Profit, Trailing Stop-Loss và cảnh báo biến động thị trường.
+*   **Trò chuyện với AI:** Tương tác với Gemini AI để nhận tư vấn về danh mục đầu tư và phân tích thị trường.
+*   **Giao diện thân thiện:** Giao diện người dùng trực quan, dễ sử dụng, được tối ưu hóa cho trải nghiệm giao dịch.
 
-## 🚀 Quick Start
+## 🏗️ Kiến trúc
 
-### Prerequisites
-- **Python 3.11+**
-- **Node.js 22+**
-- **Docker** (optional, for containerized deployment)
+Ứng dụng bao gồm hai phần chính:
 
-### Option A: Run with Docker (Recommended)
+*   **Backend (Node.js/Express):** Hoạt động như một proxy an toàn cho Binance API, xử lý việc ký yêu cầu (HMAC SHA256) và quản lý CORS. Đồng thời, nó tích hợp với Gemini AI để xử lý các yêu cầu phân tích và trò chuyện.
+*   **Frontend (HTML/CSS/JavaScript thuần):** Cung cấp giao diện người dùng tương tác, hiển thị dữ liệu thị trường, tín hiệu AI, thông tin tài khoản Binance và cho phép người dùng thực hiện các hành động giao dịch.
 
-```bash
-cd backend
-docker-compose up --build
-```
+## 🛠️ Cài đặt và Chạy ứng dụng
 
-This starts all 4 services:
-| Service | Port | URL |
-|---------|------|-----|
-| AI Engine | 8000 | http://localhost:8000/docs |
-| Real-time WS | 3001 | ws://localhost:3001 |
-| Notification | 3002 | http://localhost:3002/health |
-| Redis | 6379 | redis://localhost:6379 |
+### Yêu cầu
 
-### Option B: Run Manually
+*   **Node.js 18+**
+*   **API Key của Binance:** Để kết nối với sàn giao dịch Binance.
+*   **API Key của Gemini AI:** Để sử dụng các tính năng phân tích và trò chuyện AI.
 
-#### 1. AI Engine (Python/FastAPI)
-```bash
-cd backend/services/ai-engine
-python -m venv venv
-venv\Scripts\activate        # Windows
-# source venv/bin/activate   # macOS/Linux
-pip install -r requirements.txt
-copy .env.example .env
-uvicorn app.main:app --reload --port 8000
-```
+### Hướng dẫn
 
-#### 2. Real-time WebSocket Service
-```bash
-cd backend/services/realtime
-npm install
-npm run dev
-```
+1.  **Clone kho lưu trữ:**
+    ```bash
+    git clone https://github.com/TranVanDien97/cryptoai-pro.git
+    cd cryptoai-pro
+    ```
 
-#### 3. Notification Service
-```bash
-cd backend/services/notification
-npm install
-npm run dev
-```
+2.  **Cài đặt dependencies cho Backend:**
+    ```bash
+    cd server
+    npm install
+    cd ..
+    ```
 
-#### 4. Mobile App
-```bash
-cd mobile
-npm install
-npx react-native start
-# New terminal:
-npx react-native run-android  # or run-ios
-```
+3.  **Cấu hình API Keys:**
+    *   Tạo tệp `.env` trong thư mục `server` với nội dung sau (thay thế bằng API Key và Secret của bạn):
+        ```
+        BINANCE_API_KEY=YOUR_BINANCE_API_KEY
+        BINANCE_API_SECRET=YOUR_BINANCE_API_SECRET
+        GEMINI_API_KEY=YOUR_GEMINI_API_KEY
+        ```
+    *   Hoặc bạn có thể nhập trực tiếp trong giao diện ứng dụng sau khi khởi chạy.
 
-## 📁 Project Structure
+4.  **Khởi chạy Backend:**
+    ```bash
+    npm start
+    ```
+    (Server sẽ chạy trên cổng 8001 theo mặc định)
 
-```
-stockai/
-├── backend/
-│   ├── docker-compose.yml           # All services orchestration
-│   └── services/
-│       ├── ai-engine/               # 🧠 Python AI Engine (FastAPI)
-│       │   ├── app/
-│       │   │   ├── analysis/        # Technical, Fundamental, Signals
-│       │   │   ├── api/             # REST endpoints
-│       │   │   ├── data/            # vnstock client
-│       │   │   └── models.py        # Pydantic models
-│       │   └── requirements.txt
-│       ├── realtime/                # ⚡ WebSocket Server (Node.js)
-│       │   └── src/
-│       │       ├── feeds/           # Market data feeds
-│       │       ├── handlers/        # Alert engine
-│       │       └── index.ts         # Socket.IO server
-│       └── notification/            # 🔔 Push Notifications (Node.js)
-│           └── src/
-│               └── index.ts         # FCM + history + preferences
-└── mobile/                          # 📱 React Native App
-    ├── App.tsx
-    └── src/
-        ├── components/              # Reusable UI components
-        ├── screens/                 # 6 screens
-        ├── hooks/                   # WebSocket hooks
-        ├── services/                # API + WebSocket + Notification clients
-        ├── stores/                  # Zustand state management
-        ├── theme/                   # Design system
-        └── types/                   # TypeScript definitions
-```
-
-## 🧠 AI Analysis Pipeline
-
-```
-Vietnamese Stock Data (vnstock library)
-    ↓
-Technical Analysis (11 indicators)
-  RSI, MACD, SMA, EMA, Bollinger Bands,
-  Stochastic, ADX, ATR, OBV, MFI, VWAP
-    ↓
-Fundamental Analysis
-  P/E, P/B, ROE, ROA, D/E, Margins
-  (vs Vietnamese industry benchmarks)
-    ↓
-Signal Generator (60% Tech + 40% Fund)
-    ↓
-STRONG_BUY │ BUY │ HOLD │ SELL │ STRONG_SELL
-  + Confidence %, Target Price, Stop Loss
-  + Reasoning in Vietnamese 🇻🇳
-```
-
-## 📱 Mobile App Screens
-
-| Screen | Features |
-|--------|----------|
-| **Home Dashboard** | Portfolio summary, market indices, AI signals, watchlist, news |
-| **Market** | Stock list, search, exchange filter (HOSE/HNX/UPCOM), sort, top movers |
-| **AI Signals** | Signal cards with confidence, scores, reasons, filter by type |
-| **Portfolio** | Holdings table, P&L, allocation bar chart |
-| **Notifications** | Real-time alerts: AI signals, price targets, volume spikes |
-| **Settings** | Notification toggles, AI config, language, security |
-
-## 🔔 Alert System
-
-| Type | Trigger | Priority |
-|------|---------|----------|
-| **AI Signal** | Model generates BUY/SELL signal | 🔴 HIGH |
-| **Price Target** | Stock hits user-defined price | 🔴 HIGH |
-| **Volume Spike** | Volume > 2x daily average | 🟡 MEDIUM |
-| **News Alert** | Breaking news for watchlist | 🟡 MEDIUM |
-
-## 🛠️ Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Mobile | React Native, TypeScript, Zustand, Socket.IO Client |
-| AI Engine | Python, FastAPI, vnstock, pandas-ta, Pydantic |
-| Real-time | Node.js, Socket.IO, TypeScript |
-| Notifications | Express, Firebase Cloud Messaging |
-| Cache | Redis |
-| Container | Docker Compose |
+5.  **Truy cập Frontend:**
+    Mở trình duyệt và truy cập `http://localhost:8001`.
 
 ## ⚠️ Disclaimer
 
-StockAI chỉ cung cấp thông tin tham khảo, không phải tư vấn đầu tư chuyên nghiệp.
-Mọi quyết định đầu tư là trách nhiệm của người dùng.
+CryptoAI Pro chỉ cung cấp thông tin tham khảo và công cụ hỗ trợ giao dịch, không phải tư vấn đầu tư chuyên nghiệp. Thị trường tiền điện tử có rủi ro cao và biến động mạnh. Mọi quyết định đầu tư là trách nhiệm của người dùng. Hãy luôn nghiên cứu kỹ lưỡng và quản lý rủi ro cẩn thận.
 
 ## 📝 License
 

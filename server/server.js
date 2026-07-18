@@ -19,6 +19,9 @@ const cors = require('cors');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const { setGeminiKey } = require('./services/ai/aiClient');
+const { generateRecommendationsFromCandidates } = require('./services/ai/coinRecommendationEngine');
+const { generateSmartAlert } = require('./services/ai/priceAlertEngine');
 
 const app = express();
 const PORT = process.env.PORT || 8001;
@@ -38,7 +41,7 @@ function loadCredentials() {
   try {
     if (fs.existsSync(CRED_FILE)) {
       const data = JSON.parse(fs.readFileSync(CRED_FILE, 'utf8'));
-      console.log('  📂 Đã tải credentials từ', CRED_FILE);
+      console.log(\'  📂 Đã tải credentials từ\', CRED_FILE, credentials.apiKey ? \'(Binance Key: ***\'+credentials.apiKey.slice(-4)+\' Gemini Key: ***\'+geminiKey.slice(-4)+\' )\' : \'(Chưa có key)\' );
       return data;
     }
   } catch (e) { console.error('  ⚠️ Lỗi đọc credentials:', e.message); }
@@ -51,7 +54,7 @@ function saveCredentials() {
       binance: { apiKey: credentials.apiKey, apiSecret: credentials.apiSecret, connected: credentials.connected },
       geminiKey: geminiKey
     }, null, 2), 'utf8');
-    console.log('  💾 Đã lưu credentials');
+    console.log(\'  💾 Đã lưu credentials\', credentials.apiKey ? \'(Binance Key: ***\'+credentials.apiKey.slice(-4)+\' Gemini Key: ***\'+geminiKey.slice(-4)+\' )\' : \'(Chưa có key)\' );
   } catch (e) { console.error('  ⚠️ Lỗi lưu:', e.message); }
 }
 
@@ -63,6 +66,7 @@ let credentials = {
   connected: !!(process.env.BINANCE_API_KEY || savedData.binance?.apiKey)
 };
 let geminiKey = process.env.GEMINI_API_KEY || savedData.geminiKey || null;
+if (geminiKey) setGeminiKey(geminiKey);
 
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
@@ -537,6 +541,7 @@ app.post('/api/ai/connect', (req, res) => {
   const { apiKey } = req.body;
   if (!apiKey || apiKey.length < 20) return res.json({ success: false, error: 'API Key không hợp lệ' });
   geminiKey = apiKey;
+  setGeminiKey(apiKey);
   saveCredentials(); // Lưu Gemini key vào máy
   res.json({ success: true, message: 'Đã kết nối Gemini AI' });
 });
@@ -621,6 +626,20 @@ FORMAT: Tiếng Việt, ngắn gọn, dùng emoji vừa phải, chia mục rõ r
 
   // All models failed
   res.json({ success: false, error: 'Tất cả model Gemini đều bị giới hạn. Đợi 1 phút rồi thử lại.' });
+});
+
+// Gợi ý AI (Recommendation Engine)
+app.post('/api/ai/recommendations', async (req, res) => {
+  if (!geminiKey) return res.json({ success: false, error: 'Chưa kết nối Gemini AI.' });
+  const { candidates } = req.body;
+  if (!candidates || !candidates.length) return res.json({ success: false, error: 'Không có dữ liệu' });
+
+  try {
+    const enriched = await generateRecommendationsFromCandidates(candidates, { maxCandidates: 10 });
+    res.json({ success: true, data: enriched });
+  } catch (err) {
+    res.json({ success: false, error: err.message });
+  }
 });
 
 // Gemini Chat — multi-turn with portfolio context

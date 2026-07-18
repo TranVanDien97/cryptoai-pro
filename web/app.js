@@ -641,6 +641,19 @@ async function manualScan(){
   if(btn){btn.disabled=true;btn.textContent='Đang quét...'}
   try {
     await aiScanPro();
+    const candidates = S.signals.slice(0, 5);
+    if(geminiConnected && candidates.length > 0) {
+      if(btn) btn.textContent='⏳ AI đang diễn giải...';
+      const r = await postJ(BACKEND+'/api/ai/recommendations', { candidates });
+      if(r && r.success && r.data) {
+        r.data.forEach(enriched => {
+          const idx = S.signals.findIndex(sig => sig.symbol === enriched.symbol);
+          if(idx !== -1 && enriched.ai) {
+            S.signals[idx].ai = enriched.ai;
+          }
+        });
+      }
+    }
     renderSignals();
   } catch(e) {
     console.error('Scan error', e);
@@ -1236,7 +1249,7 @@ function sigCardHTML(s){
       <span class="sig-badge ${s.signal}">${F.sig(s.signal)}</span>
     </div>
     ${checks?'<div class="sig-checks">'+checks+'</div>':''}
-    <ul class="sig-reasons">${s.reasons.slice(0,2).map(r=>'<li>'+simplifyReason(r)+'</li>').join('')}</ul>
+    ${s.ai ? `<div class="sig-ai-box" style="background:var(--yellowA);border-left:3px solid var(--yellow);padding:8px;margin:8px 0;border-radius:4px;font-size:13px;line-height:1.4"><div style="color:var(--yellow);font-weight:600;margin-bottom:4px">🤖 ${s.ai.headline||'AI Phân tích'}</div><div style="color:var(--t1)">${s.ai.explanation||''}</div></div>` : `<ul class="sig-reasons">${s.reasons.slice(0,2).map(r=>'<li>'+simplifyReason(r)+'</li>').join('')}</ul>`}
     <div class="sig-entry">
       <div><div class="label">Giá Live</div><div class="val" style="color:var(--yellow)">${F.usd(liveP)}</div></div>
       <div><div class="label">Vào lệnh</div><div class="val">${F.usd(s.entry)}</div></div>
@@ -1870,11 +1883,11 @@ function init(){
   });
 
   // Settings toggles
-  const toggles=[['togSound','sound'],['togAutoScan','autoScan'],['togHighConf','highConf'],['togVolatility','volatility'],['togFng','fngAlert'],['togStoploss','stoploss'],['togTakeprofit','takeprofit'],['togTrailingSL','trailingSL']];
+  const toggles=[['togSound','sound'],['togAutoScan','autoScan'],['togHighConf','highConf'],['togVolatility','volatility'],['togFngAlert','fngAlert'],['togStoploss','stoploss'],['togTakeprofit','takeprofit'],['togTrailingSL','trailingSL']];
   toggles.forEach(([id,key])=>{const el=$(id);if(el){el.checked=S.settings[key];el.addEventListener('change',()=>{S.settings[key]=el.checked;saveS();if(key==='autoScan'){if(S.settings.autoScan){S.scanTimer=setInterval(fullScan,300000);toast('Scanner: BẬT','success')}else{clearInterval(S.scanTimer);toast('Scanner: TẮT','info')}}})}});
 
   // Trailing SL % input
-  const trailInput=$('trailPctInput');
+  const trailInput=$(\'trailPctInput\');
   if(trailInput){trailInput.value=S.settings.trailPct||5;trailInput.addEventListener('change',()=>{S.settings.trailPct=parseFloat(trailInput.value)||5;saveS();toast('Trailing SL: '+S.settings.trailPct+'%','info')})}
 
   // Custom Price Alerts
