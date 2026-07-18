@@ -75,17 +75,20 @@ function trimToWordLimit(text, limit = 50) {
 }
 
 const ALERT_SYSTEM_PROMPT = `
-Bạn là công cụ viết cảnh báo giá crypto ngắn gọn cho một ứng dụng mobile.
-Bạn nhận dữ liệu JSON đã được hệ thống tính toán sẵn (giá, ATR, vùng
-hỗ trợ/kháng cự, tín hiệu breakout, volume).
+Bạn là một nhà quản trị rủi ro chuyên nghiệp. Bạn nhận dữ liệu JSON của 1 đồng coin đang được giữ trong danh mục đầu tư (giá mua, giá hiện tại, PNL%, ATR, vùng hỗ trợ/kháng cự, tín hiệu breakout).
 
-QUY TẮC:
-1. Chỉ dùng đúng số liệu được cung cấp, không tự suy đoán con số mới.
-2. Câu trả lời TỐI ĐA 50 từ, 1-2 câu, tiếng Việt, văn phong cảnh báo
-   trực tiếp (như push notification), không mở đầu dài dòng.
-3. Nêu rõ: coin nào, đang tiến sát/phá vỡ vùng nào, có volume xác nhận
-   hay không.
-4. Không đưa lời khuyên "nên mua/nên bán".
+QUY TẮC PHẢN HỒI JSON:
+1. Bạn BẮT BUỘC phải trả về đúng chuẩn JSON với cấu trúc:
+{
+  "action": "DCA" | "SELL" | "HOLD" | "TAKE_PROFIT" | "STOP_LOSS",
+  "reason": "Lý do cực kỳ ngắn gọn, sắc bén, tối đa 40 từ"
+}
+2. Dựa vào Giá mua (entry) và PNL%:
+   - Nếu đang lỗ sâu nhưng gần Hỗ trợ cứng + Volatility thấp: nên DCA hoặc HOLD.
+   - Nếu đang lỗ và thủng Hỗ trợ cứng + Volatility cao: STOP_LOSS.
+   - Nếu đang lời và gần Kháng cự cứng: TAKE_PROFIT.
+   - Nếu giá đang breakout: HOLD hoặc BUY.
+3. KHÔNG trả về bất kỳ text nào nằm ngoài JSON.
 `.trim();
 
 /**
@@ -94,7 +97,7 @@ QUY TẮC:
  * để tránh spam thông báo vô nghĩa.
  */
 async function generateSmartAlert(coinRealtimeData) {
-  const { symbol, price, resistance, support, candles, volume24h, avgVolume } = coinRealtimeData;
+  const { symbol, price, entryPrice, pnlPct, resistance, support, candles, volume24h, avgVolume } = coinRealtimeData;
 
   const atr = computeATR(candles);
   if (atr == null) return null; // không đủ dữ liệu lịch sử để tính ATR đáng tin cậy
@@ -102,22 +105,34 @@ async function generateSmartAlert(coinRealtimeData) {
   const volatility = classifyVolatility(atr, price);
   const breakout = detectBreakoutSignal({ price, resistance, support, atr, volume24h, avgVolume });
 
-  if (breakout.type === "NO_SIGNIFICANT_LEVEL") return null;
-
   const userPrompt = JSON.stringify({
     symbol,
-    price,
+    currentPrice: price,
+    entryPrice: entryPrice || price,
+    pnlPct: pnlPct || 0,
     atr: Number(atr.toFixed(4)),
     volatility,
     breakout,
+    supportLevel: support,
+    resistanceLevel: resistance
   });
 
-  const rawText = await askAI(ALERT_SYSTEM_PROMPT, userPrompt, { maxTokens: 120, temperature: 0.3 });
-  const text = trimToWordLimit(rawText, 50);
+  const rawText = await askAI(ALERT_SYSTEM_PROMPT, userPrompt, { maxTokens: 150, temperature: 0.2 });
+  
+  let resultObj = { action: 'HOLD', reason: 'Tiếp tục theo dõi' };
+  try {
+    const cleanJson = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+    const parsed = JSON.parse(cleanJson);
+    if(parsed.action) resultObj.action = parsed.action;
+    if(parsed.reason) resultObj.reason = parsed.reason;
+  } catch(e) {
+    resultObj.reason = trimToWordLimit(rawText, 40);
+  }
 
   return {
     symbol,
-    text,
+    action: resultObj.action,
+    text: resultObj.reason,
     meta: { atr, volatility, breakout },
   };
 }

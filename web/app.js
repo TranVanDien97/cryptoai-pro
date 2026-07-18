@@ -1421,13 +1421,14 @@ function renderPortfolio(){
     const pnl=val-cost,pp=cost>0?((val-cost)/cost)*100:0;tv+=val;tc+=cost;
     const cc=F.cc(pnl);
     const qtyText = (hh.qty % 1 !== 0) ? hh.qty.toFixed(5) : hh.qty;
+    const sym = (hh.symbol||hh.name).toUpperCase();
 
     return `<div class="asset-card">
       <div class="ac-header">
         <div class="ac-coin">
           <img src="${hh.image||'https://cdn-icons-png.flaticon.com/512/8043/8043026.png'}">
           <div>
-            <span class="ac-sym">${(hh.symbol||hh.name).toUpperCase()}</span>
+            <span class="ac-sym">${sym}</span>
             <span class="ac-name">${hh.name}</span>
           </div>
         </div>
@@ -1441,19 +1442,19 @@ function renderPortfolio(){
         <div class="ac-row">
           <div class="ac-col">
             <div class="ac-label">Số lượng</div>
-            <div class="ac-val">${qtyText}</div>
-            <div class="ac-sub">${F.usd(val)} USD</div>
+            <div class="ac-val live-qty" data-live-sym="${sym}" data-live-qty="${hh.qty}">${qtyText}</div>
+            <div class="ac-val live-val" data-live-sym="${sym}" data-live-qty="${hh.qty}">${F.usd(val)} USD</div>
           </div>
           <div class="ac-col" style="align-items: flex-end; text-align: right;">
             <div class="ac-label">Giá thị trường</div>
-            <div class="ac-val">${F.usd(cp)} USD</div>
+            <div class="ac-val live-price" data-live-sym="${sym}">${F.usd(cp)} USD</div>
             <div class="ac-sub b-editable" onclick="editCost('${hh.id}')" title="Sửa giá vốn">Vốn: ${F.usd(hh.cost)} ✏️</div>
           </div>
         </div>
         <div class="ac-row ac-pnl-row">
           <div class="ac-col">
             <div class="ac-label">PNL thả nổi</div>
-            <div class="ac-pnl ${cc}">${pnl>=0?'+':''}${F.usd(Math.abs(pnl))} USD (${F.pct(pp)})</div>
+            <div class="ac-pnl live-pnl ${cc}" data-live-sym="${sym}" data-live-cost="${hh.cost}">${pnl>=0?'+':''}${F.usd(Math.abs(pnl))} USD (${F.pct(pp)})</div>
           </div>
         </div>
       </div>
@@ -1664,6 +1665,7 @@ async function fetchSmartAlertsData() {
     const lows = candles.map(k=>k.low).sort((a,b)=>a-b);
     
     const cp = getCurPrice(h) || candles[candles.length-1].close;
+    const pnlPct = ((cp - h.cost) / h.cost) * 100;
     
     const lastDayVol = parseFloat(oh[oh.length-1][5]); 
     let sumVol = 0;
@@ -1673,6 +1675,8 @@ async function fetchSmartAlertsData() {
     coinsData.push({
       symbol: h.symbol.toUpperCase(), 
       price: cp,
+      entryPrice: h.cost,
+      pnlPct: pnlPct,
       resistance: highs[0], 
       support: lows[0], 
       candles,
@@ -1730,7 +1734,7 @@ async function aiScanAlertsBackground() {
   } catch(e) {}
 }
 
-// Cảnh báo cho coin đang giữ — Nên BÁN hay DCA?
+// Cảnh báo cho coin đang giữ
 function renderMyCoinsAlerts(){
   const el=$('myCoinsAlerts');if(!el)return;
   if(!S.holdings.length){el.innerHTML='<div class="empty-msg">Thêm coin vào tab 💰 Tài sản để xem cảnh báo</div>';return}
@@ -1742,62 +1746,48 @@ function renderMyCoinsAlerts(){
     const cg=priceMap[h.symbol]||priceMap[h.symbolLower];
     const cp=getCurPrice(h);
     const pnlPct=((cp-h.cost)/h.cost)*100;
-    const c24=cg?cg.price_change_percentage_24h||0:0;
-    const sparkData=cg?.sparkline_in_7d?.price||[];
+    const sym = h.symbol.toUpperCase();
 
-    // Find signal for this coin
-    const sig=S.signals.find(s=>s.id===h.symbol||s.id===h.symbolLower);
-
-    let action='',actionClass='',reason='';
-    // Logic: when to sell, when to DCA
-    if(pnlPct>=h.tp){
-      action='🎯 CHỐT LỜI — Bán bớt 50%';actionClass='sell-box';
-      reason=`Đã lời +${pnlPct.toFixed(1)}% (mục tiêu ${h.tp}%). Nên bán 50% để bảo toàn lợi nhuận.`;
-    }else if(pnlPct<=-h.sl){
-      action='🛑 CẮT LỖ — Bán ngay';actionClass='sell-box';
-      reason=`Đã lỗ ${pnlPct.toFixed(1)}% (vượt ngưỡng -${h.sl}%). Nên cắt lỗ để bảo toàn vốn.`;
-    }else if(pnlPct<-15&&sig&&sig.signal.includes('BUY')){
-      action='💰 DCA — Mua thêm';actionClass='buy-box';
-      reason=`Đang lỗ ${pnlPct.toFixed(1)}% nhưng AI phát hiện tín hiệu tốt. Mua thêm để giảm giá trung bình.`;
-    }else if(pnlPct<-5&&c24<-5){
-      action='⏸️ CHỜ — Theo dõi';actionClass='';
-      reason=`Đang lỗ ${pnlPct.toFixed(1)}%, hôm nay giảm ${c24.toFixed(1)}%. Chưa nên mua thêm, đợi giá ổn định.`;
-    }else if(sig&&sig.signal==='STRONG_SELL'){
-      action='🔴 BÁN BỚT';actionClass='sell-box';
-      reason=`AI phát hiện tín hiệu bán mạnh (${sig.confidence}%). Nên bán bớt.`;
-    }else if(sig&&sig.signal.includes('BUY')&&pnlPct>5){
-      action='✅ GIỮ — Đang tốt';actionClass='buy-box';
-      reason=`Lời +${pnlPct.toFixed(1)}% và AI vẫn khuyên giữ. Tiếp tục hold.`;
-    }else if(pnlPct>0){
-      action='✅ GIỮ';actionClass='';
-      reason=`Đang lời +${pnlPct.toFixed(1)}%. Chưa cần hành động.`;
-    }else{
-      action='⏸️ CHỜ';actionClass='';
-      reason=`Đang ${pnlPct>=0?'lời':'lỗ'} ${pnlPct.toFixed(1)}%. Theo dõi tiếp.`;
-    }
-
-    const aiAlert = aiSmartAlertsData[h.symbol] || aiSmartAlertsData[h.symbol.toUpperCase()];
-    let aiBox = '';
+    const aiAlert = aiSmartAlertsData[h.symbol] || aiSmartAlertsData[sym];
+    let action='',actionClass='',reason='',aiBox='';
+    
     if(aiAlert) {
-      const volLvl = aiAlert.meta.volatility.level;
+      const aType = aiAlert.action;
+      actionClass = (aType==='SELL'||aType==='STOP_LOSS') ? 'sell-box' : (aType==='BUY'||aType==='DCA') ? 'buy-box' : '';
+      
+      const actionMap = {
+        'SELL': '🔴 BÁN NGAY',
+        'STOP_LOSS': '🛑 CẮT LỖ',
+        'TAKE_PROFIT': '🎯 CHỐT LỜI',
+        'DCA': '💰 DCA',
+        'BUY': '🛒 MUA THÊM',
+        'HOLD': '✅ GIỮ'
+      };
+      action = actionMap[aType] || aType;
+      reason = aiAlert.text;
+      
+      const volLvl = aiAlert.meta?.volatility?.level || 'MODERATE';
       const volColor = volLvl === 'EXTREME' ? 'var(--red)' : volLvl === 'HIGH' ? 'var(--yellow)' : 'var(--green)';
       aiBox = `<div style="margin-top:8px;padding:8px;background:var(--card);border-left:3px solid ${volColor};border-radius:4px;font-size:13px;line-height:1.4">
-        <div style="font-weight:bold;color:${volColor};margin-bottom:4px">🤖 AI Nhận Định (Biến động: ${volLvl})</div>
-        <div style="color:var(--t1)">${aiAlert.text}</div>
+        <div style="font-weight:bold;color:${volColor};margin-bottom:4px">🤖 Phân tích kỹ thuật (Biến động: ${volLvl})</div>
+        <div style="color:var(--t4)">S/R: ${F.usd(aiAlert.meta?.breakout?.level||0)} • Breakout: ${aiAlert.meta?.breakout?.type||'NONE'}</div>
       </div>`;
+    } else {
+      action = '⏳ CHỜ AI';
+      reason = 'Bấm "Quét AI" để nhận lời khuyên thực tế từ thị trường.';
     }
 
     return`<div class="mca-item">
       <div class="mca-top">
         <span class="mca-name">${cg?'<img src="'+cg.image+'" width="20">':''}${h.name}</span>
-        <span class="mca-pnl ${pnlPct>=0?'gain':'loss'}">${pnlPct>=0?'+':''}${pnlPct.toFixed(1)}%</span>
+        <span class="mca-pnl live-pnl ${pnlPct>=0?'gain':'loss'}" data-live-sym="${sym}" data-live-cost="${h.cost}">${pnlPct>=0?'+':''}${pnlPct.toFixed(1)}%</span>
       </div>
       <div class="mca-prices">
         <span>Mua: <strong>${F.usd(h.cost)}</strong></span>
-        <span>Hiện tại: <strong>${F.usd(cp)}</strong></span>
-        <span>Giá trị: <strong>${F.usd(cp*h.qty)}</strong></span>
+        <span>Hiện tại: <strong class="live-price" data-live-sym="${sym}">${F.usd(cp)}</strong></span>
+        <span>Giá trị: <strong class="live-val" data-live-sym="${sym}" data-live-qty="${h.qty}">${F.usd(cp*h.qty)}</strong></span>
       </div>
-      ${action?`<div class="sig-action-box ${actionClass}">👉 <strong>${action}</strong></div>`:''}
+      <div class="sig-action-box ${actionClass}">👉 <strong>${action}</strong></div>
       <div class="mca-reason">${reason}</div>
       ${aiBox}
     </div>`;
@@ -2305,3 +2295,59 @@ document.addEventListener('DOMContentLoaded',()=>{
     document.body.innerHTML='<div style="padding:40px;color:#ef4444;font-family:monospace"><h2>❌ App Init Error</h2><pre>'+e.message+'</pre><p>Check console (F12) for details.</p></div>';
   }
 });
+
+window.updateLiveUI = function() {
+  document.querySelectorAll('.live-price').forEach(el => {
+    const sym = el.getAttribute('data-live-sym');
+    const lp = livePrices[sym+'USDT']?.p || S.tickerMap[sym+'USDT'];
+    if(lp) el.innerHTML = F.usd(lp) + (el.innerHTML.includes('USD') ? ' USD' : '');
+  });
+  
+  let totalUSD = 0;
+  document.querySelectorAll('.live-val').forEach(el => {
+    const sym = el.getAttribute('data-live-sym');
+    const qty = parseFloat(el.getAttribute('data-live-qty')||0);
+    const lp = livePrices[sym+'USDT']?.p || S.tickerMap[sym+'USDT'];
+    if(lp) {
+      const val = lp * qty;
+      el.innerHTML = F.usd(val) + (el.innerHTML.includes('USD') ? ' USD' : '');
+      totalUSD += val;
+    }
+  });
+
+  document.querySelectorAll('.live-pnl').forEach(el => {
+    const sym = el.getAttribute('data-live-sym');
+    const cost = parseFloat(el.getAttribute('data-live-cost')||0);
+    const lp = livePrices[sym+'USDT']?.p || S.tickerMap[sym+'USDT'];
+    if(lp && cost > 0) {
+      const pnlPct = ((lp - cost)/cost)*100;
+      if(el.classList.contains('mca-pnl')) {
+        el.className = 'mca-pnl live-pnl ' + (pnlPct>=0?'gain':'loss');
+        el.innerHTML = (pnlPct>=0?'+':'') + pnlPct.toFixed(1) + '%';
+      } else {
+        const qtyStr = el.closest('.asset-card')?.querySelector('.live-qty')?.getAttribute('data-live-qty');
+        if(qtyStr) {
+          const qty = parseFloat(qtyStr);
+          const val = lp * qty;
+          const pnl = val - (cost * qty);
+          el.className = 'ac-pnl live-pnl ' + F.cc(pnl);
+          el.innerHTML = (pnl>=0?'+':'') + F.usd(Math.abs(pnl)) + ' USD (' + F.pct(pnlPct) + ')';
+        }
+      }
+    }
+  });
+  
+  // Update total portfolio values
+  const tvNode = document.getElementById('pTotal');
+  if(tvNode && totalUSD > 0) {
+    const h = S.holdings;
+    let tc = 0;
+    h.forEach(hh=>tc+=(hh.cost*hh.qty));
+    const tp = totalUSD - tc;
+    const tpp = tc > 0 ? (tp/tc)*100 : 0;
+    
+    tvNode.innerHTML = totalUSD.toFixed(8) + ' <span class="bp-currency">USDT</span><i class="bp-dropdown"></i>';
+    document.getElementById('pTotalFiat').textContent = '≈ ' + F.usd(totalUSD) + ' USD';
+    document.getElementById('pPnl').innerHTML = 'Tổng PNL thả nổi <span class="'+(tp>=0?'gain':'loss')+'">'+(tp>=0?'+ ':'') + F.usd(Math.abs(tp)) + ' USD (' + F.pct(tpp) + ')</span>';
+  }
+};
