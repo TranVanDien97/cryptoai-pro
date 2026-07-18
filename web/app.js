@@ -399,8 +399,8 @@ async function aiScanPro(){
   const fngVal=S.fng?parseInt(S.fng.value):50;
   const grid=$('signalGrid');
 
-  // Only scan top 10 for speed (3 API calls each = 30 total)
-  const topCoins=S.crypto.slice(0,10);
+  // Only scan top 20 for speed (3 API calls each = 60 total)
+  const topCoins=S.crypto.slice(0,20);
   let done=0;
 
   // Show progress
