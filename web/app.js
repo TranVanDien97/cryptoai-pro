@@ -1644,6 +1644,64 @@ function switchTab(t){
   window.scrollTo(0,0);
 }
 
+// Cảnh báo thông minh bằng AI
+let aiSmartAlertsData = {};
+
+async function aiScanAlerts() {
+  const btn = $('btnAiScanAlerts');
+  if(!btn || !S.holdings.length) return;
+  if(!geminiConnected) { toast('Cần kết nối Gemini AI ở tab Cài đặt trước', 'error'); return; }
+  
+  btn.textContent = '⏳ Đang quét...';
+  btn.disabled = true;
+  
+  try {
+    const coinsData = [];
+    for(const h of S.holdings) {
+      const c = S.crypto.find(x => x.symbol === h.symbol || x.symbol === h.symbolLower);
+      if(!c) continue;
+      
+      let candles = [];
+      try {
+        const oh = await fetchJ('https://api.binance.com/api/v3/klines?symbol='+c.symbol.toUpperCase()+'USDT&interval=1d&limit=30');
+        candles = oh.map(k=>({ high:parseFloat(k[2]), low:parseFloat(k[3]), close:parseFloat(k[4]) }));
+      } catch(e) { continue; }
+      
+      const highs = candles.map(k=>k.high).sort((a,b)=>b-a);
+      const lows = candles.map(k=>k.low).sort((a,b)=>a-b);
+      const resistance = highs[0];
+      const support = lows[0];
+      
+      coinsData.push({
+        symbol: c.symbol.toUpperCase(),
+        price: c.current_price,
+        resistance,
+        support,
+        candles,
+        volume24h: c.total_volume,
+        avgVolume: c.total_volume * 0.8 
+      });
+    }
+    
+    if(!coinsData.length) throw new Error("Không tải được dữ liệu nến");
+    
+    const r = await postJ(BACKEND+'/api/ai/smart-alerts', { coinsData });
+    if(r && r.success && r.data) {
+      r.data.forEach(alert => { aiSmartAlertsData[alert.symbol] = alert; });
+      toast('Đã quét xong Cảnh báo Thông minh', 'success');
+      renderMyCoinsAlerts();
+    } else {
+      toast(r?.error || 'Lỗi quét AI', 'error');
+    }
+  } catch(e) {
+    console.error(e);
+    toast('Lỗi khi quét: ' + e.message, 'error');
+  } finally {
+    btn.textContent = '🤖 Quét AI';
+    btn.disabled = false;
+  }
+}
+
 // Cảnh báo cho coin đang giữ — Nên BÁN hay DCA?
 function renderMyCoinsAlerts(){
   const el=$('myCoinsAlerts');if(!el)return;
@@ -1690,6 +1748,17 @@ function renderMyCoinsAlerts(){
       reason=`Đang ${pnlPct>=0?'lời':'lỗ'} ${pnlPct.toFixed(1)}%. Theo dõi tiếp.`;
     }
 
+    const aiAlert = aiSmartAlertsData[h.symbol] || aiSmartAlertsData[h.symbol.toUpperCase()];
+    let aiBox = '';
+    if(aiAlert) {
+      const volLvl = aiAlert.meta.volatility.level;
+      const volColor = volLvl === 'EXTREME' ? 'var(--red)' : volLvl === 'HIGH' ? 'var(--yellow)' : 'var(--green)';
+      aiBox = `<div style="margin-top:8px;padding:8px;background:var(--card);border-left:3px solid ${volColor};border-radius:4px;font-size:13px;line-height:1.4">
+        <div style="font-weight:bold;color:${volColor};margin-bottom:4px">🤖 AI Nhận Định (Biến động: ${volLvl})</div>
+        <div style="color:var(--t1)">${aiAlert.text}</div>
+      </div>`;
+    }
+
     return`<div class="mca-item">
       <div class="mca-top">
         <span class="mca-name">${cg?'<img src="'+cg.image+'" width="20">':''}${h.name}</span>
@@ -1702,6 +1771,7 @@ function renderMyCoinsAlerts(){
       </div>
       ${action?`<div class="sig-action-box ${actionClass}">👉 <strong>${action}</strong></div>`:''}
       <div class="mca-reason">${reason}</div>
+      ${aiBox}
     </div>`;
   }).join('');
 
@@ -1857,6 +1927,8 @@ function init(){
 
   // Refresh alerts button
   const btnRA=$('btnRefreshAlerts');if(btnRA)btnRA.addEventListener('click',()=>{renderMyCoinsAlerts();toast('Cảnh báo đã cập nhật','success')});
+  
+  on('btnAiScanAlerts','click',aiScanAlerts);
 
   // Binance refresh
   const btnRefreshBn=$('btnRefreshBn');

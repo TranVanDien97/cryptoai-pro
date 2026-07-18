@@ -642,6 +642,28 @@ app.post('/api/ai/recommendations', async (req, res) => {
   }
 });
 
+// Cảnh báo thông minh (Smart Alerts)
+app.post('/api/ai/smart-alerts', async (req, res) => {
+  if (!geminiKey) return res.json({ success: false, error: 'Chưa kết nối Gemini AI.' });
+  const { coinsData } = req.body;
+  if (!coinsData || !Array.isArray(coinsData)) return res.json({ success: false, error: 'Không có dữ liệu hợp lệ' });
+
+  try {
+    const alerts = [];
+    for (const coin of coinsData) {
+      try {
+        const result = await generateSmartAlert(coin);
+        if (result) alerts.push(result);
+      } catch (err) {
+        console.error('Smart Alert error for', coin.symbol, err.message);
+      }
+    }
+    res.json({ success: true, data: alerts });
+  } catch (err) {
+    res.json({ success: false, error: err.message });
+  }
+});
+
 // Gemini Chat — multi-turn with portfolio context
 app.post('/api/ai/chat', async (req, res) => {
   if (!geminiKey) return res.json({ success: false, error: 'Chưa kết nối Gemini AI. Vào Cài đặt nhập API Key.' });
