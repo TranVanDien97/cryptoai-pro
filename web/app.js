@@ -1891,7 +1891,7 @@ function init(){
   toggles.forEach(([id,key])=>{const el=$(id);if(el){el.checked=S.settings[key];el.addEventListener('change',()=>{S.settings[key]=el.checked;saveS();if(key==='autoScan'){if(S.settings.autoScan){S.scanTimer=setInterval(fullScan,300000);toast('Scanner: BẬT','success')}else{clearInterval(S.scanTimer);toast('Scanner: TẮT','info')}}})}});
 
   // Trailing SL % input
-  const trailInput=$(\'trailPctInput\');
+  const trailInput=$('trailPctInput');
   if(trailInput){trailInput.value=S.settings.trailPct||5;trailInput.addEventListener('change',()=>{S.settings.trailPct=parseFloat(trailInput.value)||5;saveS();toast('Trailing SL: '+S.settings.trailPct+'%','info')})}
 
   // Custom Price Alerts

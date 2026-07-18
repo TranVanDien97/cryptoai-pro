@@ -41,7 +41,7 @@ function loadCredentials() {
   try {
     if (fs.existsSync(CRED_FILE)) {
       const data = JSON.parse(fs.readFileSync(CRED_FILE, 'utf8'));
-      console.log(\'  📂 Đã tải credentials từ\', CRED_FILE, credentials.apiKey ? \'(Binance Key: ***\'+credentials.apiKey.slice(-4)+\' Gemini Key: ***\'+geminiKey.slice(-4)+\' )\' : \'(Chưa có key)\' );
+      console.log('  📂 Đã tải credentials từ', CRED_FILE);
       return data;
     }
   } catch (e) { console.error('  ⚠️ Lỗi đọc credentials:', e.message); }
@@ -54,7 +54,7 @@ function saveCredentials() {
       binance: { apiKey: credentials.apiKey, apiSecret: credentials.apiSecret, connected: credentials.connected },
       geminiKey: geminiKey
     }, null, 2), 'utf8');
-    console.log(\'  💾 Đã lưu credentials\', credentials.apiKey ? \'(Binance Key: ***\'+credentials.apiKey.slice(-4)+\' Gemini Key: ***\'+geminiKey.slice(-4)+\' )\' : \'(Chưa có key)\' );
+    console.log('  💾 Đã lưu credentials');
   } catch (e) { console.error('  ⚠️ Lỗi lưu:', e.message); }
 }
 
