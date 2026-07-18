@@ -1647,6 +1647,30 @@ function switchTab(t){
 // Cảnh báo thông minh bằng AI
 let aiSmartAlertsData = {};
 
+async function fetchSmartAlertsData() {
+  const coinsData = [];
+  for(const h of S.holdings) {
+    const c = S.crypto.find(x => x.symbol === h.symbol || x.symbol === h.symbolLower);
+    if(!c) continue;
+    let candles = [];
+    try {
+      const oh = await fetchJ('https://api.binance.com/api/v3/klines?symbol='+c.symbol.toUpperCase()+'USDT&interval=1d&limit=30');
+      candles = oh.map(k=>({ high:parseFloat(k[2]), low:parseFloat(k[3]), close:parseFloat(k[4]) }));
+    } catch(e) { continue; }
+    
+    const highs = candles.map(k=>k.high).sort((a,b)=>b-a);
+    const lows = candles.map(k=>k.low).sort((a,b)=>a-b);
+    coinsData.push({
+      symbol: c.symbol.toUpperCase(), price: c.current_price,
+      resistance: highs[0], support: lows[0], candles,
+      volume24h: c.total_volume, avgVolume: c.total_volume * 0.8 
+    });
+  }
+  if(!coinsData.length) return [];
+  const r = await postJ(BACKEND+'/api/ai/smart-alerts', { coinsData });
+  return (r && r.success && r.data) ? r.data : [];
+}
+
 async function aiScanAlerts() {
   const btn = $('btnAiScanAlerts');
   if(!btn || !S.holdings.length) return;
@@ -1654,52 +1678,42 @@ async function aiScanAlerts() {
   
   btn.textContent = '⏳ Đang quét...';
   btn.disabled = true;
-  
   try {
-    const coinsData = [];
-    for(const h of S.holdings) {
-      const c = S.crypto.find(x => x.symbol === h.symbol || x.symbol === h.symbolLower);
-      if(!c) continue;
-      
-      let candles = [];
-      try {
-        const oh = await fetchJ('https://api.binance.com/api/v3/klines?symbol='+c.symbol.toUpperCase()+'USDT&interval=1d&limit=30');
-        candles = oh.map(k=>({ high:parseFloat(k[2]), low:parseFloat(k[3]), close:parseFloat(k[4]) }));
-      } catch(e) { continue; }
-      
-      const highs = candles.map(k=>k.high).sort((a,b)=>b-a);
-      const lows = candles.map(k=>k.low).sort((a,b)=>a-b);
-      const resistance = highs[0];
-      const support = lows[0];
-      
-      coinsData.push({
-        symbol: c.symbol.toUpperCase(),
-        price: c.current_price,
-        resistance,
-        support,
-        candles,
-        volume24h: c.total_volume,
-        avgVolume: c.total_volume * 0.8 
-      });
-    }
-    
-    if(!coinsData.length) throw new Error("Không tải được dữ liệu nến");
-    
-    const r = await postJ(BACKEND+'/api/ai/smart-alerts', { coinsData });
-    if(r && r.success && r.data) {
-      r.data.forEach(alert => { aiSmartAlertsData[alert.symbol] = alert; });
-      toast('Đã quét xong Cảnh báo Thông minh', 'success');
-      renderMyCoinsAlerts();
-    } else {
-      toast(r?.error || 'Lỗi quét AI', 'error');
-    }
+    const alerts = await fetchSmartAlertsData();
+    alerts.forEach(alert => { aiSmartAlertsData[alert.symbol] = alert; });
+    toast('Đã quét xong Cảnh báo Thông minh', 'success');
+    renderMyCoinsAlerts();
   } catch(e) {
-    console.error(e);
     toast('Lỗi khi quét: ' + e.message, 'error');
   } finally {
     btn.textContent = '🤖 Quét AI';
     btn.disabled = false;
   }
+}
+
+async function aiScanAlertsBackground() {
+  if(!geminiConnected || !S.holdings.length) return;
+  try {
+    const alerts = await fetchSmartAlertsData();
+    alerts.forEach(alert => { 
+      aiSmartAlertsData[alert.symbol] = alert;
+      const h = S.holdings.find(x => x.symbol === alert.symbol || x.symbolLower === alert.symbol.toLowerCase());
+      if (h) {
+        const lastTime = h._lastSmartAlert || 0;
+        // Chỉ push cảnh báo mỗi 4 tiếng để tránh spam
+        if (Date.now() - lastTime > 3600000 * 4) {
+          if (alert.meta?.volatility?.level === 'EXTREME') {
+             addAlert('sell', '⚠️', `CẢNH BÁO AI: ${alert.symbol}`, alert.text);
+             h._lastSmartAlert = Date.now(); saveH();
+          } else if (alert.meta?.breakout?.confirmed) {
+             addAlert('buy', '🚀', `ĐỘT PHÁ: ${alert.symbol}`, alert.text);
+             h._lastSmartAlert = Date.now(); saveH();
+          }
+        }
+      }
+    });
+    renderMyCoinsAlerts();
+  } catch(e) {}
 }
 
 // Cảnh báo cho coin đang giữ — Nên BÁN hay DCA?
@@ -1960,7 +1974,31 @@ function init(){
 
   // Settings toggles
   const toggles=[['togSound','sound'],['togAutoScan','autoScan'],['togHighConf','highConf'],['togVolatility','volatility'],['togFngAlert','fngAlert'],['togStoploss','stoploss'],['togTakeprofit','takeprofit'],['togTrailingSL','trailingSL']];
-  toggles.forEach(([id,key])=>{const el=$(id);if(el){el.checked=S.settings[key];el.addEventListener('change',()=>{S.settings[key]=el.checked;saveS();if(key==='autoScan'){if(S.settings.autoScan){S.scanTimer=setInterval(fullScan,300000);toast('Scanner: BẬT','success')}else{clearInterval(S.scanTimer);toast('Scanner: TẮT','info')}}})}});
+  toggles.forEach(([id,key])=>{
+    const el=$(id);
+    if(el){
+      el.checked=S.settings[key];
+      el.addEventListener('change',()=>{
+        S.settings[key]=el.checked;
+        saveS();
+        if(key==='autoScan'){
+          if(S.settings.autoScan){
+            S.scanTimer=setInterval(fullScan,300000);
+            S.aiAlertTimer=setInterval(aiScanAlertsBackground,900000);
+            toast('Scanner: BẬT','success')
+          }else{
+            clearInterval(S.scanTimer);
+            clearInterval(S.aiAlertTimer);
+            toast('Scanner: TẮT','info')
+          }
+        }
+      })
+    }
+  });
+
+  if(S.settings.autoScan) {
+    S.aiAlertTimer=setInterval(aiScanAlertsBackground,900000); // 15 mins
+  }
 
   // Trailing SL % input
   const trailInput=$('trailPctInput');
