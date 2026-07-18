@@ -641,7 +641,10 @@ async function manualScan(){
   if(btn){btn.disabled=true;btn.textContent='Đang quét...'}
   try {
     await aiScanPro();
-    const candidates = S.signals.slice(0, 5);
+    const large = S.signals.filter(s => s.rank <= 50).slice(0, 2);
+    const mid = S.signals.filter(s => s.rank > 50 && s.rank <= 150).slice(0, 2);
+    const small = S.signals.filter(s => s.rank > 150).slice(0, 2);
+    const candidates = [...large, ...mid, ...small];
     if(geminiConnected && candidates.length > 0) {
       if(btn) btn.textContent='⏳ AI đang diễn giải...';
       const r = await postJ(BACKEND+'/api/ai/recommendations', { candidates });
@@ -1245,7 +1248,7 @@ function sigCardHTML(s){
   return`<div class="sig-card ${cls}" onclick="openCoinModal('${s.id}')">
     <div class="sig-top">
       <img class="sig-img" src="${s.image}" alt="">
-      <div class="sig-name"><div class="sym">${s.symbol} <small style="color:var(--t4);font-weight:400">#${s.rank||''}</small></div><div class="name">${src} · ${s.confidence}%</div></div>
+      <div class="sig-name"><div class="sym">${s.symbol} <small style="color:var(--t4);font-weight:400">#${s.rank||''} · <span style="color:${s.rank<=50?'var(--green)':s.rank<=150?'var(--yellow)':'var(--red)'}">${s.rank<=50?'Lớn':s.rank<=150?'Trung bình':'Nhỏ'}</span></small></div><div class="name">${src} · ${s.confidence}%</div></div>
       <span class="sig-badge ${s.signal}">${F.sig(s.signal)}</span>
     </div>
     ${checks?'<div class="sig-checks">'+checks+'</div>':''}
