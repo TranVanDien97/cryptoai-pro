@@ -1395,7 +1395,7 @@ function renderPortfolio(){
     tb.innerHTML='<div class="ld empty-msg" style="padding:40px 0;text-align:center;color:var(--t4);grid-column:1/-1">Chưa có tài sản</div>';
     $('pTotal').innerHTML=`0.00000000 <span class="bp-currency">USDT</span><i class="bp-dropdown"></i>`;
     $('pTotalFiat').textContent=`≈ 0.00 USD`;
-    $('pPnl').innerHTML=`PNL hôm nay <span style="color:var(--t4)">--</span>`;
+    $('pPnl').innerHTML=`Tổng PNL thả nổi <span style="color:var(--t4)">--</span>`;
     return;
   }
   let tv=0,tc=0;
@@ -1446,7 +1446,7 @@ function renderPortfolio(){
   const tp=tv-tc,tpp=tc>0?((tv-tc)/tc)*100:0;
   $('pTotal').innerHTML=`${tv.toFixed(8)} <span class="bp-currency">USDT</span><i class="bp-dropdown"></i>`;
   $('pTotalFiat').textContent=`≈ ${F.usd(tv)} USD`;
-  $('pPnl').innerHTML=`PNL hôm nay <span class="${tp>=0?'gain':'loss'}">${tp>=0?'+ ':''}${F.usd(Math.abs(tp))} USD (${F.pct(tpp)})</span>`;
+  $('pPnl').innerHTML=`Tổng PNL thả nổi <span class="${tp>=0?'gain':'loss'}">${tp>=0?'+ ':''}${F.usd(Math.abs(tp))} USD (${F.pct(tpp)})</span>`;
 }
 
 function editCost(id){
