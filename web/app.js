@@ -641,9 +641,9 @@ async function manualScan(){
   if(btn){btn.disabled=true;btn.textContent='Đang quét...'}
   try {
     await aiScanPro();
-    const large = S.signals.filter(s => s.rank <= 50).slice(0, 2);
-    const mid = S.signals.filter(s => s.rank > 50 && s.rank <= 150).slice(0, 2);
-    const small = S.signals.filter(s => s.rank > 150).slice(0, 2);
+    const large = S.signals.filter(s => s.rank <= 50).slice(0, 5);
+    const mid = S.signals.filter(s => s.rank > 50 && s.rank <= 150).slice(0, 5);
+    const small = S.signals.filter(s => s.rank > 150).slice(0, 5);
     const candidates = [...large, ...mid, ...small];
     if(geminiConnected && candidates.length > 0) {
       if(btn) btn.textContent='⏳ AI đang diễn giải...';

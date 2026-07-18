@@ -635,7 +635,7 @@ app.post('/api/ai/recommendations', async (req, res) => {
   if (!candidates || !candidates.length) return res.json({ success: false, error: 'Không có dữ liệu' });
 
   try {
-    const enriched = await generateRecommendationsFromCandidates(candidates, { maxCandidates: 10 });
+    const enriched = await generateRecommendationsFromCandidates(candidates, { maxCandidates: 15 });
     res.json({ success: true, data: enriched });
   } catch (err) {
     res.json({ success: false, error: err.message });
