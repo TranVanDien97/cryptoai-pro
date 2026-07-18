@@ -660,7 +660,12 @@ async function connectGemini(){
   try{
     const r=await fetch(BACKEND+'/api/ai/connect',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({apiKey:key})});
     const j=await r.json();
-    if(j.success){geminiConnected=true;toast('✅ Đã kết nối Gemini AI','success');updateGeminiStatus()}
+    if(j.success){
+      geminiConnected=true;
+      localStorage.setItem('cai4_gemini_key', key);
+      toast('✅ Đã kết nối Gemini AI','success');
+      updateGeminiStatus();
+    }
     else toast(j.error||'Lỗi kết nối','error');
   }catch{toast('Backend không chạy','error')}
 }
@@ -1939,8 +1944,15 @@ function init(){
     }
     updConn();
   });
-  // Check Gemini status
-  fetch(BACKEND+'/api/ai/status').then(r=>r.json()).then(j=>{if(j.connected){geminiConnected=true;updateGeminiStatus()}}).catch(()=>{});
+  // Check Gemini status & Auto reconnect if key saved in browser localStorage
+  const savedGKey = localStorage.getItem('cai4_gemini_key');
+  if(savedGKey){
+    const inp = $('geminiApiKey'); if(inp) inp.value = savedGKey;
+    fetch(BACKEND+'/api/ai/connect',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({apiKey:savedGKey})})
+      .then(r=>r.json()).then(j=>{if(j.success){geminiConnected=true;updateGeminiStatus()}}).catch(()=>{});
+  } else {
+    fetch(BACKEND+'/api/ai/status').then(r=>r.json()).then(j=>{if(j.connected){geminiConnected=true;updateGeminiStatus()}}).catch(()=>{});
+  }
 
   // Start
   fullScan();

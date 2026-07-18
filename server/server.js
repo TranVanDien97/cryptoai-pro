@@ -576,8 +576,8 @@ FORMAT: Tiếng Việt, ngắn gọn, dùng emoji vừa phải, chia mục rõ r
     generationConfig: { temperature: 0.35, maxOutputTokens: 1200 }
   });
 
-  // Try models in order: flash-lite (30 RPM free) → 1.5-flash (15 RPM) → 2.0-flash (10 RPM)
-  const models = ['gemini-2.0-flash-lite', 'gemini-1.5-flash', 'gemini-2.0-flash'];
+  // Try models in order: 2.0-pro-exp → 1.5-pro → 2.0-flash → 1.5-flash
+  const models = ['gemini-2.0-pro-exp', 'gemini-1.5-pro', 'gemini-2.0-flash', 'gemini-1.5-flash'];
 
   for (const model of models) {
     try {
@@ -660,7 +660,7 @@ ${portfolioContext || 'Chưa có dữ liệu portfolio.'}`;
     generationConfig: { temperature: 0.4, maxOutputTokens: 1500 }
   });
 
-  const models = ['gemini-2.0-flash-lite', 'gemini-1.5-flash', 'gemini-2.0-flash'];
+  const models = ['gemini-2.0-pro-exp', 'gemini-1.5-pro', 'gemini-2.0-flash', 'gemini-1.5-flash'];
   for (const model of models) {
     try {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`;
