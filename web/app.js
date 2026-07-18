@@ -1650,20 +1650,34 @@ let aiSmartAlertsData = {};
 async function fetchSmartAlertsData() {
   const coinsData = [];
   for(const h of S.holdings) {
-    const c = S.crypto.find(x => x.symbol === h.symbol || x.symbol === h.symbolLower);
-    if(!c) continue;
     let candles = [];
+    let oh = null;
     try {
-      const oh = await fetchJ('https://api.binance.com/api/v3/klines?symbol='+c.symbol.toUpperCase()+'USDT&interval=1d&limit=30');
+      oh = await fetchJ('https://api.binance.com/api/v3/klines?symbol='+h.symbol.toUpperCase()+'USDT&interval=1d&limit=30');
+      if(!oh || !Array.isArray(oh) || !oh.length) continue;
       candles = oh.map(k=>({ high:parseFloat(k[2]), low:parseFloat(k[3]), close:parseFloat(k[4]) }));
     } catch(e) { continue; }
     
+    if(!candles.length) continue;
+
     const highs = candles.map(k=>k.high).sort((a,b)=>b-a);
     const lows = candles.map(k=>k.low).sort((a,b)=>a-b);
+    
+    const cp = getCurPrice(h) || candles[candles.length-1].close;
+    
+    const lastDayVol = parseFloat(oh[oh.length-1][5]); 
+    let sumVol = 0;
+    oh.forEach(k=>sumVol+=parseFloat(k[5]));
+    const avgVolume = sumVol / oh.length;
+
     coinsData.push({
-      symbol: c.symbol.toUpperCase(), price: c.current_price,
-      resistance: highs[0], support: lows[0], candles,
-      volume24h: c.total_volume, avgVolume: c.total_volume * 0.8 
+      symbol: h.symbol.toUpperCase(), 
+      price: cp,
+      resistance: highs[0], 
+      support: lows[0], 
+      candles,
+      volume24h: lastDayVol, 
+      avgVolume: avgVolume 
     });
   }
   if(!coinsData.length) return [];
@@ -1726,7 +1740,7 @@ function renderMyCoinsAlerts(){
 
   const html=S.holdings.map(h=>{
     const cg=priceMap[h.symbol]||priceMap[h.symbolLower];
-    const cp=cg?cg.current_price:h.cost;
+    const cp=getCurPrice(h);
     const pnlPct=((cp-h.cost)/h.cost)*100;
     const c24=cg?cg.price_change_percentage_24h||0:0;
     const sparkData=cg?.sparkline_in_7d?.price||[];
