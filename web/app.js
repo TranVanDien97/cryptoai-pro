@@ -657,6 +657,7 @@ async function manualScan(){
         });
       }
     }
+    S.signals = candidates;
     renderSignals();
   } catch(e) {
     console.error('Scan error', e);
