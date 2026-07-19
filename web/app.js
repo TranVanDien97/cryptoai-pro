@@ -2853,39 +2853,7 @@ window.processVirtualBot = function() {
     }
   }
   
-  // 2. Scan for entries
-  S.signals.forEach(sig => {
-    if(sig.signal === 'STRONG_BUY' || sig.signal === 'BUY') {
-      // Check if we already hold it
-      const holds = botState.positions.some(p => p.symbol === sig.symbol);
-      if(!holds && botState.balanceUSDT >= 100) {
-        // Buy allocation: 20% of current free balance
-        const buyAmount = botState.balanceUSDT * 0.2;
-        const liveP = livePrices[sig.symbol+'USDT']?.p || S.tickerMap[sig.symbol+'USDT'] || sig.entry;
-        const qty = buyAmount / liveP;
-        
-        botState.balanceUSDT -= buyAmount;
-        botState.positions.push({
-          symbol: sig.symbol,
-          qty: qty,
-          buyPrice: liveP,
-          currentPrice: liveP
-        });
-        
-        botState.logs.unshift({
-          time: new Date().toLocaleTimeString(),
-          symbol: sig.symbol,
-          type: 'BUY',
-          price: liveP,
-          qty: qty,
-          pnl: 0
-        });
-        
-        changed = true;
-        toast('🤖 Bot mua ' + sig.symbol + ' giá $' + F.usd(liveP) + ' (Đầu tư $' + Math.round(buyAmount) + ' USDT)', 'info');
-      }
-    }
-  });
+  // 2. Scan for entries (REMOVED: Users now buy manually using the Buy button to choose specific coins)
   
   if(changed) {
     saveBotState();
