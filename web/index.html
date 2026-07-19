@@ -227,14 +227,52 @@
 
     <!-- ══════ CẢNH BÁO ══════ -->
     <section class="tab" id="tab-alerts">
-      <div class="hdr"><h1>Cảnh báo</h1><div class="hdr-right">
-        <button class="hdr-btn" id="btnAddPriceAlert">+ Giá</button>
-        <button class="hdr-btn" id="btnClearAlerts">🗑️</button>
-      </div></div>
+      <div class="hdr">
+        <h1>Cảnh báo</h1>
+        <div class="hdr-right">
+          <button class="hdr-btn" id="btnAddPriceAlert">+ Giá tự đặt</button>
+          <button class="hdr-btn" id="btnClearAlerts">🗑️</button>
+        </div>
+      </div>
 
-      <div class="card"><div class="card-h"><h2>Cảnh báo giá</h2></div><div id="paList"><div class="empty-msg">Chưa có</div></div></div>
-      <div class="card"><div class="card-h" style="display:flex; justify-content:space-between; align-items:center;"><h2>Coin đang giữ</h2><button id="btnAiScanAlerts" class="btn" style="background:var(--yellow);color:#000;font-weight:bold;padding:4px 8px;font-size:12px;border-radius:4px">🤖 Quét AI</button></div><div id="myCoinsAlerts"><div class="empty-msg">Thêm coin vào Tài sản</div></div></div>
-      <div class="card"><div class="card-h"><h2>Lịch sử</h2></div><div id="alertHistory"><div class="empty-msg">Chưa có cảnh báo</div></div></div>
+      <!-- Section 1: AI Advisor on Holdings -->
+      <div class="card" style="margin: 12px 16px;">
+        <div class="card-h" style="display:flex; justify-content:space-between; align-items:center;">
+          <h2>💡 Lời khuyên danh mục AI</h2>
+          <button id="btnAiScanAlerts" class="btn" style="background:var(--yellow);color:#000;font-weight:bold;padding:4px 8px;font-size:11px;border-radius:4px">🤖 Quét AI</button>
+        </div>
+        <div id="myCoinsAlerts">
+          <div class="empty-msg" style="text-align:center;padding:20px;color:var(--t4)">Thêm coin vào tab Tài sản để AI tư vấn</div>
+        </div>
+      </div>
+
+      <!-- Section 2: Live Market Breakout Feed (NEW) -->
+      <div class="card" style="margin: 12px 16px;">
+        <div class="card-h">
+          <h2>🚀 Tín hiệu đột phá dòng tiền (Real-time)</h2>
+        </div>
+        <div id="breakoutAlertsFeed" style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 4px 0;">
+          <div class="empty-msg" style="padding: 20px; text-align: center; color: var(--t4);">Chưa phát hiện đột phá nào trên thị trường.</div>
+        </div>
+      </div>
+
+      <!-- Section 3: Manual Price Alerts -->
+      <div class="card" style="margin: 12px 16px;">
+        <div class="card-h">
+          <h2>🔔 Giá tự đặt</h2>
+        </div>
+        <div id="paList">
+          <div class="empty-msg" style="text-align:center;padding:20px;color:var(--t4)">Chưa cài đặt cảnh báo giá tự động</div>
+        </div>
+      </div>
+
+      <!-- Section 4: History -->
+      <div class="card" style="margin: 12px 16px;">
+        <div class="card-h"><h2>Lịch sử thông báo</h2></div>
+        <div id="alertHistory">
+          <div class="empty-msg" style="text-align:center;padding:20px;color:var(--t4)">Chưa có thông báo nào được phát ra</div>
+        </div>
+      </div>
     </section>
 
     <!-- ══════ CÀI ĐẶT ══════ -->
