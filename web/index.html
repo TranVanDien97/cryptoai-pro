@@ -22,7 +22,7 @@
     <ul class="nav-menu">
       <li class="nav-item active" data-tab="portfolio"><span class="nav-icon">💰</span><span class="nav-label">Tài sản</span></li>
       <li class="nav-item" data-tab="research"><span class="nav-icon">🤖</span><span class="nav-label">AI</span><span class="nav-badge" id="signalBadge"></span></li>
-      <li class="nav-item" data-tab="binance"><span class="nav-icon">💎</span><span class="nav-label">Sàn</span></li>
+      <li class="nav-item" data-tab="binance"><span class="nav-icon">🤖</span><span class="nav-label">Bot</span></li>
       <li class="nav-item" data-tab="alerts"><span class="nav-icon">🔔</span><span class="nav-label">Báo</span><span class="nav-badge" id="alertBadge"></span></li>
       <li class="nav-item" data-tab="settings"><span class="nav-icon">⚙️</span><span class="nav-label">Cài đặt</span></li>
     </ul>
@@ -159,57 +159,69 @@
       </div>
     </section>
 
-    <!-- ══════ BINANCE ══════ -->
+    <!-- ══════ GIAO DỊCH BOT (VIRTUAL BOT) ══════ -->
     <section class="tab" id="tab-binance">
-      <div class="hdr"><h1>Binance</h1></div>
-
-      <div id="bnConnectForm" class="bn-connect">
-        <div style="font-size:40px;margin-bottom:12px">💎</div>
-        <h3 style="color:var(--t1);margin-bottom:6px">Kết nối Binance</h3>
-        <p>Nhập API Key để xem số dư và giao dịch.</p>
-        <div style="max-width:300px;margin:0 auto">
-          <div class="field"><label>API Key</label><input id="bnApiKey" type="password" placeholder="Paste key..." autocomplete="off"></div>
-          <div class="field"><label>API Secret</label><input id="bnApiSecret" type="password" placeholder="Paste secret..." autocomplete="off"></div>
-          <button class="btn btn-yellow" style="width:100%" id="btnBnConnect">Kết nối</button>
+      <div class="hdr">
+        <h1>Bot Giao Dịch AI</h1>
+        <div class="hdr-right" style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:12px;font-weight:bold;color:var(--t4);" id="botStatusText">BOT TẮT</span>
+          <label class="toggle">
+            <input type="checkbox" id="togVirtualBot">
+            <span class="tslider"></span>
+          </label>
         </div>
       </div>
 
-      <div id="bnStatusMsg" style="display:none;padding:8px 16px;font-size:11px;color:var(--green)">✅ Đã kết nối</div>
-
-      <div id="bnBalanceCard" class="card" style="display:none">
-        <div class="card-h"><h2>Số dư</h2><span style="font-size:18px;font-weight:700;font-family:var(--mono);color:var(--yellow)" id="bnTotalValue">$0</span></div>
-        <div class="tbl-w"><table class="tbl"><thead><tr><th>Coin</th><th>Khả dụng</th><th>Khoá</th><th>Tổng</th><th>≈ USD</th></tr></thead>
-        <tbody id="bnBalanceTbody"><tr><td colspan="5" class="ld">Đang tải...</td></tr></tbody></table></div>
-      </div>
-
-      <div id="bnTradeCard" class="card" style="display:none">
-        <div class="card-h"><h2>Đặt lệnh</h2></div>
-        <div class="card-body">
-          <div class="row2">
-            <div class="field"><label>Cặp</label><input id="tradeSymbol" placeholder="BTCUSDT" autocomplete="off"></div>
-            <div class="field"><label>Loại</label><select id="tradeType"><option value="MARKET">Market</option><option value="LIMIT">Limit</option></select></div>
-          </div>
-          <div class="row2">
-            <div class="field"><label>Giá (Limit)</label><input id="tradePrice" type="number" placeholder="Auto" step="any"></div>
-            <div class="field"><label>USDT</label><input id="tradeQuoteQty" type="number" placeholder="10" step="any"></div>
-          </div>
-          <div style="display:flex;gap:8px">
-            <button class="btn btn-green" style="flex:1" id="btnTradeBuy">MUA</button>
-            <button class="btn btn-red" style="flex:1" id="btnTradeSell">BÁN</button>
-          </div>
+      <!-- Bot Stats Cards Grid -->
+      <div class="stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 12px 16px;">
+        <div class="card" style="margin: 0; padding: 12px; text-align: center;">
+          <div style="font-size: 10px; color: var(--t4);">Số Dư Tài Sản</div>
+          <div style="font-size: 16px; font-weight: 700; color: var(--yellow); margin-top: 4px;" id="botBalanceText">$10,000.00</div>
+          <div style="font-size: 10px; color: var(--green); margin-top: 2px;" id="botGrowthText">+0.00%</div>
+        </div>
+        <div class="card" style="margin: 0; padding: 12px; text-align: center;">
+          <div style="font-size: 10px; color: var(--t4);">Tỷ Lệ Thắng</div>
+          <div style="font-size: 16px; font-weight: 700; color: var(--green); margin-top: 4px;" id="botWinRateText">0%</div>
+          <div style="font-size: 10px; color: var(--t4); margin-top: 2px;" id="botWinCountText">0/0 lệnh</div>
+        </div>
+        <div class="card" style="margin: 0; padding: 12px; text-align: center;">
+          <div style="font-size: 10px; color: var(--t4);">Lệnh Đang Mở</div>
+          <div style="font-size: 16px; font-weight: 700; color: var(--yellow); margin-top: 4px;" id="botActiveTradesText">0</div>
+          <div style="font-size: 10px; color: var(--t4); margin-top: 2px;">Chờ quét AI tiếp theo</div>
         </div>
       </div>
 
-      <div id="bnOrderCard" class="card" style="display:none">
-        <div class="card-h"><h2>Lệnh mở</h2><span class="tag" style="background:var(--yellowA);color:var(--yellow)" id="bnOrderCount">0</span></div>
-        <div class="tbl-w"><table class="tbl"><thead><tr><th>Cặp</th><th>Loại</th><th>Hướng</th><th>Giá</th><th>SL</th><th>Khớp</th><th>TG</th><th></th></tr></thead>
-        <tbody id="bnOrdersTbody"><tr><td colspan="8" class="ld">Không có lệnh</td></tr></tbody></table></div>
+      <!-- Bot Open Positions -->
+      <div class="card" style="margin: 12px 16px;">
+        <div class="card-h"><h2>Vị thế ảo đang mở</h2></div>
+        <div class="tbl-w">
+          <table class="tbl">
+            <thead>
+              <tr><th>Coin</th><th>Số lượng</th><th>Giá mua</th><th>Hiện tại</th><th>Lợi nhuận</th></tr>
+            </thead>
+            <tbody id="botPositionsTbody">
+              <tr><td colspan="5" class="ld" style="text-align:center;padding:20px;color:var(--t4)">Không có vị thế mở</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <div id="bnHistoryCard" class="card" style="display:none">
-        <div class="card-h"><h2>Lịch sử</h2></div>
-        <div class="tbl-w"><table class="tbl"><thead><tr><th>TG</th><th>Cặp</th><th>Hướng</th><th>Giá</th><th>SL</th><th>GT</th><th>Phí</th></tr></thead>
-        <tbody id="bnHistoryTbody"><tr><td colspan="7" class="ld">--</td></tr></tbody></table></div>
+      <!-- Bot Trading Logs -->
+      <div class="card" style="margin: 12px 16px;">
+        <div class="card-h" style="display:flex; justify-content:space-between; align-items:center;">
+          <h2>Lịch sử giao dịch ảo (Logs)</h2>
+          <button class="btn btn-ghost btn-sm" id="btnClearBotHistory" style="padding: 2px 6px; font-size:10px;">Xoá</button>
+        </div>
+        <div class="tbl-w" style="max-height: 200px; overflow-y: auto;">
+          <table class="tbl">
+            <thead>
+              <tr><th>Thời gian</th><th>Coin</th><th>Loại</th><th>Giá</th><th>Lượng</th><th>P&L</th></tr>
+            </thead>
+            <tbody id="botLogsTbody">
+              <tr><td colspan="6" class="ld" style="text-align:center;padding:20px;color:var(--t4)">Chưa có giao dịch nào</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
 
@@ -296,10 +308,10 @@
         <button class="modal-x" id="chartModalClose">✕</button>
       </div>
       <div id="chartContainer" style="width: 100%; height: 350px; background: #181A20;"></div>
-      <div style="padding: 12px; font-size: 12px; color: var(--t4); display: flex; gap: 16px; border-top: 1px solid var(--border)">
-        <span>🟢 Hỗ trợ AI: <strong id="chartSupportVal" style="color:var(--green)">--</strong></span>
-        <span>🔴 Kháng cự AI: <strong id="chartResistanceVal" style="color:var(--red)">--</strong></span>
-        <span>⚡ EMA(20)/EMA(50) & RSI</span>
+      <div style="padding: 12px; font-size: 12px; color: var(--t4); display: flex; gap: 16px; border-top: 1px solid var(--border); align-items: center;">
+        <span>🟢 Hỗ trợ: <strong id="chartSupportVal" style="color:var(--green)">--</strong></span>
+        <span>🔴 Kháng cự: <strong id="chartResistanceVal" style="color:var(--red)">--</strong></span>
+        <button class="btn btn-yellow btn-sm" id="btnRunBacktest" style="margin-left: auto; padding: 4px 8px; font-size: 11px;">📊 Thử Nghiệm 30 Ngày</button>
       </div>
     </div>
   </div>
