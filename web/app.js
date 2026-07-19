@@ -399,8 +399,40 @@ async function aiScanPro(){
   const fngVal=S.fng?parseInt(S.fng.value):50;
   const grid=$('signalGrid');
 
-  // Only scan top 20 for speed (3 API calls each = 60 total)
-  const topCoins=S.crypto.slice(0,20);
+  // Build dynamic scan list: S.holdings + small caps + mid caps + large caps
+  const scanMap = new Map();
+  
+  // 1. Add all holdings first
+  S.holdings.forEach(h => {
+    const coin = S.crypto.find(c => c.symbol.toLowerCase() === h.symbol.toLowerCase() || c.id === h.symbol.toLowerCase());
+    if (coin) {
+      scanMap.set(coin.id, coin);
+    } else {
+      // Mock coingecko-like object for low-cap custom holdings
+      scanMap.set(h.symbol.toLowerCase(), {
+        id: h.symbol.toLowerCase(),
+        symbol: h.symbol,
+        name: h.name,
+        image: 'https://cdn-icons-png.flaticon.com/512/8043/8043026.png',
+        market_cap_rank: 999,
+        market_cap: 1000000
+      });
+    }
+  });
+
+  // 2. Add some small-caps (rank 150-250) from S.crypto
+  const smallCaps = S.crypto.filter(c => c.market_cap_rank > 150);
+  smallCaps.slice(0, 10).forEach(c => scanMap.set(c.id, c));
+
+  // 3. Add some mid-caps (rank 50-150)
+  const midCaps = S.crypto.filter(c => c.market_cap_rank > 50 && c.market_cap_rank <= 150);
+  midCaps.slice(0, 5).forEach(c => scanMap.set(c.id, c));
+
+  // 4. Add some large-caps (rank 1-50)
+  const largeCaps = S.crypto.filter(c => c.market_cap_rank <= 50);
+  largeCaps.slice(0, 5).forEach(c => scanMap.set(c.id, c));
+
+  const topCoins = Array.from(scanMap.values()).slice(0, 25);
   let done=0;
 
   // Show progress
@@ -641,10 +673,10 @@ async function manualScan(){
   if(btn){btn.disabled=true;btn.textContent='Đang quét...'}
   try {
     await aiScanPro();
-    const large = S.signals.filter(s => s.rank <= 50).slice(0, 5);
-    const mid = S.signals.filter(s => s.rank > 50 && s.rank <= 150).slice(0, 5);
-    const small = S.signals.filter(s => s.rank > 150).slice(0, 5);
-    const candidates = [...large, ...mid, ...small];
+    const small = S.signals.filter(s => !s.rank || s.rank > 150);
+    const mid = S.signals.filter(s => s.rank > 50 && s.rank <= 150);
+    const large = S.signals.filter(s => s.rank && s.rank <= 50);
+    const candidates = [...small.slice(0, 8), ...mid.slice(0, 4), ...large.slice(0, 3)];
     if(geminiConnected && candidates.length > 0) {
       if(btn) btn.textContent='⏳ AI đang diễn giải...';
       const r = await postJ(BACKEND+'/api/ai/recommendations', { candidates });
@@ -897,7 +929,7 @@ function drawDonut(cv,data){
 // API FETCHERS
 // ═══════════════════════════════════════════════════════
 async function fetchCrypto(){
-  const j=await fetchJ(CG+'/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=true&price_change_percentage=24h,7d');
+  const j=await fetchJ(CG+'/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=true&price_change_percentage=24h,7d');
   if(j&&Array.isArray(j)){S.crypto=j;S.cgOn=true}else S.cgOn=false;
   updConn();
 }
