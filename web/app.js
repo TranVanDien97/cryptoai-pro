@@ -32,7 +32,7 @@ function simplifyReason(r){
 // STATE
 // ═══════════════════════════════════════════════════════
 const S={
-  tab:'portfolio',crypto:[],signals:[],alerts:[],holdings:[],
+  tab:'research',crypto:[],signals:[],alerts:[],holdings:[],
   favs:[],fng:null,cglobal:null,trending:[],
   mktSearch:'',sigFilter:'ALL',
   cgOn:false,backendOn:false,binanceOn:false,wsOn:false,scanTimer:null,
@@ -1158,7 +1158,7 @@ function connectLiveWS(){
       <div><div class="label">${s.tp2?'Mục tiêu 1':'Chốt lời'}</div><div class="val g">${F.usd(s.tp)}</div>${s.tp2?`<div class="val2">T2: ${F.usd(s.tp2)}</div>`:''}</div>
     </div>
     <div style="margin-top:10px; border-top:1px solid var(--border); padding-top:8px; display:flex; justify-content:space-between; align-items:center;">
-      <button class="btn btn-yellow btn-sm" style="padding: 4px 8px; font-size:10px; font-weight:bold;" onclick="event.stopPropagation(); window.buyVirtualMarket('${s.symbol}', ${liveP})">🛒 Mua ảo</button>
+      <button class="btn btn-yellow btn-sm" style="padding: 4px 8px; font-size:10px; font-weight:bold;" onclick="event.stopPropagation(); window.buyVirtualMarket('${s.symbol}', ${liveP})">🤖 Chạy Bot Test</button>
       <span style="font-size:10px; color:var(--t4)">R/R: ${s.rr}</span>
     </div>
   </div>`;
@@ -1316,7 +1316,7 @@ function sigCardHTML(s){
       <div><div class="label">${s.tp2?'Mục tiêu 1':'Chốt lời'}</div><div class="val g">${F.usd(s.tp)}</div>${s.tp2?`<div class="val2">T2: ${F.usd(s.tp2)}</div>`:''}</div>
     </div>
     <div style="margin-top:10px; border-top:1px solid var(--border); padding-top:8px; display:flex; justify-content:space-between; align-items:center;">
-      <button class="btn btn-yellow btn-sm" style="padding: 4px 8px; font-size:10px; font-weight:bold;" onclick="event.stopPropagation(); window.buyVirtualMarket('${s.symbol}', ${liveP})">🛒 Mua ảo</button>
+      <button class="btn btn-yellow btn-sm" style="padding: 4px 8px; font-size:10px; font-weight:bold;" onclick="event.stopPropagation(); window.buyVirtualMarket('${s.symbol}', ${liveP})">🤖 Chạy Bot Test</button>
       <span style="font-size:10px; color:var(--t4)">R/R: ${s.rr}</span>
     </div>
   </div>`;
@@ -3105,7 +3105,7 @@ window.addBreakoutAlert = function(symbol, type, message) {
 // Manual Virtual Buy/Sell functions
 window.buyVirtualMarket = function(symbol, price) {
   const cleanSym = symbol.toUpperCase().replace('USDT', '');
-  const amtStr = prompt('Nhap so USDT muon dau tu vao ' + cleanSym + ' (Vốn ảo hien co: $' + Math.round(botState.balanceUSDT) + '):', '2000');
+  const amtStr = prompt('Nhap so USDT muon dau tu chay test cho ' + cleanSym + ' (Von ao dang co: $' + Math.round(botState.balanceUSDT) + '):', '2000');
   if(!amtStr) return;
   
   const amt = parseFloat(amtStr);
