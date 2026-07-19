@@ -3,7 +3,7 @@ services:
     name: cryptoai-pro
     runtime: node
     plan: free
-    buildCommand: npm install
+    buildCommand: npm install && cd frontend && npm install && npm run build
     startCommand: node server/server.js
     envVars:
       - key: NODE_ENV

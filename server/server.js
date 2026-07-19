@@ -26,7 +26,7 @@ const { generateSmartAlert } = require('./services/ai/priceAlertEngine');
 const app = express();
 const PORT = process.env.PORT || 8001;
 const BINANCE_BASE = 'https://api.binance.com';
-const WEB_DIR = path.join(__dirname, '..', 'web');
+const WEB_DIR = path.join(__dirname, '..', 'frontend', 'dist');
 
 // ═══════════════════════════════════════════════════════
 // PERSISTENT STORAGE — Lưu tất cả vào file trên máy
