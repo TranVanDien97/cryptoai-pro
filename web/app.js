@@ -2523,29 +2523,54 @@ window.showInteractiveChart = async function(symbol) {
   // Start Whale tracking for this coin too!
   window.startWhaleTracker(cleanSym);
 
-  // Fetch candles
+  // Fetch candles with CoinGecko fallback for low-cap coins (e.g. ALLO, KITE)
   let klines = [];
   try {
     const r = await fetch(`https://api.binance.com/api/v3/klines?symbol=${cleanSym}USDT&interval=1d&limit=150`);
-    const data = await r.json();
-    if(Array.isArray(data)) {
-      klines = data.map(k => ({
-        time: k[0] / 1000,
-        open: parseFloat(k[1]),
-        high: parseFloat(k[2]),
-        low: parseFloat(k[3]),
-        close: parseFloat(k[4]),
-        value: parseFloat(k[5])
-      }));
+    if (r.ok) {
+      const data = await r.json();
+      if(Array.isArray(data)) {
+        klines = data.map(k => ({
+          time: k[0] / 1000,
+          open: parseFloat(k[1]),
+          high: parseFloat(k[2]),
+          low: parseFloat(k[3]),
+          close: parseFloat(k[4]),
+          value: parseFloat(k[5])
+        }));
+      }
     }
   } catch(e) {
-    console.error(e);
-    container.innerHTML = '<div style="color: var(--red); text-align: center; padding-top: 150px;">Không thể tải dữ liệu từ Binance.</div>';
-    return;
+    console.warn('Binance chart failed, trying CoinGecko...');
   }
   
-  if(!klines.length) {
-    container.innerHTML = '<div style="color: var(--red); text-align: center; padding-top: 150px;">Cặp giao dịch không khả dụng trên Binance.</div>';
+  // CoinGecko fallback
+  if (!klines || !klines.length) {
+    try {
+      const coinObj = S.crypto.find(c => c.symbol.toLowerCase() === cleanSym.toLowerCase()) || 
+                      S.holdings.find(h => h.symbol.toLowerCase() === cleanSym.toLowerCase());
+      const cgId = coinObj ? coinObj.id : cleanSym.toLowerCase();
+      
+      const r = await fetch(`https://api.coingecko.com/api/v3/coins/${cgId}/ohlc?vs_currency=usd&days=30`);
+      if (r.ok) {
+        const data = await r.json();
+        if (Array.isArray(data)) {
+          klines = data.map(k => ({
+            time: k[0] / 1000,
+            open: k[1],
+            high: k[2],
+            low: k[3],
+            close: k[4]
+          }));
+        }
+      }
+    } catch(e) {
+      console.error('CoinGecko fallback chart failed:', e);
+    }
+  }
+  
+  if(!klines || !klines.length) {
+    container.innerHTML = '<div style="color: var(--red); text-align: center; padding-top: 150px;">Biểu đồ của đồng coin này không khả dụng trên cả Binance & CoinGecko.</div>';
     return;
   }
 
