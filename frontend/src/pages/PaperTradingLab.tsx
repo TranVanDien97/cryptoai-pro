@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import { AlertCircle, PlayCircle, StopCircle } from 'lucide-react';
 import axios from 'axios';
+import ChartWidget from '../components/ChartWidget';
 
 const PaperTradingLab = () => {
   const balance = useAppStore(state => state.balance);
@@ -46,6 +47,9 @@ const PaperTradingLab = () => {
   }, [positions.filter(p => p.status === 'OPEN').length]);
 
   const totalUnrealizedPnL = positions.filter(p => p.status === 'OPEN').reduce((sum, p) => sum + p.pnl, 0);
+  
+  // Find the first open position to show on chart
+  const activePosition = positions.find(p => p.status === 'OPEN');
 
   return (
     <div>
@@ -61,6 +65,15 @@ const PaperTradingLab = () => {
           </div>
         </div>
       </header>
+
+      {activePosition && (
+        <ChartWidget 
+          symbol={activePosition.symbol}
+          entryPrice={activePosition.entryPrice}
+          takeProfit={activePosition.takeProfit}
+          stopLoss={activePosition.stopLoss}
+        />
+      )}
 
       <div className="glass-panel" style={{ overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
