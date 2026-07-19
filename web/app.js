@@ -2663,6 +2663,49 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   
+  // Hook new Bot tab buttons
+  const btnReset = document.getElementById('btnResetBot');
+  if (btnReset) {
+    btnReset.addEventListener('click', () => {
+      if (typeof window.resetBotState === 'function') window.resetBotState();
+    });
+  }
+
+  const btnSellAll = document.getElementById('btnBotSellAll');
+  if (btnSellAll) {
+    btnSellAll.addEventListener('click', () => {
+      if (typeof window.sellAllVirtualPositions === 'function') window.sellAllVirtualPositions();
+    });
+  }
+
+  // Hook Quick Buy form
+  const btnQuickBuy = document.getElementById('btnQuickBuy');
+  if (btnQuickBuy) {
+    btnQuickBuy.addEventListener('click', () => {
+      const symInput = document.getElementById('quickBuySymbol');
+      const amtInput = document.getElementById('quickBuyAmount');
+      if (!symInput || !amtInput) return;
+      
+      const symbol = symInput.value.trim().toUpperCase();
+      const amt = parseFloat(amtInput.value);
+      
+      if (!symbol) {
+        alert('Vui long nhap ma coin.');
+        return;
+      }
+      if (isNaN(amt) || amt <= 0) {
+        alert('Vui long nhap so tien hop le.');
+        return;
+      }
+      
+      if (typeof window.buyVirtualMarket === 'function') {
+        window.buyVirtualMarket(symbol, 0); // triggers prompt with prefilled or handles natively
+        symInput.value = '';
+        amtInput.value = '';
+      }
+    });
+  }
+
   if (typeof loadBotState === 'function') {
     loadBotState();
   }
@@ -3100,4 +3143,50 @@ window.sellVirtualMarket = function(symbol) {
   botState.positions.splice(posIndex, 1);
   saveBotState();
   toast('🤖 Da ban ao ' + cleanSym + ' chot lai/lo: ' + (pnl >= 0 ? '+' : '') + '$' + F.usd(pnl), pnl >= 0 ? 'success' : 'warn');
+};
+
+// Convenience functions for Bot Page
+window.sellAllVirtualPositions = function() {
+  if (botState.positions.length === 0) {
+    alert('Khong co vi the mo nao de ban.');
+    return;
+  }
+  if (!confirm('Ban muon thanh ly toan bo vi the dang mo sang USDT?')) {
+    return;
+  }
+  
+  botState.positions.forEach(pos => {
+    const liveP = livePrices[pos.symbol+'USDT']?.p || S.tickerMap[pos.symbol+'USDT'] || pos.currentPrice;
+    const pnl = (liveP - pos.buyPrice) * pos.qty;
+    const totalReturn = pos.qty * liveP;
+    
+    botState.balanceUSDT += totalReturn;
+    botState.logs.unshift({
+      time: new Date().toLocaleTimeString(),
+      symbol: pos.symbol,
+      type: 'SELL',
+      price: liveP,
+      qty: pos.qty,
+      pnl: pnl
+    });
+  });
+  
+  botState.positions = [];
+  saveBotState();
+  toast('🤖 Da ban thanh ly toan bo danh muc vi the ao.', 'success');
+};
+
+window.resetBotState = function() {
+  if (!confirm('Ban thuc su muon dat lai so du bot ve $10,000 USDT va xoa sach lich su?')) {
+    return;
+  }
+  botState = {
+    enabled: botState.enabled,
+    balanceUSDT: 10000,
+    initialBalance: 10000,
+    positions: [],
+    logs: []
+  };
+  saveBotState();
+  toast('🤖 Da khoi phuc so du ao ve $10,000 USDT.', 'info');
 };

@@ -174,10 +174,11 @@
 
       <!-- Bot Stats Cards Grid -->
       <div class="stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 12px 16px;">
-        <div class="card" style="margin: 0; padding: 12px; text-align: center;">
+        <div class="card" style="margin: 0; padding: 12px; text-align: center; position: relative;">
           <div style="font-size: 10px; color: var(--t4);">Số Dư Tài Sản</div>
           <div style="font-size: 16px; font-weight: 700; color: var(--yellow); margin-top: 4px;" id="botBalanceText">$10,000.00</div>
           <div style="font-size: 10px; color: var(--green); margin-top: 2px;" id="botGrowthText">+0.00%</div>
+          <button id="btnResetBot" class="btn btn-ghost" style="position: absolute; top: 4px; right: 4px; padding: 2px; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center;" title="Đặt lại số dư về $10k">🔄</button>
         </div>
         <div class="card" style="margin: 0; padding: 12px; text-align: center;">
           <div style="font-size: 10px; color: var(--t4);">Tỷ Lệ Thắng</div>
@@ -191,9 +192,22 @@
         </div>
       </div>
 
+      <!-- Quick Buy Tool -->
+      <div class="card" style="margin: 12px 16px; padding: 12px;">
+        <div class="card-h" style="padding: 0 0 8px 0; border-bottom: 1px solid var(--border); margin-bottom: 10px;"><h2>🛒 Mua Nhanh (Không cần chờ AI)</h2></div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <input id="quickBuySymbol" placeholder="Tên Coin (Ví dụ: ALLO)" style="flex: 1.2; font-size: 11px; padding: 6px 10px;" autocomplete="off">
+          <input id="quickBuyAmount" type="number" placeholder="Số USDT (Ví dụ: 1000)" style="flex: 1; font-size: 11px; padding: 6px 10px;" min="10">
+          <button id="btnQuickBuy" class="btn btn-yellow" style="padding: 6px 14px; font-size: 11px; font-weight: bold;">Mua ảo</button>
+        </div>
+      </div>
+
       <!-- Bot Open Positions -->
       <div class="card" style="margin: 12px 16px;">
-        <div class="card-h"><h2>Vị thế ảo đang mở</h2></div>
+        <div class="card-h" style="display:flex; justify-content:space-between; align-items:center;">
+          <h2>Vị thế ảo đang mở</h2>
+          <button id="btnBotSellAll" class="btn btn-red" style="padding: 2px 8px; font-size: 10px; font-weight: bold; border-radius: 4px;">🔴 Bán tất cả</button>
+        </div>
         <div class="tbl-w">
           <table class="tbl">
             <thead>
