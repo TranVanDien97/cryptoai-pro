@@ -1,0 +1,335 @@
+{"_e":"root:init","_t":1781921996865,"format":"v0-jsonl","version":"56.1.16"}
+{"_e":"env:mode","_t":1781921996866,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+{"_e":"env:load","_t":1781921996869,"mode":"development","files":[],"env":{}}
+{"_e":"devserver:start","_t":1781921997068,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../..\\..\\app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1781921997368,"serverRoot":"../..\\..","projectRoot":"../..\\..","exporting":false,"flags":{"autolinkingModuleResolution":false,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:instantiate","_t":1781922004523,"atlas":false,"workers":12,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1781922179504,"id":"1","platform":"web","environment":null,"entry":"node_modules\\expo\\AppEntry.js"}
+{"_e":"metro:bundling:done","_t":1781922185591,"id":"1","total":541,"ms":6086.9752}
+{"_e":"metro:client_log","_t":1781922185925,"level":"error","data":["[Error: Incompatible React versions: The \"react\" and \"react-dom\" packages must have the exact same version. Instead got:\n  - react:      19.1.0\n  - react-dom:  19.2.7\nLearn more: https://react.dev/warnings/version-mismatch]","\n\nCode: react-dom-client.development.js\n\u001b[0m \u001b[90m 27933 |\u001b[39m       \u001b[36mvar\u001b[39m isomorphicReactPackageVersion \u001b[33m=\u001b[39m \u001b[33mReact\u001b[39m\u001b[33m.\u001b[39mversion\u001b[33m;\u001b[39m\n \u001b[90m 27934 |\u001b[39m       \u001b[36mif\u001b[39m (\u001b[32m\"19.2.7\"\u001b[39m \u001b[33m!==\u001b[39m isomorphicReactPackageVersion)\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 27935 |\u001b[39m         \u001b[36mthrow\u001b[39m \u001b[33mError\u001b[39m(\n \u001b[90m       |\u001b[39m               \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 27936 |\u001b[39m           \u001b[32m'Incompatible React versions: The \"react\" and \"react-dom\" packages must have the exact same version. Instead got:\\n  - react:      '\u001b[39m \u001b[33m+\u001b[39m\n \u001b[90m 27937 |\u001b[39m             (isomorphicReactPackageVersion \u001b[33m+\u001b[39m\n \u001b[90m 27938 |\u001b[39m               \u001b[32m\"\\n  - react-dom:  19.2.7\\nLearn more: https://react.dev/warnings/version-mismatch\"\u001b[39m)\u001b[0m\nCall Stack\n  <anonymous> (node_modules\\react-dom\\cjs\\react-dom-client.development.js:27935:15)\n  <anonymous> (node_modules\\react-dom\\cjs\\react-dom-client.development.js:27940:6)\n  <global> (node_modules\\react-dom\\cjs\\react-dom-client.development.js:28121:4)\n  loadModuleImplementation (node_modules\\metro\\node_modules\\metro-runtime\\src\\polyfills\\require.js:285:5)\n  guardedLoadModule (node_modules\\metro\\node_modules\\metro-runtime\\src\\polyfills\\require.js:190:12)\n  metroRequire (node_modules\\metro\\node_modules\\metro-runtime\\src\\polyfills\\require.js:98:7)\n  <global> (node_modules\\react-dom\\client.js:37:20)\n  loadModuleImplementation (node_modules\\metro\\node_modules\\metro-runtime\\src\\polyfills\\require.js:285:5)\n  guardedLoadModule (node_modules\\metro\\node_modules\\metro-runtime\\src\\polyfills\\require.js:190:12)\n  metroRequire (node_modules\\metro\\node_modules\\metro-runtime\\src\\polyfills\\require.js:98:7)"]}
+{"_e":"metro:bundling:started","_t":1781922258045,"id":"4","platform":"web","environment":null,"entry":"node_modules\\expo\\AppEntry.js"}
+{"_e":"metro:bundling:done","_t":1781922258063,"id":"4","total":1,"ms":18.6297}
+{"_e":"metro:client_log","_t":1781922258311,"level":"error","data":["[Error: Incompatible React versions: The \"react\" and \"react-dom\" packages must have the exact same version. Instead got:\n  - react:      19.1.0\n  - react-dom:  19.2.7\nLearn more: https://react.dev/warnings/version-mismatch]","\n\nCode: react-dom-client.development.js\n\u001b[0m \u001b[90m 27933 |\u001b[39m       \u001b[36mvar\u001b[39m isomorphicReactPackageVersion \u001b[33m=\u001b[39m \u001b[33mReact\u001b[39m\u001b[33m.\u001b[39mversion\u001b[33m;\u001b[39m\n \u001b[90m 27934 |\u001b[39m       \u001b[36mif\u001b[39m (\u001b[32m\"19.2.7\"\u001b[39m \u001b[33m!==\u001b[39m isomorphicReactPackageVersion)\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 27935 |\u001b[39m         \u001b[36mthrow\u001b[39m \u001b[33mError\u001b[39m(\n \u001b[90m       |\u001b[39m               \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 27936 |\u001b[39m           \u001b[32m'Incompatible React versions: The \"react\" and \"react-dom\" packages must have the exact same version. Instead got:\\n  - react:      '\u001b[39m \u001b[33m+\u001b[39m\n \u001b[90m 27937 |\u001b[39m             (isomorphicReactPackageVersion \u001b[33m+\u001b[39m\n \u001b[90m 27938 |\u001b[39m               \u001b[32m\"\\n  - react-dom:  19.2.7\\nLearn more: https://react.dev/warnings/version-mismatch\"\u001b[39m)\u001b[0m\nCall Stack\n  <anonymous> (node_modules\\react-dom\\cjs\\react-dom-client.development.js:27935:15)\n  <anonymous> (node_modules\\react-dom\\cjs\\react-dom-client.development.js:27940:6)\n  <global> (node_modules\\react-dom\\cjs\\react-dom-client.development.js:28121:4)\n  loadModuleImplementation (node_modules\\metro\\node_modules\\metro-runtime\\src\\polyfills\\require.js:285:5)\n  guardedLoadModule (node_modules\\metro\\node_modules\\metro-runtime\\src\\polyfills\\require.js:190:12)\n  metroRequire (node_modules\\metro\\node_modules\\metro-runtime\\src\\polyfills\\require.js:98:7)\n  <global> (node_modules\\react-dom\\client.js:37:20)\n  loadModuleImplementation (node_modules\\metro\\node_modules\\metro-runtime\\src\\polyfills\\require.js:285:5)\n  guardedLoadModule (node_modules\\metro\\node_modules\\metro-runtime\\src\\polyfills\\require.js:190:12)\n  metroRequire (node_modules\\metro\\node_modules\\metro-runtime\\src\\polyfills\\require.js:98:7)"]}
+{"_e":"metro:bundling:started","_t":1781922325327,"id":"7","platform":"web","environment":null,"entry":"node_modules\\expo\\AppEntry.js"}
+{"_e":"metro:bundling:done","_t":1781922325348,"id":"7","total":1,"ms":20.7781}
+{"_e":"metro:client_log","_t":1781922325577,"level":"error","data":["[Error: Incompatible React versions: The \"react\" and \"react-dom\" packages must have the exact same version. Instead got:\n  - react:      19.1.0\n  - react-dom:  19.2.7\nLearn more: https://react.dev/warnings/version-mismatch]","\n\nCode: react-dom-client.development.js\n\u001b[0m \u001b[90m 27933 |\u001b[39m       \u001b[36mvar\u001b[39m isomorphicReactPackageVersion \u001b[33m=\u001b[39m \u001b[33mReact\u001b[39m\u001b[33m.\u001b[39mversion\u001b[33m;\u001b[39m\n \u001b[90m 27934 |\u001b[39m       \u001b[36mif\u001b[39m (\u001b[32m\"19.2.7\"\u001b[39m \u001b[33m!==\u001b[39m isomorphicReactPackageVersion)\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 27935 |\u001b[39m         \u001b[36mthrow\u001b[39m \u001b[33mError\u001b[39m(\n \u001b[90m       |\u001b[39m               \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 27936 |\u001b[39m           \u001b[32m'Incompatible React versions: The \"react\" and \"react-dom\" packages must have the exact same version. Instead got:\\n  - react:      '\u001b[39m \u001b[33m+\u001b[39m\n \u001b[90m 27937 |\u001b[39m             (isomorphicReactPackageVersion \u001b[33m+\u001b[39m\n \u001b[90m 27938 |\u001b[39m               \u001b[32m\"\\n  - react-dom:  19.2.7\\nLearn more: https://react.dev/warnings/version-mismatch\"\u001b[39m)\u001b[0m\nCall Stack\n  <anonymous> (node_modules\\react-dom\\cjs\\react-dom-client.development.js:27935:15)\n  <anonymous> (node_modules\\react-dom\\cjs\\react-dom-client.development.js:27940:6)\n  <global> (node_modules\\react-dom\\cjs\\react-dom-client.development.js:28121:4)\n  loadModuleImplementation (node_modules\\metro\\node_modules\\metro-runtime\\src\\polyfills\\require.js:285:5)\n  guardedLoadModule (node_modules\\metro\\node_modules\\metro-runtime\\src\\polyfills\\require.js:190:12)\n  metroRequire (node_modules\\metro\\node_modules\\metro-runtime\\src\\polyfills\\require.js:98:7)\n  <global> (node_modules\\react-dom\\client.js:37:20)\n  loadModuleImplementation (node_modules\\metro\\node_modules\\metro-runtime\\src\\polyfills\\require.js:285:5)\n  guardedLoadModule (node_modules\\metro\\node_modules\\metro-runtime\\src\\polyfills\\require.js:190:12)\n  metroRequire (node_modules\\metro\\node_modules\\metro-runtime\\src\\polyfills\\require.js:98:7)"]}
+{"_e":"metro:bundling:started","_t":1781922334598,"id":"a","platform":"web","environment":null,"entry":"node_modules\\expo\\AppEntry.js"}
+{"_e":"metro:bundling:done","_t":1781922334623,"id":"a","total":1,"ms":25.0683}
+{"_e":"metro:client_log","_t":1781922334846,"level":"error","data":["[Error: Incompatible React versions: The \"react\" and \"react-dom\" packages must have the exact same version. Instead got:\n  - react:      19.1.0\n  - react-dom:  19.2.7\nLearn more: https://react.dev/warnings/version-mismatch]","\n\nCode: react-dom-client.development.js\n\u001b[0m \u001b[90m 27933 |\u001b[39m       \u001b[36mvar\u001b[39m isomorphicReactPackageVersion \u001b[33m=\u001b[39m \u001b[33mReact\u001b[39m\u001b[33m.\u001b[39mversion\u001b[33m;\u001b[39m\n \u001b[90m 27934 |\u001b[39m       \u001b[36mif\u001b[39m (\u001b[32m\"19.2.7\"\u001b[39m \u001b[33m!==\u001b[39m isomorphicReactPackageVersion)\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 27935 |\u001b[39m         \u001b[36mthrow\u001b[39m \u001b[33mError\u001b[39m(\n \u001b[90m       |\u001b[39m               \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 27936 |\u001b[39m           \u001b[32m'Incompatible React versions: The \"react\" and \"react-dom\" packages must have the exact same version. Instead got:\\n  - react:      '\u001b[39m \u001b[33m+\u001b[39m\n \u001b[90m 27937 |\u001b[39m             (isomorphicReactPackageVersion \u001b[33m+\u001b[39m\n \u001b[90m 27938 |\u001b[39m               \u001b[32m\"\\n  - react-dom:  19.2.7\\nLearn more: https://react.dev/warnings/version-mismatch\"\u001b[39m)\u001b[0m\nCall Stack\n  <anonymous> (node_modules\\react-dom\\cjs\\react-dom-client.development.js:27935:15)\n  <anonymous> (node_modules\\react-dom\\cjs\\react-dom-client.development.js:27940:6)\n  <global> (node_modules\\react-dom\\cjs\\react-dom-client.development.js:28121:4)\n  loadModuleImplementation (node_modules\\metro\\node_modules\\metro-runtime\\src\\polyfills\\require.js:285:5)\n  guardedLoadModule (node_modules\\metro\\node_modules\\metro-runtime\\src\\polyfills\\require.js:190:12)\n  metroRequire (node_modules\\metro\\node_modules\\metro-runtime\\src\\polyfills\\require.js:98:7)\n  <global> (node_modules\\react-dom\\client.js:37:20)\n  loadModuleImplementation (node_modules\\metro\\node_modules\\metro-runtime\\src\\polyfills\\require.js:285:5)\n  guardedLoadModule (node_modules\\metro\\node_modules\\metro-runtime\\src\\polyfills\\require.js:190:12)\n  metroRequire (node_modules\\metro\\node_modules\\metro-runtime\\src\\polyfills\\require.js:98:7)"]}
+{"_e":"metro:bundling:failed","_t":1781922375711,"id":null,"message":"Unable to resolve \"react\" from \"node_modules\\expo\\src\\async-require\\setupHMR.ts\"\n  64 |   }\n  65 |\n> 66 |   const react = require('react') as typeof React;\n     |                          ^\n  67 |   const componentStack = react.captureOwnerStack?.();\n  68 |   if (componentStack) {\n  69 |     dataWithStacks.push(componentStack);","importStack":"Import stack:\n\n node_modules\\expo\\src\\async-require\\setupHMR.ts\n | import \"react\"\n\n node_modules\\expo\\src\\async-require\\setup.ts\n | import \"./setupHMR\"\n\n node_modules\\expo\\src\\winter\\runtime.ts\n | import \"../async-require/setup\"\n\n node_modules\\expo\\src\\winter\\index.ts\n | import \"./runtime\"\n\n node_modules\\expo\\src\\Expo.fx.web.tsx\n | import \"./winter\"\n\n node_modules\\expo\\src\\launch\\registerRootComponent.web.tsx\n | import \"../Expo.fx\"\n\n node_modules\\expo\\AppEntry.js\n | import \"expo/src/launch/registerRootComponent\"\n\n \n | import \"./node_modules/expo/AppEntry\"\n","filename":null,"targetModuleName":"react","originModulePath":"node_modules\\expo\\src\\async-require\\setupHMR.ts"}
+{"_e":"metro:client_log","_t":1781922375740,"level":"error","data":["[UnableToResolveError: Unable to resolve module react from C:\\Users\\trand\\.gemini\\antigravity\\scratch\\stockai\\mobile\\node_modules\\expo\\src\\async-require\\setupHMR.ts: react could not be found within the project or in these directories:\n  node_modules\n  64 |   }\n  65 |\n> 66 |   const react = require('react') as typeof React;\n     |                          ^\n  67 |   const componentStack = react.captureOwnerStack?.();\n  68 |   if (componentStack) {\n  69 |     dataWithStacks.push(componentStack);]"]}
+{"_e":"metro:client_log","_t":1781922375741,"level":"error","data":["[UnableToResolveError: Unable to resolve module react from C:\\Users\\trand\\.gemini\\antigravity\\scratch\\stockai\\mobile\\node_modules\\expo\\src\\async-require\\setupHMR.ts: react could not be found within the project or in these directories:\n  node_modules\n  64 |   }\n  65 |\n> 66 |   const react = require('react') as typeof React;\n     |                          ^\n  67 |   const componentStack = react.captureOwnerStack?.();\n  68 |   if (componentStack) {\n  69 |     dataWithStacks.push(componentStack);]"]}
+{"_e":"metro:bundling:failed","_t":1781922376706,"id":null,"message":"Unable to resolve \"react\" from \"node_modules\\expo\\src\\async-require\\setupHMR.ts\"\n  64 |   }\n  65 |\n> 66 |   const react = require('react') as typeof React;\n     |                          ^\n  67 |   const componentStack = react.captureOwnerStack?.();\n  68 |   if (componentStack) {\n  69 |     dataWithStacks.push(componentStack);","importStack":"Import stack:\n\n node_modules\\expo\\src\\async-require\\setupHMR.ts\n | import \"react\"\n\n node_modules\\expo\\src\\async-require\\setup.ts\n | import \"./setupHMR\"\n\n node_modules\\expo\\src\\winter\\runtime.ts\n | import \"../async-require/setup\"\n\n node_modules\\expo\\src\\winter\\index.ts\n | import \"./runtime\"\n\n node_modules\\expo\\src\\Expo.fx.web.tsx\n | import \"./winter\"\n\n node_modules\\expo\\src\\launch\\registerRootComponent.web.tsx\n | import \"../Expo.fx\"\n\n node_modules\\expo\\AppEntry.js\n | import \"expo/src/launch/registerRootComponent\"\n\n \n | import \"./node_modules/expo/AppEntry\"\n","filename":null,"targetModuleName":"react","originModulePath":"node_modules\\expo\\src\\async-require\\setupHMR.ts"}
+{"_e":"metro:client_log","_t":1781922376732,"level":"error","data":["[UnableToResolveError: Unable to resolve module react from C:\\Users\\trand\\.gemini\\antigravity\\scratch\\stockai\\mobile\\node_modules\\expo\\src\\async-require\\setupHMR.ts: react could not be found within the project or in these directories:\n  node_modules\n  64 |   }\n  65 |\n> 66 |   const react = require('react') as typeof React;\n     |                          ^\n  67 |   const componentStack = react.captureOwnerStack?.();\n  68 |   if (componentStack) {\n  69 |     dataWithStacks.push(componentStack);]"]}
+{"_e":"metro:client_log","_t":1781922376732,"level":"error","data":["[UnableToResolveError: Unable to resolve module react from C:\\Users\\trand\\.gemini\\antigravity\\scratch\\stockai\\mobile\\node_modules\\expo\\src\\async-require\\setupHMR.ts: react could not be found within the project or in these directories:\n  node_modules\n  64 |   }\n  65 |\n> 66 |   const react = require('react') as typeof React;\n     |                          ^\n  67 |   const componentStack = react.captureOwnerStack?.();\n  68 |   if (componentStack) {\n  69 |     dataWithStacks.push(componentStack);]"]}
+{"_e":"root:init","_t":1781922512262,"format":"v0-jsonl","version":"56.1.16"}
+{"_e":"env:mode","_t":1781922512262,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+{"_e":"env:load","_t":1781922512265,"mode":"development","files":[],"env":{}}
+{"_e":"devserver:start","_t":1781922512474,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../..\\..\\app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1781922512769,"serverRoot":"../..\\..","projectRoot":"../..\\..","exporting":false,"flags":{"autolinkingModuleResolution":false,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:instantiate","_t":1781922520249,"atlas":false,"workers":12,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1781922600646,"id":"1","platform":"web","environment":null,"entry":"node_modules\\expo\\AppEntry.js"}
+{"_e":"metro:bundling:failed","_t":1781922600654,"id":"1","message":"Cannot read properties of undefined (reading 'transformFile')","importStack":null,"filename":null,"targetModuleName":null,"originModulePath":null}
+{"_e":"metro:bundling:started","_t":1781922610986,"id":"3","platform":"web","environment":null,"entry":"node_modules\\expo\\AppEntry.js"}
+{"_e":"metro:bundling:failed","_t":1781922610990,"id":"3","message":"Cannot read properties of undefined (reading 'transformFile')","importStack":null,"filename":null,"targetModuleName":null,"originModulePath":null}
+{"_e":"metro:bundling:started","_t":1781922611602,"id":"5","platform":"web","environment":null,"entry":"node_modules\\expo\\AppEntry.js"}
+{"_e":"metro:bundling:failed","_t":1781922611604,"id":"5","message":"Cannot read properties of undefined (reading 'transformFile')","importStack":null,"filename":null,"targetModuleName":null,"originModulePath":null}
+{"_e":"metro:bundling:started","_t":1781922611840,"id":"7","platform":"web","environment":null,"entry":"node_modules\\expo\\AppEntry.js"}
+{"_e":"metro:bundling:failed","_t":1781922611843,"id":"7","message":"Cannot read properties of undefined (reading 'transformFile')","importStack":null,"filename":null,"targetModuleName":null,"originModulePath":null}
+{"_e":"metro:bundling:started","_t":1781922660277,"id":"9","platform":"web","environment":null,"entry":"node_modules\\expo\\AppEntry.js"}
+{"_e":"metro:bundling:failed","_t":1781922660281,"id":"9","message":"Cannot read properties of undefined (reading 'transformFile')","importStack":null,"filename":null,"targetModuleName":null,"originModulePath":null}
+{"_e":"root:init","_t":1781922738176,"format":"v0-jsonl","version":"56.1.16"}
+{"_e":"env:mode","_t":1781922738177,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+{"_e":"env:load","_t":1781922738179,"mode":"development","files":[],"env":{}}
+{"_e":"devserver:start","_t":1781922738395,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../..\\..\\app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1781922738729,"serverRoot":"../..\\..","projectRoot":"../..\\..","exporting":false,"flags":{"autolinkingModuleResolution":false,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:instantiate","_t":1781922745414,"atlas":false,"workers":12,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1781923453734,"id":"1","platform":"web","environment":null,"entry":"node_modules\\expo\\AppEntry.js"}
+{"_e":"metro:bundling:done","_t":1781923460101,"id":"1","total":541,"ms":6366.221}
+{"_e":"metro:client_log","_t":1781923460296,"level":"info","data":["%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools","font-weight:bold"]}
+{"_e":"metro:client_log","_t":1781923460297,"level":"warn","data":["\"shadow*\" style props are deprecated. Use \"boxShadow\"."]}
+{"_e":"metro:client_log","_t":1781923460298,"level":"log","data":["Running application \"main\" with appParams:\n","{\"hydrate\": undefined, \"rootTag\": \"#root\"}","\nDevelopment-level warnings: ON.\nPerformance optimizations: OFF."]}
+{"_e":"metro:client_log","_t":1781923460298,"level":"warn","data":["props.pointerEvents is deprecated. Use style.pointerEvents"]}
+{"_e":"metro:client_log","_t":1781923470384,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781923483339,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781923498245,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781923515240,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781923532242,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781923549240,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781923619296,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781923636240,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781923653244,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781923670241,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781923739293,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781923756232,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781923773241,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781923790247,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781923859286,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781923876238,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781923893233,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781923910242,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781923979292,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781923996239,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924013242,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924030245,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924099282,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781924116244,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924133247,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924150242,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924219309,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781924236245,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924253247,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924270243,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924285259,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924300270,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924315284,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924330294,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924345302,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924360312,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924375341,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924390355,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924405363,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924420369,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924435378,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924450391,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924465404,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924480421,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924495431,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924512236,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924529233,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924546244,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924573291,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781924590232,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924607239,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924624237,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924685234,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924701245,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924718242,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924735233,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924762323,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781924779233,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924796232,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924813239,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924879307,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781924896245,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924913235,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924930238,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781924999308,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:bundling:started","_t":1781925010352,"id":"3","platform":"web","environment":null,"entry":"node_modules\\expo\\AppEntry.js"}
+{"_e":"metro:bundling:done","_t":1781925010375,"id":"3","total":1,"ms":22.6764}
+{"_e":"metro:client_log","_t":1781925010572,"level":"info","data":["%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools","font-weight:bold"]}
+{"_e":"metro:client_log","_t":1781925010572,"level":"warn","data":["\"shadow*\" style props are deprecated. Use \"boxShadow\"."]}
+{"_e":"metro:client_log","_t":1781925010572,"level":"log","data":["Running application \"main\" with appParams:\n","{\"hydrate\": undefined, \"rootTag\": \"#root\"}","\nDevelopment-level warnings: ON.\nPerformance optimizations: OFF."]}
+{"_e":"metro:client_log","_t":1781925010573,"level":"warn","data":["props.pointerEvents is deprecated. Use style.pointerEvents"]}
+{"_e":"metro:client_log","_t":1781925020594,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925033185,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925045950,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925060963,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925075976,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925090981,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925106009,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925121039,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925136060,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925151235,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925168239,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925185234,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925202237,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:bundling:started","_t":1781925216788,"id":"5","platform":"web","environment":null,"entry":"node_modules\\expo\\AppEntry.js"}
+{"_e":"metro:bundling:done","_t":1781925216806,"id":"5","total":1,"ms":17.2197}
+{"_e":"metro:client_log","_t":1781925217027,"level":"info","data":["%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools","font-weight:bold"]}
+{"_e":"metro:client_log","_t":1781925217027,"level":"warn","data":["\"shadow*\" style props are deprecated. Use \"boxShadow\"."]}
+{"_e":"metro:client_log","_t":1781925217027,"level":"log","data":["Running application \"main\" with appParams:\n","{\"hydrate\": undefined, \"rootTag\": \"#root\"}","\nDevelopment-level warnings: ON.\nPerformance optimizations: OFF."]}
+{"_e":"metro:client_log","_t":1781925217027,"level":"warn","data":["props.pointerEvents is deprecated. Use style.pointerEvents"]}
+{"_e":"metro:client_log","_t":1781925227001,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925238591,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925253604,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925268618,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925283636,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925298657,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925313662,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925328667,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925343671,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925358686,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925373702,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925388710,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:bundling:started","_t":1781925509538,"id":"7","platform":"web","environment":null,"entry":"node_modules\\expo\\AppEntry.js"}
+{"_e":"metro:bundling:done","_t":1781925509563,"id":"7","total":1,"ms":24.3305}
+{"_e":"metro:client_log","_t":1781925509846,"level":"info","data":["%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools","font-weight:bold"]}
+{"_e":"metro:client_log","_t":1781925509846,"level":"warn","data":["\"shadow*\" style props are deprecated. Use \"boxShadow\"."]}
+{"_e":"metro:client_log","_t":1781925509846,"level":"log","data":["Running application \"main\" with appParams:\n","{\"hydrate\": undefined, \"rootTag\": \"#root\"}","\nDevelopment-level warnings: ON.\nPerformance optimizations: OFF."]}
+{"_e":"metro:client_log","_t":1781925509846,"level":"warn","data":["props.pointerEvents is deprecated. Use style.pointerEvents"]}
+{"_e":"metro:bundling:started","_t":1781925514106,"id":"9","platform":"web","environment":null,"entry":"node_modules\\expo\\AppEntry.js"}
+{"_e":"metro:bundling:done","_t":1781925514127,"id":"9","total":1,"ms":21.2704}
+{"_e":"metro:client_log","_t":1781925514238,"level":"info","data":["%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools","font-weight:bold"]}
+{"_e":"metro:client_log","_t":1781925514238,"level":"warn","data":["\"shadow*\" style props are deprecated. Use \"boxShadow\"."]}
+{"_e":"metro:client_log","_t":1781925514238,"level":"log","data":["Running application \"main\" with appParams:\n","{\"hydrate\": undefined, \"rootTag\": \"#root\"}","\nDevelopment-level warnings: ON.\nPerformance optimizations: OFF."]}
+{"_e":"metro:client_log","_t":1781925514238,"level":"warn","data":["props.pointerEvents is deprecated. Use style.pointerEvents"]}
+{"_e":"metro:client_log","_t":1781925524244,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925535782,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925550246,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925566245,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925583233,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925600245,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925627288,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781925644233,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925661240,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925678238,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925719274,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781925736246,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925753243,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925770242,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925839285,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781925856236,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925873242,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925890237,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925959284,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781925976248,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781925993242,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781926010241,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781926079299,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781926096242,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781926113236,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781926130236,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781926199297,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781926216241,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781926233244,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781926250250,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781926267233,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781926284243,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781926301241,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781926328343,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781926345235,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781926362244,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781926379240,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781926439266,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781926456238,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781926473238,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781926490240,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781926559291,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781926576238,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781926593246,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781926610248,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781926679285,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781926696235,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781926713237,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781926730244,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781926799323,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781926816239,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781926833232,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781926850249,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781926919289,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781926936238,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781926953244,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781926970247,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781927039293,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781927056236,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781927073238,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781927090238,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781927159309,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781927176238,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781927193243,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781927210238,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781927279322,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781927296233,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781927313242,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781927330238,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781927399302,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781927416238,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781927433236,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781927450234,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781927519307,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781927536233,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781927553244,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781927570241,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781927639318,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781927656235,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781927673237,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781927690232,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781927759301,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781927776244,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781927793245,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781927810236,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781927879324,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781927896248,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781927913235,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781927930235,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781927946235,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781927963247,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781927980246,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781928059295,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781928076237,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781928093237,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781928110241,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781928179268,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781928196235,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781928213247,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781928230241,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781928299306,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781928316244,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781928332238,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781928349232,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781928366240,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781928393334,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781928410244,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781928427243,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781928444241,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781928469237,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781928486237,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781928503237,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781928520235,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781928599288,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781928616245,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781928633237,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781928650244,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781928719269,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781928736242,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781928753240,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781928770245,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781928839297,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781928856244,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781928873236,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781928890244,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781928959316,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781928976238,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781928993246,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781929010238,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781929079305,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781929096247,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781929113239,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781929130242,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781929199292,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781929216246,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781929233240,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781929250245,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781929319309,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781929336239,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781929353237,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781929370233,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781929439299,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781929456238,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781929473240,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781929490240,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781929559307,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781929576237,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781929593244,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781929610236,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781929679288,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781929696237,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781929713241,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781929730238,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781929799285,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781929816241,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781929833239,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781929850240,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781929919321,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781929936239,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781929953235,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781929970243,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781930039305,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781930056243,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781930073243,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781930090238,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781930159309,"level":"log","data":["[WS] Connection error: websocket error"]}
+{"_e":"metro:client_log","_t":1781930176246,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781930193242,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"metro:client_log","_t":1781930210245,"level":"log","data":["[WS] Connection error: timeout"]}
