@@ -390,6 +390,18 @@ app.get('/api/binance/ticker', async (req, res) => {
   }
 });
 
+// Get Orderbook Depth for a symbol (Imbalance calculation)
+app.get('/api/binance/depth', async (req, res) => {
+  try {
+    const symbol = (req.query.symbol || 'BTCUSDT').toUpperCase();
+    const limit = parseInt(req.query.limit) || 100;
+    const data = await binanceRequest('GET', '/api/v3/depth', { symbol, limit }, false);
+    res.json({ success: true, bids: data.bids, asks: data.asks });
+  } catch (err) {
+    res.json({ success: false, error: err.message });
+  }
+});
+
 // Exchange Info (for trading rules — lot size, min notional, etc.)
 app.get('/api/binance/exchangeInfo', async (req, res) => {
   try {

@@ -2,12 +2,12 @@
  * StockAI — Core Type Definitions
  */
 
-export type SignalType = 'STRONG_BUY' | 'BUY' | 'HOLD' | 'SELL' | 'STRONG_SELL' | 'DCA';
+export type SignalType = 'STRONG_BUY' | 'BUY' | 'HOLD' | 'SELL' | 'STRONG_SELL';
 
 export interface StockItem {
   symbol: string;
   name: string;
-  exchange: 'HOSE' | 'HNX' | 'UPCOM' | 'BINANCE';
+  exchange: 'HOSE' | 'HNX' | 'UPCOM';
   price: number;
   change: number;
   changePercent: number;

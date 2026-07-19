@@ -6,18 +6,14 @@
 import React, {useEffect} from 'react';
 import {AppNavigator} from './src/navigation/AppNavigator';
 import {wsService} from './src/services/websocket';
-import {notificationApi} from './src/services/notifications';
 
 function App(): React.JSX.Element {
   useEffect(() => {
     // Initialize WebSocket connection on app start
     wsService.connect();
 
-    // Register push notification permissions
-    notificationApi.registerForPushNotificationsAsync();
-
     // Subscribe to default watchlist
-    const defaultWatchlist = ['BTC', 'ETH', 'ALLO', 'KITE', 'NEAR', 'TRX'];
+    const defaultWatchlist = ['FPT', 'VNM', 'VCB', 'HPG', 'MWG', 'SSI', 'ACB', 'TCB'];
     wsService.subscribeWatchlist(defaultWatchlist);
 
     return () => {

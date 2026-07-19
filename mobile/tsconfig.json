@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "module": "esnext",
+    "module": "commonjs",
     "lib": [
       "es2022"
     ],
@@ -10,7 +10,7 @@
     "noEmit": true,
     "isolatedModules": true,
     "strict": true,
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "baseUrl": ".",
     "paths": {
       "@/*": [

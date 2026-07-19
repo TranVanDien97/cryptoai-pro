@@ -1,14 +1,16 @@
 /**
  * useRealtime — React hook for real-time WebSocket data
+ *
+ * Connects to WebSocket on mount, subscribes to watchlist updates,
+ * and updates the Zustand store with live price data.
  */
 import { useEffect, useRef, useState } from 'react';
 import { useMarketStore } from '../stores/marketStore';
-import { wsService, TickerUpdate } from '../services/websocket';
-import { api } from '../services/api';
-import { notificationApi } from '../services/notifications';
+import { wsService, TickerUpdate, MarketIndexUpdate, AlertPayload } from '../services/websocket';
 
 /**
  * Hook to manage WebSocket connection lifecycle.
+ * Call once in App or top-level component.
  */
 export function useRealtimeConnection() {
   const [isConnected, setIsConnected] = useState(wsService.isConnected);
@@ -22,6 +24,7 @@ export function useRealtimeConnection() {
 
     return () => {
       unsub();
+      // Don't disconnect on unmount — keep alive across screens
     };
   }, []);
 
@@ -33,16 +36,29 @@ export function useRealtimeConnection() {
  */
 export function useRealtimePrices() {
   const updateStockFromTick = useMarketStore(s => s.updateStockFromTick);
+  const updateIndexFromTick = useMarketStore(s => s.updateIndexFromTick);
 
   useEffect(() => {
+    const unsubBatch = wsService.onBatchUpdate((ticks) => {
+      for (const tick of ticks) {
+        updateStockFromTick(tick);
+      }
+    });
+
     const unsubTicker = wsService.onTickerUpdate((tick) => {
       updateStockFromTick(tick);
     });
 
+    const unsubIndex = wsService.onIndexUpdate((update) => {
+      updateIndexFromTick(update);
+    });
+
     return () => {
+      unsubBatch();
       unsubTicker();
+      unsubIndex();
     };
-  }, [updateStockFromTick]);
+  }, [updateStockFromTick, updateIndexFromTick]);
 }
 
 /**
@@ -54,72 +70,50 @@ export function useWatchlistSubscription(symbols: string[]) {
   useEffect(() => {
     if (!wsService.isConnected) return;
 
+    // Unsubscribe old symbols
+    if (prevSymbols.current.length > 0) {
+      wsService.unsubscribeWatchlist(prevSymbols.current);
+    }
+
     // Subscribe new symbols
     if (symbols.length > 0) {
       wsService.subscribeWatchlist(symbols);
     }
 
     prevSymbols.current = symbols;
+
+    return () => {
+      if (symbols.length > 0) {
+        wsService.unsubscribeWatchlist(symbols);
+      }
+    };
   }, [symbols]);
 }
 
 /**
- * Hook to poll AI signals periodically and trigger push notifications.
+ * Hook to receive real-time alerts.
  */
-export function useRealtimeAlerts() {
+export function useRealtimeAlerts(onAlert?: (alert: AlertPayload) => void) {
   const addNotification = useMarketStore(s => s.addNotification);
-  const watchlist = useMarketStore(s => s.watchlist);
-  const lastAlertTimes = useRef<Record<string, number>>({});
 
   useEffect(() => {
-    const checkAlerts = async () => {
-      try {
-        const signals = await api.getAISignals(watchlist);
-        const now = Date.now();
-        
-        signals.forEach(sig => {
-          const lastTime = lastAlertTimes.current[sig.symbol] || 0;
-          // Rate-limit notifications per coin to 2 minutes for testing/demo
-          if (now - lastTime < 120000) return;
+    const unsub = wsService.onAlert((alert) => {
+      // Add to store
+      addNotification({
+        id: alert.id,
+        type: alert.type,
+        symbol: alert.symbol,
+        title: alert.title,
+        message: alert.message,
+        priority: alert.priority,
+        timestamp: alert.timestamp,
+        read: false,
+      });
 
-          const isActionable = sig.signal === 'BUY' || sig.signal === 'SELL' || sig.signal === 'DCA';
-          if (isActionable) {
-            lastAlertTimes.current[sig.symbol] = now;
-            
-            // Trigger OS Notification
-            notificationApi.sendLocalNotification(
-              `🤖 AI Cảnh báo: ${sig.symbol}`,
-              `Hành động: ${sig.signal} • ${sig.reasons[0] || 'Phát hiện tín hiệu giao dịch mới.'}`,
-              { symbol: sig.symbol }
-            );
+      // Custom callback
+      onAlert?.(alert);
+    });
 
-            // Add in-app notification to store
-            addNotification({
-              id: sig.id,
-              type: 'AI_SIGNAL',
-              symbol: sig.symbol,
-              title: `Tín hiệu ${sig.symbol}`,
-              message: sig.reasons[0] || 'Phát hiện tín hiệu giao dịch mới.',
-              priority: 'HIGH',
-              timestamp: now,
-              read: false,
-            });
-          }
-        });
-      } catch (e) {
-        console.warn('Failed to run background alert check', e);
-      }
-    };
-
-    // Run first check after 5 seconds
-    const initialTimer = setTimeout(checkAlerts, 5000);
-    
-    // Poll every 60 seconds for demo
-    const interval = setInterval(checkAlerts, 60000);
-
-    return () => {
-      clearTimeout(initialTimer);
-      clearInterval(interval);
-    };
-  }, [watchlist, addNotification]);
+    return unsub;
+  }, [addNotification, onAlert]);
 }

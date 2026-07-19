@@ -1,82 +1,95 @@
 /**
- * CryptoAI — Notification Service (using Expo Notifications)
+ * StockAI — Notification Service Client
+ *
+ * REST API client for the notification service.
  */
-import * as Notifications from 'expo-notifications';
-import { Platform } from 'react-native';
+import axios from 'axios';
 
-// Configure notification behavior when app is in foreground
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
+const NOTIFICATION_URL = __DEV__
+  ? 'http://10.0.2.2:3002'
+  : 'http://localhost:3002';
+
+const client = axios.create({
+  baseURL: NOTIFICATION_URL,
+  timeout: 10000,
 });
+
+export interface NotificationRecord {
+  id: string;
+  alert: {
+    id: string;
+    type: string;
+    symbol: string;
+    title: string;
+    message: string;
+    priority: string;
+    data: Record<string, unknown>;
+    timestamp: number;
+  };
+  sentAt: number;
+  deliveredVia: string;
+  read: boolean;
+}
 
 export const notificationApi = {
   /**
-   * Request push notification permissions and register for token.
+   * Register this device's FCM token with the notification service.
    */
-  async registerForPushNotificationsAsync(): Promise<string | undefined> {
-    if (Platform.OS === 'web') return;
-    
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-    
-    if (existingStatus !== 'granted') {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
-    }
-    
-    if (finalStatus !== 'granted') {
-      console.warn('Failed to get push token for push notification!');
-      return;
-    }
-    
-    // Get Expo Push Token
-    try {
-      const tokenData = await Notifications.getExpoPushTokenAsync();
-      console.log('[Notification] Expo Token:', tokenData.data);
-      return tokenData.data;
-    } catch (e) {
-      console.error('[Notification] Error getting token:', e);
-    }
+  async registerDevice(userId: string, token: string, platform: 'ios' | 'android') {
+    const res = await client.post('/api/v1/devices/register', { userId, token, platform });
+    return res.data;
   },
 
   /**
-   * Send a local push notification (instantly).
+   * Fetch notification history.
    */
-  async sendLocalNotification(title: string, body: string, data: Record<string, any> = {}) {
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title,
-        body,
-        data,
-        sound: true,
-        priority: Notifications.AndroidNotificationPriority.HIGH,
-      },
-      trigger: null, // null trigger sends it immediately
-    });
+  async getNotifications(limit = 50, offset = 0, type?: string): Promise<{
+    data: NotificationRecord[];
+    pagination: { total: number; limit: number; offset: number };
+  }> {
+    const params: Record<string, string | number> = { limit, offset };
+    if (type) params.type = type;
+    const res = await client.get('/api/v1/notifications', { params });
+    return res.data;
   },
 
   /**
-   * Schedule a notification for a price target.
+   * Get unread notification count.
    */
-  async schedulePriceAlert(symbol: string, targetPrice: number, currentPrice: number) {
-    const isAbove = targetPrice > currentPrice;
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: `🚨 Cảnh báo giá ${symbol}`,
-        body: `Giá ${symbol} đã ${isAbove ? 'vượt' : 'giảm xuống'} mục tiêu ${targetPrice}!`,
-        data: { symbol, targetPrice },
-        sound: true,
-      },
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-        seconds: 2,
-      },
-    });
+  async getUnreadCount(): Promise<number> {
+    const res = await client.get('/api/v1/notifications/unread-count');
+    return res.data.data.unreadCount;
+  },
+
+  /**
+   * Mark a notification as read.
+   */
+  async markAsRead(notificationId: string) {
+    const res = await client.put(`/api/v1/notifications/${notificationId}/read`);
+    return res.data;
+  },
+
+  /**
+   * Mark all notifications as read.
+   */
+  async markAllAsRead() {
+    const res = await client.put('/api/v1/notifications/read-all');
+    return res.data;
+  },
+
+  /**
+   * Get user notification preferences.
+   */
+  async getPreferences(userId: string) {
+    const res = await client.get(`/api/v1/preferences/${userId}`);
+    return res.data.data;
+  },
+
+  /**
+   * Update user notification preferences.
+   */
+  async updatePreferences(userId: string, prefs: Record<string, boolean | string>) {
+    const res = await client.put(`/api/v1/preferences/${userId}`, prefs);
+    return res.data.data;
   },
 };

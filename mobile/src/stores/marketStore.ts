@@ -68,7 +68,7 @@ export const useMarketStore = create<MarketState>((set, get) => ({
   signals: aiSignals,
   news: newsItems,
   portfolio: portfolioData,
-  watchlist: ['BTC', 'ETH', 'ALLO', 'KITE', 'NEAR', 'TRX'],
+  watchlist: ['FPT', 'VNM', 'VCB', 'HPG', 'MWG', 'SSI', 'ACB', 'TCB'],
   notifications: [],
   isLoading: false,
   isConnected: false,

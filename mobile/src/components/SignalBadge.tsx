@@ -18,7 +18,6 @@ const signalColors: Record<SignalType, {bg: string; text: string}> = {
   HOLD: {bg: 'rgba(143, 149, 165, 0.15)', text: colors.hold},
   SELL: {bg: 'rgba(255, 138, 128, 0.15)', text: colors.sell},
   STRONG_SELL: {bg: 'rgba(255, 82, 82, 0.2)', text: colors.strongSell},
-  DCA: {bg: 'rgba(255, 215, 64, 0.15)', text: colors.aiGold},
 };
 
 export function SignalBadge({signal, size = 'medium'}: Props) {

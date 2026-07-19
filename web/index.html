@@ -12,6 +12,7 @@
   <link rel="icon" href="icon-512.png">
   <link rel="apple-touch-icon" href="icon-512.png">
   <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 </head>
 <body>
 
@@ -84,6 +85,31 @@
       </div>
 
       <div class="market-health" id="marketHealthRow"></div>
+
+      <!-- Whale Tracker & Orderbook Imbalance Section -->
+      <div class="whale-section" style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 12px; margin: 12px 16px;">
+        <!-- Orderbook Imbalance -->
+        <div class="card" style="margin: 0; padding: 12px;">
+          <div class="card-h" style="padding: 0 0 8px 0; border-bottom: 1px solid var(--border)"><h2>⚖️ Lệch Sổ Lệnh</h2></div>
+          <div style="text-align: center; margin-top: 10px;">
+            <div id="imbalanceSymbol" style="font-weight: bold; font-size: 14px; color: var(--yellow);">BTCUSDT</div>
+            <div style="font-size: 20px; font-weight: 700; margin: 5px 0;" id="imbalancePct">50% / 50%</div>
+            <div style="font-size: 10px; color: var(--t4)">Sức mua (Bids) vs Sức bán (Asks)</div>
+            <div style="background: var(--border); height: 8px; border-radius: 4px; overflow: hidden; margin-top: 10px; display: flex;">
+              <div id="bidGauge" style="background: var(--green); width: 50%;"></div>
+              <div id="askGauge" style="background: var(--red); width: 50%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Whale Tracker Feed -->
+        <div class="card" style="margin: 0; padding: 12px; display: flex; flex-direction: column;">
+          <div class="card-h" style="padding: 0 0 8px 0; border-bottom: 1px solid var(--border)"><h2>🐳 Cá Voi Khớp Lệnh</h2></div>
+          <div id="whaleTradesFeed" style="flex: 1; max-height: 110px; overflow-y: auto; font-size: 10px; font-family: var(--mono); margin-top: 8px; display: flex; flex-direction: column; gap: 4px;">
+            <div style="color: var(--t4); text-align: center; padding-top: 20px;">Đang quét lệnh lớn (>20k USDT)...</div>
+          </div>
+        </div>
+      </div>
 
       <!-- Signals Grid -->
       <div class="filter-bar" id="sigChips" style="margin-top: 12px;">
@@ -261,6 +287,23 @@
   </main>
 
   <div class="modal-bg" id="modal"><div class="modal"><div class="modal-hdr"><h2 id="mTitle">--</h2><button class="modal-x" id="mClose">✕</button></div><div id="mBody"></div></div></div>
+  
+  <!-- Chart Modal -->
+  <div class="modal-bg" id="chartModal">
+    <div class="modal" style="max-width: 800px; width: 95%;">
+      <div class="modal-hdr">
+        <h2 id="chartModalTitle">Biểu đồ kỹ thuật</h2>
+        <button class="modal-x" id="chartModalClose">✕</button>
+      </div>
+      <div id="chartContainer" style="width: 100%; height: 350px; background: #181A20;"></div>
+      <div style="padding: 12px; font-size: 12px; color: var(--t4); display: flex; gap: 16px; border-top: 1px solid var(--border)">
+        <span>🟢 Hỗ trợ AI: <strong id="chartSupportVal" style="color:var(--green)">--</strong></span>
+        <span>🔴 Kháng cự AI: <strong id="chartResistanceVal" style="color:var(--red)">--</strong></span>
+        <span>⚡ EMA(20)/EMA(50) & RSI</span>
+      </div>
+    </div>
+  </div>
+
   <div id="toasts"></div>
   <script src="app.js"></script>
 </body>

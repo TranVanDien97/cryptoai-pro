@@ -333,3 +333,11 @@
 {"_e":"metro:client_log","_t":1781930176246,"level":"log","data":["[WS] Connection error: timeout"]}
 {"_e":"metro:client_log","_t":1781930193242,"level":"log","data":["[WS] Connection error: timeout"]}
 {"_e":"metro:client_log","_t":1781930210245,"level":"log","data":["[WS] Connection error: timeout"]}
+{"_e":"root:init","_t":1784458430513,"format":"v0-jsonl","version":"56.1.16"}
+{"_e":"env:mode","_t":1784458430514,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+{"_e":"env:load","_t":1784458430518,"mode":"development","files":[],"env":{}}
+{"_e":"devserver:start","_t":1784458430995,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../..\\..\\app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1784458431809,"serverRoot":"../..\\..","projectRoot":"../..\\..","exporting":false,"flags":{"autolinkingModuleResolution":false,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:instantiate","_t":1784458439498,"atlas":false,"workers":12,"host":"::","port":8081}
+{"_e":"metro:client_log","_t":1784458546505,"level":"error","data":["Project is incompatible with this version of Expo Go\n\nThis project requires a newer version of Expo Go.\n\nHow to fix this error:\nDownload the latest version of Expo Go from the Play Store."]}
+{"_e":"metro:client_log","_t":1784458551287,"level":"error","data":["Project is incompatible with this version of Expo Go\n\nThis project requires a newer version of Expo Go.\n\nHow to fix this error:\nDownload the latest version of Expo Go from the Play Store."]}
