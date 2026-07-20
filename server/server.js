@@ -654,6 +654,49 @@ app.post('/api/ai/recommendations', async (req, res) => {
   }
 });
 
+// SignalLab - Trình tạo tín hiệu tùy chỉnh
+app.post('/api/ai/generate-signals', async (req, res) => {
+  if (!geminiKey) return res.json({ success: false, error: 'Chưa kết nối Gemini AI. Vào Cài đặt nhập API Key.' });
+  
+  const { prompt } = req.body;
+  if (!prompt) return res.json({ success: false, error: 'Không có prompt' });
+
+  const body = JSON.stringify({
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: { temperature: 0.7, maxOutputTokens: 2500, responseMimeType: 'application/json' }
+  });
+
+  const models = ['gemini-2.0-pro-exp', 'gemini-1.5-pro', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+  
+  for (const model of models) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`;
+      const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+
+      if (response.status === 429 || response.status === 404) continue;
+      
+      if (!response.ok) {
+        const errText = await response.text();
+        console.error(`Gemini ${model} error:`, response.status, errText);
+        if (response.status === 400 || response.status === 403) {
+          return res.json({ success: false, error: 'API Key bị chặn hoặc không hợp lệ.' });
+        }
+        continue;
+      }
+
+      const data = await response.json();
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) continue;
+
+      return res.json({ success: true, analysis: text });
+    } catch (err) {
+      continue;
+    }
+  }
+
+  res.json({ success: false, error: 'Hệ thống AI đang quá tải. Hãy thử lại sau ít phút.' });
+});
+
 // Cảnh báo thông minh (Smart Alerts)
 app.post('/api/ai/smart-alerts', async (req, res) => {
   if (!geminiKey) return res.json({ success: false, error: 'Chưa kết nối Gemini AI.' });

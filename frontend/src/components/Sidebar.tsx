@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Activity, Cpu, LayoutDashboard, Settings } from 'lucide-react';
+import { Cpu, LayoutDashboard, Settings, BrainCircuit } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 
 const Sidebar = () => {
@@ -16,8 +16,8 @@ const Sidebar = () => {
 
       <nav className="nav-links">
         <NavLink to="/ai-war-room" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <Activity size={20} />
-          <span>AI War Room</span>
+          <BrainCircuit size={20} />
+          <span>Đài Tín Hiệu AI</span>
         </NavLink>
         <NavLink to="/paper-trading" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <LayoutDashboard size={20} />
