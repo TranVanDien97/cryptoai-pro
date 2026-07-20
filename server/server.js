@@ -730,6 +730,15 @@ ${portfolioContext || 'Chưa có dữ liệu portfolio.'}`;
 });
 
 
+// SPA Fallback for React Router
+app.get('*', (req, res) => {
+  if (fs.existsSync(path.join(WEB_DIR, 'index.html'))) {
+    res.sendFile(path.join(WEB_DIR, 'index.html'));
+  } else {
+    res.status(404).send('Frontend build not found');
+  }
+});
+
 // ═══════════════════════════════════════════════════════
 // START
 // ═══════════════════════════════════════════════════════
