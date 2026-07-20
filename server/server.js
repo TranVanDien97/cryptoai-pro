@@ -654,47 +654,131 @@ app.post('/api/ai/recommendations', async (req, res) => {
   }
 });
 
-// SignalLab - Trình tạo tín hiệu tùy chỉnh
+// SignalLab - Tạo tín hiệu AI với dữ liệu thị trường thật
 app.post('/api/ai/generate-signals', async (req, res) => {
-  if (!geminiKey) return res.json({ success: false, error: 'Chưa kết nối Gemini AI. Vào Cài đặt nhập API Key.' });
-  
-  const { prompt } = req.body;
-  if (!prompt) return res.json({ success: false, error: 'Không có prompt' });
+  if (!geminiKey) return res.json({ success: false, error: 'Chưa kết nối Gemini AI. Vào ⚙️ Cài đặt để nhập API Key.' });
 
-  const body = JSON.stringify({
-    contents: [{ parts: [{ text: prompt }] }],
-    generationConfig: { temperature: 0.7, maxOutputTokens: 2500, responseMimeType: 'application/json' }
-  });
+  try {
+    // Bước 1: Lấy dữ liệu thị trường thật từ CoinGecko
+    console.log('  🔍 Đang lấy dữ liệu thị trường từ CoinGecko...');
+    const cgUrl = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=80&page=1&sparkline=false&price_change_percentage=1h,24h,7d';
+    const cgRes = await fetch(cgUrl);
+    
+    let marketSummary = '';
+    if (cgRes.ok) {
+      const coins = await cgRes.json();
+      // Top 30 = large cap, 31-80 = small/mid cap
+      const largeCaps = coins.slice(0, 30).map(c => 
+        `${c.symbol.toUpperCase()} ($${c.current_price}) 24h:${(c.price_change_percentage_24h||0).toFixed(1)}% 7d:${(c.price_change_percentage_7d_in_currency||0).toFixed(1)}% vol:$${(c.total_volume/1e6).toFixed(0)}M mcap:#${c.market_cap_rank}`
+      ).join('\n');
+      const smallCaps = coins.slice(30, 80).map(c =>
+        `${c.symbol.toUpperCase()} ($${c.current_price}) 24h:${(c.price_change_percentage_24h||0).toFixed(1)}% 7d:${(c.price_change_percentage_7d_in_currency||0).toFixed(1)}% vol:$${(c.total_volume/1e6).toFixed(0)}M mcap:#${c.market_cap_rank}`
+      ).join('\n');
+      marketSummary = `\n\nDỮ LIỆU THỊ TRƯỜNG THẬT (CoinGecko, cập nhật tại thời điểm gọi API):\n\n--- VỐN HÓA LỚN (Top 30) ---\n${largeCaps}\n\n--- VỐN HÓA NHỎ/VỪA (Rank 31-80) ---\n${smallCaps}`;
+    } else {
+      marketSummary = '\n\n(Không lấy được dữ liệu CoinGecko — hãy dùng kiến thức và ước lượng giá hợp lý nhất.)';
+    }
 
-  const models = ['gemini-2.0-pro-exp', 'gemini-1.5-pro', 'gemini-2.0-flash', 'gemini-1.5-flash'];
-  
-  for (const model of models) {
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`;
-      const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+    // Bước 2: Tạo prompt thông minh cho Gemini
+    const prompt = `Bạn là nhà phân tích thị trường crypto định lượng cho bàn giao dịch ngắn hạn (swing trade 3-14 ngày).
 
-      if (response.status === 429 || response.status === 404) continue;
-      
-      if (!response.ok) {
-        const errText = await response.text();
-        console.error(`Gemini ${model} error:`, response.status, errText);
-        if (response.status === 400 || response.status === 403) {
-          return res.json({ success: false, error: 'API Key bị chặn hoặc không hợp lệ.' });
+Dựa trên dữ liệu thị trường thật bên dưới VÀ kiến thức của bạn về xu hướng kỹ thuật, hãy chọn ĐÚNG 6 đồng coin tiềm năng nhất:
+- 3 đồng vốn hóa lớn (top 30 CoinGecko)
+- 3 đồng vốn hóa nhỏ/vừa (ngoài top 30)
+
+${marketSummary}
+
+Với MỖI đồng coin, xác định:
+- coinId: ID chính xác trên CoinGecko (ví dụ: "bitcoin", "ethereum", "solana")
+- symbol: mã ticker viết HOA (ví dụ: BTC, ETH)
+- name: tên đầy đủ
+- cap: "large" hoặc "small"
+- entryPrice: giá mua đề xuất (phải SÁT với giá thực tế ở trên)
+- stopLoss: giá cắt lỗ (thấp hơn entryPrice 3-8%)
+- takeProfit: giá chốt lời (cao hơn entryPrice 5-15%)
+- confidence: "low" | "medium" | "high"
+- timeframe: ví dụ "5-10 ngày"
+- reasoning: 2-3 câu tiếng Việt giải thích lý do, dựa trên dữ liệu biến động giá 24h/7d, khối lượng giao dịch, xu hướng kỹ thuật
+
+CHỈ trả về một mảng JSON duy nhất, KHÔNG kèm markdown, KHÔNG giải thích thêm:
+[{"coinId":"...","symbol":"...","name":"...","cap":"large","entryPrice":0,"stopLoss":0,"takeProfit":0,"confidence":"medium","timeframe":"...","reasoning":"..."}]`;
+
+    // Bước 3: Gọi Gemini với Google Search grounding
+    const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
+
+    for (const model of models) {
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`;
+        const body = {
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.6, maxOutputTokens: 3000 },
+          tools: [{ google_search: {} }]
+        };
+
+        console.log(`  🧠 Đang gọi ${model}...`);
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        if (response.status === 429 || response.status === 404) {
+          console.log(`  ⚠️ ${model}: ${response.status}, thử model tiếp...`);
+          continue;
         }
+
+        if (!response.ok) {
+          const errText = await response.text();
+          console.error(`  ❌ ${model} error:`, response.status, errText.slice(0, 200));
+          // Nếu lỗi 400 do google_search không hỗ trợ, thử lại không có tools
+          if (response.status === 400) {
+            console.log(`  🔄 Thử ${model} không có Google Search...`);
+            const fallbackBody = {
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: { temperature: 0.6, maxOutputTokens: 3000 }
+            };
+            const fallbackRes = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(fallbackBody)
+            });
+            if (fallbackRes.ok) {
+              const fallbackData = await fallbackRes.json();
+              const text = fallbackData?.candidates?.[0]?.content?.parts
+                ?.filter(p => p.text)?.map(p => p.text)?.join('');
+              if (text) {
+                console.log(`  ✅ ${model} (fallback) trả về OK`);
+                return res.json({ success: true, analysis: text, model });
+              }
+            }
+            continue;
+          }
+          if (response.status === 403) {
+            return res.json({ success: false, error: 'API Key không hợp lệ. Vào Cài đặt kiểm tra lại.' });
+          }
+          continue;
+        }
+
+        const data = await response.json();
+        // Gemini with grounding may return multiple parts (text + search results)
+        const text = data?.candidates?.[0]?.content?.parts
+          ?.filter(p => p.text)?.map(p => p.text)?.join('');
+        if (!text) continue;
+
+        console.log(`  ✅ ${model} trả về tín hiệu OK`);
+        return res.json({ success: true, analysis: text, model });
+
+      } catch (err) {
+        console.error(`  ❌ ${model} fetch error:`, err.message);
         continue;
       }
-
-      const data = await response.json();
-      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!text) continue;
-
-      return res.json({ success: true, analysis: text });
-    } catch (err) {
-      continue;
     }
-  }
 
-  res.json({ success: false, error: 'Hệ thống AI đang quá tải. Hãy thử lại sau ít phút.' });
+    res.json({ success: false, error: 'Tất cả model AI đang bận. Hãy thử lại sau 1-2 phút.' });
+  } catch (err) {
+    console.error('  ❌ generate-signals error:', err.message);
+    res.json({ success: false, error: 'Lỗi hệ thống: ' + err.message });
+  }
 });
 
 // Cảnh báo thông minh (Smart Alerts)

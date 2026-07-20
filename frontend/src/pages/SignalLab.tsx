@@ -25,29 +25,7 @@ const COIN_TO_BINANCE: Record<string, string> = {
   vechain: 'VETUSDT', fantom: 'FTMUSDT', 'hedera-hashgraph': 'HBARUSDT',
 };
 
-const SYSTEM_PROMPT = `Bạn là một nhà phân tích thị trường tiền điện tử định lượng, làm việc cho một bàn giao dịch ngắn hạn (swing trade 3–14 ngày).
 
-Nhiệm vụ: dùng công cụ tìm kiếm web để tra cứu diễn biến giá, khối lượng giao dịch và tin tức mới nhất của thị trường crypto, sau đó đề xuất ĐÚNG 6 đồng coin có tiềm năng giao dịch ngắn hạn tốt nhất tại thời điểm hiện tại, trải rộng theo vốn hóa:
-- 3 đồng "vốn hóa lớn" (large-cap: nằm trong khoảng top ~30 theo vốn hóa thị trường, ví dụ bitcoin, ethereum, solana, ripple, cardano, dogecoin, chainlink, avalanche-2, polkadot, litecoin...).
-- 3 đồng "vốn hóa nhỏ/vừa" (small/mid-cap: ngoài top 30, biến động mạnh hơn, tiềm năng tăng trưởng cao hơn nhưng rủi ro cao hơn).
-
-Với mỗi đồng, xác định:
-- coinId: ĐÚNG id của đồng đó trên CoinGecko. Không được bịa id — chỉ dùng id bạn chắc chắn tồn tại trên CoinGecko.
-- symbol: mã ticker (vd BTC)
-- name: tên đầy đủ
-- cap: "large" hoặc "small" (đúng theo phân loại vốn hóa ở trên)
-- entryPrice: giá mua đề xuất (số, đơn vị USD)
-- stopLoss: giá cắt lỗ (số, thấp hơn entryPrice)
-- takeProfit: giá chốt lời (số, cao hơn entryPrice)
-- confidence: "low" | "medium" | "high"
-- timeframe: khung thời gian dự kiến, ví dụ "5-10 ngày"
-- reasoning: lý do phân tích, 2-3 câu ngắn gọn bằng tiếng Việt, dựa trên dữ liệu vừa tra cứu (xu hướng giá, tin tức, chỉ báo kỹ thuật, dòng tiền...)
-
-Yêu cầu bắt buộc:
-- entryPrice, stopLoss, takeProfit phải là số hợp lý, sát với giá thị trường thực tế mà bạn vừa tra cứu được.
-- Đảm bảo đúng 3 đồng cap="large" và đúng 3 đồng cap="small", không trùng lặp coin giữa các lần đề xuất trong cùng một phản hồi.
-- Sau khi nghiên cứu xong, CHỈ trả lời bằng một mảng JSON hợp lệ duy nhất, không kèm markdown code fence, không kèm lời giải thích nào khác ngoài JSON. Đúng cấu trúc:
-[{"coinId":"...","symbol":"...","name":"...","cap":"large","entryPrice":0,"stopLoss":0,"takeProfit":0,"confidence":"medium","timeframe":"...","reasoning":"..."}]`;
 
 const fmtUsd = (n: any) => {
   if (n === null || n === undefined || Number.isNaN(n)) return "—";
@@ -299,9 +277,8 @@ export default function SignalLab() {
     setGenerating(true);
     setGenError(null);
     try {
-      // Gọi API nội bộ thay vì gọi trực tiếp Anthropic (vì cần API Key và tránh lỗi CORS)
-      // Endpoint này sẽ sử dụng Gemini API sẵn có ở backend hoặc chuyển tiếp lên AI
-      const res = await axios.post("/api/ai/generate-signals", { prompt: SYSTEM_PROMPT });
+      // Backend tự lấy dữ liệu thị trường thật từ CoinGecko + gọi Gemini AI
+      const res = await axios.post("/api/ai/generate-signals", {});
       
       let parsed = [];
       if (res.data && res.data.success) {
