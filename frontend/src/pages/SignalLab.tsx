@@ -2,9 +2,28 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Sparkles, RefreshCw, Loader2, TrendingUp, Target,
   ShieldAlert, Clock, Trash2, Radio, ArrowUpRight, ArrowDownRight,
-  CheckCircle2, Info,
+  CheckCircle2, Info, Rocket, X,
 } from "lucide-react";
 import axios from 'axios';
+import { useAppStore } from '../store/useAppStore';
+import { useNavigate } from 'react-router-dom';
+
+// Map CoinGecko ID → Binance trading pair symbol
+const COIN_TO_BINANCE: Record<string, string> = {
+  bitcoin: 'BTCUSDT', ethereum: 'ETHUSDT', solana: 'SOLUSDT',
+  ripple: 'XRPUSDT', cardano: 'ADAUSDT', dogecoin: 'DOGEUSDT',
+  'avalanche-2': 'AVAXUSDT', polkadot: 'DOTUSDT', chainlink: 'LINKUSDT',
+  litecoin: 'LTCUSDT', 'matic-network': 'MATICUSDT', toncoin: 'TONUSDT',
+  'shiba-inu': 'SHIBUSDT', 'bitcoin-cash': 'BCHUSDT', stellar: 'XLMUSDT',
+  uniswap: 'UNIUSDT', cosmos: 'ATOMUSDT', monero: 'XMRUSDT',
+  'internet-computer': 'ICPUSDT', filecoin: 'FILUSDT', aptos: 'APTUSDT',
+  arbitrum: 'ARBUSDT', optimism: 'OPUSDT', sui: 'SUIUSDT',
+  injective: 'INJUSDT', sei: 'SEIUSDT', celestia: 'TIAUSDT',
+  render: 'RENDERUSDT', 'the-graph': 'GRTUSDT', aave: 'AAVEUSDT',
+  pepe: 'PEPEUSDT', 'floki-inu': 'FLOKIUSDT', bonk: 'BONKUSDT',
+  kaspa: 'KASUSDT', near: 'NEARUSDT', algorand: 'ALGOUSDT',
+  vechain: 'VETUSDT', fantom: 'FTMUSDT', 'hedera-hashgraph': 'HBARUSDT',
+};
 
 const SYSTEM_PROMPT = `Bạn là một nhà phân tích thị trường tiền điện tử định lượng, làm việc cho một bàn giao dịch ngắn hạn (swing trade 3–14 ngày).
 
@@ -81,7 +100,7 @@ function RangeGauge({ stop, entry, target, current }: any) {
   );
 }
 
-function SignalTicket({ s, mode, onToggle }: any) {
+function SignalTicket({ s, mode, onToggle, onRunTest }: any) {
   const isUp = s.currentPrice != null && s.currentPrice >= s.entryPrice;
   return (
     <div className={`ticket ${s.status !== "pending" ? "ticket-closed" : ""} ${s.selected ? "ticket-selected" : ""}`}>
@@ -135,9 +154,16 @@ function SignalTicket({ s, mode, onToggle }: any) {
       </div>
 
       {mode === "signals" && (
-        <button className={`btn-track ${s.selected ? "btn-track-active" : ""}`} onClick={() => onToggle(s.id)}>
-          {s.selected ? <><CheckCircle2 size={14} /> Đang theo dõi</> : "+ Chọn theo dõi"}
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button className={`btn-track ${s.selected ? "btn-track-active" : ""}`} style={{ flex: 1 }} onClick={() => onToggle(s.id)}>
+            {s.selected ? <><CheckCircle2 size={14} /> Đang theo dõi</> : "+ Chọn theo dõi"}
+          </button>
+          {s.status === 'pending' && (
+            <button className="btn-run-test" onClick={() => onRunTest(s)}>
+              <Rocket size={14} /> Chạy Test
+            </button>
+          )}
+        </div>
       )}
     </div>
   );
@@ -210,7 +236,39 @@ export default function SignalLab() {
   const [trackError, setTrackError] = useState<string | null>(null);
   const [ticker, setTicker] = useState<any>(null);
   const [capFilter, setCapFilter] = useState("all");
+  const [testModal, setTestModal] = useState<any>(null);
+  const [testAmount, setTestAmount] = useState('100');
   const signalsRef = useRef(signals);
+  const addPosition = useAppStore(state => state.addPosition);
+  const balance = useAppStore(state => state.balance);
+  const navigate = useNavigate();
+
+  const handleRunTest = (signal: any) => {
+    setTestModal(signal);
+    setTestAmount('100');
+  };
+
+  const confirmRunTest = () => {
+    if (!testModal) return;
+    const amount = parseFloat(testAmount);
+    if (isNaN(amount) || amount <= 0) return;
+    if (amount > balance) {
+      alert(`Vốn không đủ! Hiện có $${balance.toFixed(2)}`);
+      return;
+    }
+    // Map coinId to Binance symbol
+    const binanceSymbol = COIN_TO_BINANCE[testModal.coinId] || (testModal.symbol + 'USDT');
+    addPosition({
+      symbol: binanceSymbol,
+      type: 'LONG',
+      entryPrice: testModal.entryPrice,
+      takeProfit: testModal.takeProfit,
+      stopLoss: testModal.stopLoss,
+      size: amount,
+    });
+    setTestModal(null);
+    navigate('/paper-trading');
+  };
 
   useEffect(() => { signalsRef.current = signals; }, [signals]);
 
@@ -500,6 +558,49 @@ export default function SignalLab() {
         @media (max-width: 720px) {
           .stat-strip { grid-template-columns: 1fr 1fr; }
           .winrate-card { grid-column: span 2; }
+          .hero { flex-direction: column; }
+          .hero h1 { font-size: 22px; }
+        }
+
+        .btn-run-test {
+          border: 1px solid var(--teal); background: rgba(63,199,180,0.08);
+          color: var(--teal); font-size: 12.5px; font-weight: 600;
+          padding: 9px 14px; border-radius: 8px; cursor: pointer;
+          display: flex; align-items: center; gap: 6px;
+          transition: all .15s; white-space: nowrap;
+        }
+        .btn-run-test:hover { background: rgba(63,199,180,0.18); transform: translateY(-1px); }
+
+        .modal-overlay {
+          position: fixed; inset: 0; z-index: 999;
+          background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+          display: flex; align-items: center; justify-content: center;
+          padding: 16px;
+        }
+        .modal-box {
+          background: var(--bg-card, #161B24); border: 1px solid var(--border);
+          border-radius: 16px; padding: 28px; width: 100%; max-width: 420px;
+          color: var(--text-primary, #E8EAEE);
+        }
+        .modal-box h2 { margin: 0 0 6px; font-size: 20px; }
+        .modal-box .modal-sub { color: var(--text-muted); font-size: 13px; margin-bottom: 20px; }
+        .modal-box input {
+          width: 100%; padding: 14px; font-size: 18px; font-weight: 700;
+          font-family: 'IBM Plex Mono', monospace;
+          background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+          border-radius: 10px; color: var(--text-primary, #fff); outline: none;
+          text-align: center; margin-bottom: 16px;
+        }
+        .modal-box input:focus { border-color: var(--teal, #3FC7B4); }
+        .modal-actions { display: flex; gap: 10px; }
+        .modal-actions button { flex: 1; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; }
+        .modal-confirm {
+          background: linear-gradient(135deg, var(--teal, #3FC7B4), #2ba08e);
+          color: #0a1a16; border: none;
+        }
+        .modal-cancel {
+          background: transparent; border: 1px solid var(--border);
+          color: var(--text-muted);
         }
       `}</style>
 
@@ -563,7 +664,7 @@ export default function SignalLab() {
               </div>
             ) : (
               <div className="grid">
-                {visibleSignals.map((s) => <SignalTicket key={s.id} s={s} mode="signals" onToggle={toggleSelect} />)}
+                {visibleSignals.map((s) => <SignalTicket key={s.id} s={s} mode="signals" onToggle={toggleSelect} onRunTest={handleRunTest} />)}
               </div>
             )}
           </>
@@ -621,6 +722,50 @@ export default function SignalLab() {
       </main>
 
       <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+
+      {/* Test Modal */}
+      {testModal && (
+        <div className="modal-overlay" onClick={() => setTestModal(null)}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <h2 className="disp">🚀 Chạy Test Lệnh</h2>
+                <div className="modal-sub">{testModal.symbol} — {testModal.name}</div>
+              </div>
+              <button onClick={() => setTestModal(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}>
+                <X size={20} />
+              </button>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '16px', fontSize: '12px' }}>
+              <div style={{ background: 'rgba(242,85,95,0.06)', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
+                <div style={{ color: 'var(--text-muted)', marginBottom: '4px' }}>Cắt lỗ</div>
+                <div style={{ fontWeight: 700, color: 'var(--danger)', fontFamily: 'IBM Plex Mono' }}>{fmtUsd(testModal.stopLoss)}</div>
+              </div>
+              <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
+                <div style={{ color: 'var(--text-muted)', marginBottom: '4px' }}>Giá mua</div>
+                <div style={{ fontWeight: 700, fontFamily: 'IBM Plex Mono' }}>{fmtUsd(testModal.entryPrice)}</div>
+              </div>
+              <div style={{ background: 'rgba(62,207,142,0.06)', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
+                <div style={{ color: 'var(--text-muted)', marginBottom: '4px' }}>Chốt lời</div>
+                <div style={{ fontWeight: 700, color: 'var(--success)', fontFamily: 'IBM Plex Mono' }}>{fmtUsd(testModal.takeProfit)}</div>
+              </div>
+            </div>
+            <div style={{ marginBottom: '6px', fontSize: '13px', color: 'var(--text-muted)' }}>Số tiền đầu tư (USD) — Vốn khả dụng: <b style={{ color: 'var(--teal)' }}>${balance.toFixed(2)}</b></div>
+            <input
+              type="number"
+              value={testAmount}
+              onChange={(e) => setTestAmount(e.target.value)}
+              placeholder="100"
+              autoFocus
+              onKeyDown={(e) => e.key === 'Enter' && confirmRunTest()}
+            />
+            <div className="modal-actions">
+              <button className="modal-cancel" onClick={() => setTestModal(null)}>Hủy</button>
+              <button className="modal-confirm" onClick={confirmRunTest}>Xác nhận chạy test</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -48,15 +48,16 @@ const ChartWidget = ({ symbol, entryPrice, takeProfit, stopLoss }: ChartWidgetPr
     
     seriesRef.current = candlestickSeries;
 
-    // Fetch initial historical data (1 hour interval)
-    axios.get(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=15m&limit=100`)
+    // Fetch initial historical data via backend proxy (avoids CORS)
+    axios.get(`/api/market/klines?symbol=${symbol}&interval=15m&limit=100`)
       .then(res => {
-        const data = res.data.map((d: any) => ({
-          time: d[0] / 1000,
-          open: parseFloat(d[1]),
-          high: parseFloat(d[2]),
-          low: parseFloat(d[3]),
-          close: parseFloat(d[4])
+        if (!res.data.success) return;
+        const data = res.data.data.map((d: any) => ({
+          time: d.t / 1000,
+          open: d.o,
+          high: d.h,
+          low: d.l,
+          close: d.c
         }));
         candlestickSeries.setData(data);
 

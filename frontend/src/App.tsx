@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Sidebar from './components/Sidebar';
 import SignalLab from './pages/SignalLab';
 import PaperTradingLab from './pages/PaperTradingLab';
+import Settings from './pages/Settings';
 import './App.css'; // Will be empty
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
             <Route path="/" element={<Navigate to="/ai-war-room" replace />} />
             <Route path="/ai-war-room" element={<SignalLab />} />
             <Route path="/paper-trading" element={<PaperTradingLab />} />
+            <Route path="/settings" element={<Settings />} />
           </Routes>
         </main>
       </div>
