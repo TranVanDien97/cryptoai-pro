@@ -412,28 +412,11 @@ export default function SignalLab() {
           --teal: #3FC7B4;
           --success: #3ECF8E;
           --danger: #F2555F;
-          min-height: 100vh;
           padding: 0 0 48px;
         }
         .sl-app * { box-sizing: border-box; }
         .sl-app .disp { font-family: 'Space Grotesk', sans-serif; }
         .sl-app .mono { font-family: 'IBM Plex Mono', monospace; }
-
-        .sl-header {
-          position: sticky; top: 0; z-index: 10;
-          background: rgba(14,18,25,0.9); backdrop-filter: blur(8px);
-          border-bottom: 1px solid var(--border);
-          padding: 16px 24px;
-          display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
-        }
-        .sl-logo { display: flex; align-items: center; gap: 10px; }
-        .sl-logo-mark {
-          width: 34px; height: 34px; border-radius: 8px;
-          background: linear-gradient(135deg, var(--gold), var(--teal));
-          display: flex; align-items: center; justify-content: center; color: #10141B; font-weight: 700;
-        }
-        .sl-logo-text .t1 { font-size: 16px; font-weight: 700; letter-spacing: 0.3px; line-height: 1.1; color: var(--text-primary); }
-        .sl-logo-text .t2 { font-size: 11px; color: var(--text-muted); }
 
         .mini-ticker { display: flex; align-items: center; gap: 16px; font-size: 12px; color: var(--text-muted); flex-wrap: wrap; }
         .live-dot { color: var(--danger); animation: pulse 1.6s infinite; }
@@ -446,8 +429,6 @@ export default function SignalLab() {
         .sl-tab { border: none; background: transparent; color: var(--text-muted); font-family: 'Inter'; font-weight: 600; font-size: 13px; padding: 8px 16px; border-radius: 7px; cursor: pointer; transition: all .15s; }
         .sl-tab.active { background: rgba(255,255,255,0.05); color: var(--text-primary); box-shadow: inset 0 0 0 1px var(--border); }
         .sl-tab:hover:not(.active) { color: var(--text-primary); }
-
-        .sl-main { max-width: 1080px; margin: 0 auto; padding: 40px 24px 0; }
 
         .hero { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; margin-bottom: 32px; flex-wrap: wrap; }
         .hero h1 { font-size: 30px; margin: 0 0 8px; font-weight: 700; color: var(--text-primary); }
@@ -607,22 +588,16 @@ export default function SignalLab() {
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');`}</style>
 
-      <header className="sl-header">
-        <div className="sl-logo">
-          <div className="sl-logo-mark disp">AI</div>
-          <div className="sl-logo-text">
-            <div className="t1 disp">ĐÀI TÍN HIỆU AI</div>
-            <div className="t2">Backtest độ chính xác của AI trên thị trường thực</div>
-          </div>
-        </div>
+      {/* Compact top bar: ticker + tabs */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' }}>
         <MiniTicker ticker={ticker} />
         <div className="sl-tabs">
           <button className={`sl-tab ${tab === "signals" ? "active" : ""}`} onClick={() => setTab("signals")}>Tín hiệu AI</button>
           <button className={`sl-tab ${tab === "tracking" ? "active" : ""}`} onClick={() => setTab("tracking")}>Theo dõi &amp; Thống kê</button>
         </div>
-      </header>
+      </div>
 
-      <main className="sl-main">
+      <div>
         {tab === "signals" && (
           <>
             <div className="hero">
@@ -719,7 +694,7 @@ export default function SignalLab() {
             )}
           </>
         )}
-      </main>
+      </div>
 
       <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
 
