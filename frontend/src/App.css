@@ -79,3 +79,56 @@
 .page-subtitle {
   color: var(--text-muted);
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    height: 70px;
+    flex-direction: row;
+    padding: 10px;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    order: 2;
+    z-index: 100;
+  }
+  .sidebar-logo, .wallet-panel {
+    display: none !important;
+  }
+  .nav-links {
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-around;
+  }
+  .nav-item {
+    flex-direction: column;
+    padding: 6px;
+    gap: 4px;
+    flex: 1;
+    justify-content: center;
+  }
+  .nav-item span {
+    font-size: 10px;
+  }
+  .main-content {
+    order: 1;
+    padding: 16px;
+    padding-bottom: 20px;
+  }
+  .page-header {
+    flex-direction: column !important;
+    gap: 16px;
+  }
+  .page-header > div:last-child {
+    width: 100%;
+    text-align: left !important;
+  }
+  .glass-panel table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}

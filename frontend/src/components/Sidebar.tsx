@@ -37,7 +37,7 @@ const Sidebar = () => {
           )}
         </NavLink>
         <div style={{ flex: 1 }}></div>
-        <div className="glass-panel" style={{ padding: '16px', marginTop: 'auto', marginBottom: '16px' }}>
+        <div className="glass-panel wallet-panel" style={{ padding: '16px', marginTop: 'auto', marginBottom: '16px' }}>
           <div style={{ color: 'var(--text-muted)', fontSize: '12px', marginBottom: '4px' }}>VỐN KHẢ DỤNG</div>
           <div className="font-mono" style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--primary)' }}>
             ${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
