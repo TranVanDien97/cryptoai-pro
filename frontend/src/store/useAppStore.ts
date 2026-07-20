@@ -18,7 +18,7 @@ interface AppState {
   positions: Position[];
   addPosition: (pos: Omit<Position, 'id' | 'status' | 'pnl' | 'currentPrice'>) => void;
   updatePrice: (symbol: string, price: number) => void;
-  closePosition: (id: string, reason: string) => void;
+  closePosition: (id: string) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -49,8 +49,7 @@ export const useAppStore = create<AppState>((set) => ({
         const pnl = pos.type === 'LONG' ? pos.size * diff : pos.size * -diff;
         
         // Check for Stop Loss / Take Profit hits
-        let status = pos.status;
-        let finalPnl = pnl;
+        let status: 'OPEN' | 'CLOSED' = pos.status;
         
         if (pos.type === 'LONG') {
           if (price >= pos.takeProfit || price <= pos.stopLoss) {
@@ -74,7 +73,7 @@ export const useAppStore = create<AppState>((set) => ({
       balance: state.balance + balanceChange
     };
   }),
-  closePosition: (id, reason) => set((state) => {
+  closePosition: (id) => set((state) => {
     const posIndex = state.positions.findIndex(p => p.id === id);
     if (posIndex === -1 || state.positions[posIndex].status === 'CLOSED') return state;
     

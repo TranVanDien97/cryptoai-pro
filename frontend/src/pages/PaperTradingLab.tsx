@@ -5,7 +5,6 @@ import axios from 'axios';
 import ChartWidget from '../components/ChartWidget';
 
 const PaperTradingLab = () => {
-  const balance = useAppStore(state => state.balance);
   const positions = useAppStore(state => state.positions);
   const updatePrice = useAppStore(state => state.updatePrice);
   const closePosition = useAppStore(state => state.closePosition);
@@ -157,7 +156,7 @@ const PaperTradingLab = () => {
                             fontWeight: 'bold',
                             cursor: 'pointer'
                           }}
-                          onClick={() => closePosition(pos.id, 'MANUAL_CLOSE')}
+                          onClick={() => closePosition(pos.id)}
                         >
                           ĐÓNG LỆNH
                         </button>

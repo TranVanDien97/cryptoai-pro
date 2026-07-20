@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { createChart, ColorType, IChartApi, ISeriesApi } from 'lightweight-charts';
+import { createChart, ColorType } from 'lightweight-charts';
+import type { IChartApi, ISeriesApi } from 'lightweight-charts';
 import axios from 'axios';
 
 interface ChartWidgetProps {
@@ -36,6 +37,7 @@ const ChartWidget = ({ symbol, entryPrice, takeProfit, stopLoss }: ChartWidgetPr
     
     chartRef.current = chart;
 
+    // @ts-ignore
     const candlestickSeries = chart.addCandlestickSeries({
       upColor: '#00e676',
       downColor: '#ff3d00',
