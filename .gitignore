@@ -11,3 +11,5 @@ venv/
 .expo/
 package-lock.json
 server/package-lock.json
+frontend/node_modules/
+# DO NOT ignore dist-web — needed for Render deployment

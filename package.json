@@ -1,11 +1,12 @@
 {
   "name": "cryptoai-pro",
-  "version": "5.0.0",
-  "description": "CryptoAI Pro — AI Trading Assistant with Binance Integration",
+  "version": "6.0.0",
+  "description": "CryptoAI Pro — AI Coin Testing & Simulation Platform",
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",
     "dev": "node server/server.js",
+    "build": "cd frontend && npm install && npm run build",
     "postinstall": "cd frontend && npm install && npm run build"
   },
   "dependencies": {
