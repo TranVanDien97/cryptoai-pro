@@ -45,14 +45,15 @@ function loadCredentials() {
       return data;
     }
   } catch (e) { console.error('  ⚠️ Lỗi đọc credentials:', e.message); }
-  return { binance: { apiKey: null, apiSecret: null, connected: false }, geminiKey: null };
+  return { binance: { apiKey: null, apiSecret: null, connected: false }, geminiKey: null, groqKey: null };
 }
 
 function saveCredentials() {
   try {
     fs.writeFileSync(CRED_FILE, JSON.stringify({
       binance: { apiKey: credentials.apiKey, apiSecret: credentials.apiSecret, connected: credentials.connected },
-      geminiKey: geminiKey
+      geminiKey: geminiKey,
+      groqKey: groqKey
     }, null, 2), 'utf8');
     console.log('  💾 Đã lưu credentials');
   } catch (e) { console.error('  ⚠️ Lỗi lưu:', e.message); }
@@ -66,6 +67,7 @@ let credentials = {
   connected: !!(process.env.BINANCE_API_KEY || savedData.binance?.apiKey)
 };
 let geminiKey = process.env.GEMINI_API_KEY || savedData.geminiKey || null;
+let groqKey = process.env.GROQ_API_KEY || savedData.groqKey || null;
 if (geminiKey) setGeminiKey(geminiKey);
 
 app.use(cors({ origin: true, credentials: true }));
@@ -550,16 +552,26 @@ app.get('/api/market/prices', async (req, res) => {
 // geminiKey đã load từ file ở trên
 
 app.post('/api/ai/connect', (req, res) => {
-  const { apiKey } = req.body;
-  if (!apiKey || apiKey.length < 20) return res.json({ success: false, error: 'API Key không hợp lệ' });
-  geminiKey = apiKey;
-  setGeminiKey(apiKey);
-  saveCredentials(); // Lưu Gemini key vào máy
-  res.json({ success: true, message: 'Đã kết nối Gemini AI' });
+  const { apiKey, provider } = req.body;
+  if (!apiKey || apiKey.length < 20) return res.json({ success: false, error: 'API Key không hợp lệ (ít nhất 20 ký tự)' });
+  
+  if (provider === 'groq') {
+    groqKey = apiKey;
+  } else {
+    geminiKey = apiKey;
+    setGeminiKey(apiKey);
+  }
+  saveCredentials();
+  res.json({ success: true, message: `Đã kết nối ${provider === 'groq' ? 'Groq' : 'Gemini'} AI` });
 });
 
 app.get('/api/ai/status', (req, res) => {
-  res.json({ connected: !!geminiKey });
+  res.json({
+    connected: !!(geminiKey || groqKey),
+    gemini: !!geminiKey,
+    groq: !!groqKey,
+    activeProvider: groqKey ? 'groq' : geminiKey ? 'gemini' : null
+  });
 });
 
 app.post('/api/ai/analyze', async (req, res) => {
@@ -654,130 +666,210 @@ app.post('/api/ai/recommendations', async (req, res) => {
   }
 });
 
-// SignalLab - Tạo tín hiệu AI với dữ liệu thị trường thật
-app.post('/api/ai/generate-signals', async (req, res) => {
-  if (!geminiKey) return res.json({ success: false, error: 'Chưa kết nối Gemini AI. Vào ⚙️ Cài đặt để nhập API Key.' });
+// ═══════════════════════════════════════════════════════
+// SIGNAL GENERATION ENGINE — Groq / Gemini / Algorithmic
+// ═══════════════════════════════════════════════════════
 
-  try {
-    // Bước 1: Lấy dữ liệu thị trường thật từ CoinGecko
-    console.log('  🔍 Đang lấy dữ liệu thị trường từ CoinGecko...');
-    const cgUrl = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=80&page=1&sparkline=false&price_change_percentage=1h,24h,7d';
-    const cgRes = await fetch(cgUrl);
-    
-    let marketSummary = '';
-    if (cgRes.ok) {
-      const coins = await cgRes.json();
-      // Top 30 = large cap, 31-80 = small/mid cap
-      const largeCaps = coins.slice(0, 30).map(c => 
-        `${c.symbol.toUpperCase()} ($${c.current_price}) 24h:${(c.price_change_percentage_24h||0).toFixed(1)}% 7d:${(c.price_change_percentage_7d_in_currency||0).toFixed(1)}% vol:$${(c.total_volume/1e6).toFixed(0)}M mcap:#${c.market_cap_rank}`
-      ).join('\n');
-      const smallCaps = coins.slice(30, 80).map(c =>
-        `${c.symbol.toUpperCase()} ($${c.current_price}) 24h:${(c.price_change_percentage_24h||0).toFixed(1)}% 7d:${(c.price_change_percentage_7d_in_currency||0).toFixed(1)}% vol:$${(c.total_volume/1e6).toFixed(0)}M mcap:#${c.market_cap_rank}`
-      ).join('\n');
-      marketSummary = `\n\nDỮ LIỆU THỊ TRƯỜNG THẬT (CoinGecko, cập nhật tại thời điểm gọi API):\n\n--- VỐN HÓA LỚN (Top 30) ---\n${largeCaps}\n\n--- VỐN HÓA NHỎ/VỪA (Rank 31-80) ---\n${smallCaps}`;
-    } else {
-      marketSummary = '\n\n(Không lấy được dữ liệu CoinGecko — hãy dùng kiến thức và ước lượng giá hợp lý nhất.)';
-    }
+// Lấy dữ liệu thị trường thật từ CoinGecko
+async function fetchMarketData() {
+  const cgUrl = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=80&page=1&sparkline=false&price_change_percentage=1h,24h,7d';
+  const res = await fetch(cgUrl);
+  if (!res.ok) throw new Error('Không lấy được dữ liệu CoinGecko');
+  return await res.json();
+}
 
-    // Bước 2: Tạo prompt thông minh cho Gemini
-    const prompt = `Bạn là nhà phân tích thị trường crypto định lượng cho bàn giao dịch ngắn hạn (swing trade 3-14 ngày).
+// Tạo prompt chuẩn cho AI
+function buildSignalPrompt(coins) {
+  const largeCaps = coins.slice(0, 30).map(c =>
+    `${c.id}|${c.symbol.toUpperCase()}|${c.name}|$${c.current_price}|24h:${(c.price_change_percentage_24h||0).toFixed(1)}%|7d:${(c.price_change_percentage_7d_in_currency||0).toFixed(1)}%|vol:$${(c.total_volume/1e6).toFixed(0)}M`
+  ).join('\n');
+  const smallCaps = coins.slice(30, 80).map(c =>
+    `${c.id}|${c.symbol.toUpperCase()}|${c.name}|$${c.current_price}|24h:${(c.price_change_percentage_24h||0).toFixed(1)}%|7d:${(c.price_change_percentage_7d_in_currency||0).toFixed(1)}%|vol:$${(c.total_volume/1e6).toFixed(0)}M`
+  ).join('\n');
 
-Dựa trên dữ liệu thị trường thật bên dưới VÀ kiến thức của bạn về xu hướng kỹ thuật, hãy chọn ĐÚNG 6 đồng coin tiềm năng nhất:
-- 3 đồng vốn hóa lớn (top 30 CoinGecko)
-- 3 đồng vốn hóa nhỏ/vừa (ngoài top 30)
+  return `Bạn là nhà phân tích crypto swing trade (3-14 ngày). Dựa trên dữ liệu thật bên dưới, chọn ĐÚNG 6 coin:
+- 3 vốn hóa lớn (từ danh sách top 30)
+- 3 vốn hóa nhỏ/vừa (từ danh sách rank 31-80)
 
-${marketSummary}
+VỐN HÓA LỚN (Top 30):
+${largeCaps}
 
-Với MỖI đồng coin, xác định:
-- coinId: ID chính xác trên CoinGecko (ví dụ: "bitcoin", "ethereum", "solana")
-- symbol: mã ticker viết HOA (ví dụ: BTC, ETH)
-- name: tên đầy đủ
-- cap: "large" hoặc "small"
-- entryPrice: giá mua đề xuất (phải SÁT với giá thực tế ở trên)
-- stopLoss: giá cắt lỗ (thấp hơn entryPrice 3-8%)
-- takeProfit: giá chốt lời (cao hơn entryPrice 5-15%)
-- confidence: "low" | "medium" | "high"
-- timeframe: ví dụ "5-10 ngày"
-- reasoning: 2-3 câu tiếng Việt giải thích lý do, dựa trên dữ liệu biến động giá 24h/7d, khối lượng giao dịch, xu hướng kỹ thuật
+VỐN HÓA NHỎ/VỪA (Rank 31-80):
+${smallCaps}
 
-CHỈ trả về một mảng JSON duy nhất, KHÔNG kèm markdown, KHÔNG giải thích thêm:
-[{"coinId":"...","symbol":"...","name":"...","cap":"large","entryPrice":0,"stopLoss":0,"takeProfit":0,"confidence":"medium","timeframe":"...","reasoning":"..."}]`;
+Với MỖI coin, trả về: coinId (ID CoinGecko chính xác), symbol (HOA), name, cap ("large"/"small"), entryPrice (sát giá thực), stopLoss (thấp hơn 3-8%), takeProfit (cao hơn 5-15%), confidence ("low"/"medium"/"high"), timeframe, reasoning (2 câu tiếng Việt).
 
-    // Bước 3: Gọi Gemini với Google Search grounding
-    const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
+CHỈ trả về mảng JSON, KHÔNG markdown:
+[{"coinId":"bitcoin","symbol":"BTC","name":"Bitcoin","cap":"large","entryPrice":0,"stopLoss":0,"takeProfit":0,"confidence":"medium","timeframe":"5-10 ngày","reasoning":"..."}]`;
+}
 
-    for (const model of models) {
-      try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`;
-        const body = {
+// Gọi Groq API
+async function callGroq(prompt) {
+  if (!groqKey) return null;
+  console.log('  🚀 Gọi Groq AI...');
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${groqKey}` },
+    body: JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      messages: [
+        { role: 'system', content: 'Bạn là bot phân tích crypto. CHỈ trả về JSON array, không giải thích.' },
+        { role: 'user', content: prompt }
+      ],
+      temperature: 0.5,
+      max_tokens: 3000,
+      response_format: { type: 'json_object' }
+    })
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    console.error('  ❌ Groq error:', res.status, err.slice(0, 200));
+    return null;
+  }
+  const data = await res.json();
+  return data?.choices?.[0]?.message?.content;
+}
+
+// Gọi Gemini API
+async function callGemini(prompt) {
+  if (!geminiKey) return null;
+  const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+  for (const model of models) {
+    try {
+      console.log(`  🧠 Gọi Gemini ${model}...`);
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.6, maxOutputTokens: 3000 },
-          tools: [{ google_search: {} }]
-        };
+          generationConfig: { temperature: 0.5, maxOutputTokens: 3000 }
+        })
+      });
+      if (res.status === 429 || res.status === 404) continue;
+      if (!res.ok) continue;
+      const data = await res.json();
+      const text = data?.candidates?.[0]?.content?.parts?.filter(p => p.text)?.map(p => p.text)?.join('');
+      if (text) return text;
+    } catch (e) { continue; }
+  }
+  return null;
+}
 
-        console.log(`  🧠 Đang gọi ${model}...`);
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
+// Phân tích thuật toán (LUÔN hoạt động, không cần API key)
+function algorithmicAnalysis(coins) {
+  console.log('  🔧 Chạy phân tích thuật toán...');
+  
+  function score(c) {
+    let s = 0;
+    const d24 = c.price_change_percentage_24h || 0;
+    const d7 = c.price_change_percentage_7d_in_currency || 0;
+    const vol = c.total_volume || 0;
+    const mcap = c.market_cap || 1;
+    const volRatio = vol / mcap; // Volume/MCap ratio
+    
+    // Momentum score: tăng nhẹ tốt hơn tăng quá mạnh (quá mua)
+    if (d24 > 0 && d24 < 8) s += d24 * 3;       // Tăng vừa phải 24h
+    if (d24 >= 8) s += 8;                          // Giới hạn
+    if (d24 < -10) s -= 5;                         // Giảm quá sâu = rủi ro
+    
+    if (d7 > 0 && d7 < 20) s += d7 * 1.5;         // Xu hướng tuần tốt
+    if (d7 >= 20) s += 15;
+    if (d7 < -15) s -= 10;
+    
+    // Volume score
+    if (volRatio > 0.1) s += 10;                   // Volume cao bất thường
+    if (volRatio > 0.05) s += 5;
+    
+    // Đảo chiều: giảm 7d nhưng tăng 24h = tiềm năng đảo chiều
+    if (d7 < -5 && d24 > 2) s += 15;
+    
+    return s;
+  }
 
-        if (response.status === 429 || response.status === 404) {
-          console.log(`  ⚠️ ${model}: ${response.status}, thử model tiếp...`);
-          continue;
-        }
+  const largeCaps = coins.slice(0, 30).map(c => ({ ...c, score: score(c), cap: 'large' }))
+    .sort((a, b) => b.score - a.score).slice(0, 3);
+  const smallCaps = coins.slice(30, 80).map(c => ({ ...c, score: score(c), cap: 'small' }))
+    .sort((a, b) => b.score - a.score).slice(0, 3);
 
-        if (!response.ok) {
-          const errText = await response.text();
-          console.error(`  ❌ ${model} error:`, response.status, errText.slice(0, 200));
-          // Nếu lỗi 400 do google_search không hỗ trợ, thử lại không có tools
-          if (response.status === 400) {
-            console.log(`  🔄 Thử ${model} không có Google Search...`);
-            const fallbackBody = {
-              contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: { temperature: 0.6, maxOutputTokens: 3000 }
-            };
-            const fallbackRes = await fetch(url, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(fallbackBody)
-            });
-            if (fallbackRes.ok) {
-              const fallbackData = await fallbackRes.json();
-              const text = fallbackData?.candidates?.[0]?.content?.parts
-                ?.filter(p => p.text)?.map(p => p.text)?.join('');
-              if (text) {
-                console.log(`  ✅ ${model} (fallback) trả về OK`);
-                return res.json({ success: true, analysis: text, model });
-              }
-            }
-            continue;
-          }
-          if (response.status === 403) {
-            return res.json({ success: false, error: 'API Key không hợp lệ. Vào Cài đặt kiểm tra lại.' });
-          }
-          continue;
-        }
+  const selected = [...largeCaps, ...smallCaps];
+  
+  return selected.map(c => {
+    const d24 = (c.price_change_percentage_24h || 0).toFixed(1);
+    const d7 = (c.price_change_percentage_7d_in_currency || 0).toFixed(1);
+    const price = c.current_price;
+    const confidence = c.score > 25 ? 'high' : c.score > 10 ? 'medium' : 'low';
+    
+    const reasons = [];
+    if (parseFloat(d24) > 2) reasons.push(`Tăng ${d24}% trong 24h cho thấy đà tăng ngắn hạn`);
+    else if (parseFloat(d24) < -3) reasons.push(`Giảm ${d24}% trong 24h, có thể là cơ hội mua đáy`);
+    if (parseFloat(d7) > 5) reasons.push(`Xu hướng tuần tích cực (+${d7}%)`);
+    else if (parseFloat(d7) < -5 && parseFloat(d24) > 0) reasons.push(`Đang phục hồi sau đợt điều chỉnh 7 ngày (${d7}%)`);
+    const volM = (c.total_volume / 1e6).toFixed(0);
+    reasons.push(`Khối lượng giao dịch $${volM}M cho thấy thanh khoản tốt`);
 
-        const data = await response.json();
-        // Gemini with grounding may return multiple parts (text + search results)
-        const text = data?.candidates?.[0]?.content?.parts
-          ?.filter(p => p.text)?.map(p => p.text)?.join('');
-        if (!text) continue;
+    return {
+      coinId: c.id,
+      symbol: c.symbol.toUpperCase(),
+      name: c.name,
+      cap: c.cap,
+      entryPrice: parseFloat(price.toPrecision(6)),
+      stopLoss: parseFloat((price * 0.95).toPrecision(6)),
+      takeProfit: parseFloat((price * 1.08).toPrecision(6)),
+      confidence,
+      timeframe: '5-10 ngày',
+      reasoning: reasons.slice(0, 2).join('. ') + '.'
+    };
+  });
+}
 
-        console.log(`  ✅ ${model} trả về tín hiệu OK`);
-        return res.json({ success: true, analysis: text, model });
-
-      } catch (err) {
-        console.error(`  ❌ ${model} fetch error:`, err.message);
-        continue;
-      }
+app.post('/api/ai/generate-signals', async (req, res) => {
+  try {
+    // Bước 1: LUÔN lấy dữ liệu thật từ CoinGecko
+    console.log('  📊 Lấy dữ liệu thị trường...');
+    let coins;
+    try {
+      coins = await fetchMarketData();
+      console.log(`  ✅ Đã lấy ${coins.length} coins từ CoinGecko`);
+    } catch (e) {
+      return res.json({ success: false, error: 'Không kết nối được CoinGecko. Thử lại sau.' });
     }
 
-    res.json({ success: false, error: 'Tất cả model AI đang bận. Hãy thử lại sau 1-2 phút.' });
+    // Bước 2: Thử AI providers theo thứ tự ưu tiên
+    const prompt = buildSignalPrompt(coins);
+    let aiText = null;
+    let usedProvider = null;
+
+    // 2a: Groq (ưu tiên — miễn phí, nhanh)
+    if (groqKey) {
+      aiText = await callGroq(prompt);
+      if (aiText) usedProvider = 'groq';
+    }
+
+    // 2b: Gemini (dự phòng)
+    if (!aiText && geminiKey) {
+      aiText = await callGemini(prompt);
+      if (aiText) usedProvider = 'gemini';
+    }
+
+    // 2c: Phân tích thuật toán (luôn hoạt động)
+    if (!aiText) {
+      console.log('  ⚙️ Không có AI key → dùng phân tích thuật toán');
+      const algoResult = algorithmicAnalysis(coins);
+      return res.json({
+        success: true,
+        analysis: JSON.stringify(algoResult),
+        provider: 'algorithm',
+        message: 'Phân tích bằng thuật toán (momentum + volume). Thêm Groq API Key ở Cài đặt để dùng AI.'
+      });
+    }
+
+    console.log(`  ✅ Tín hiệu AI từ ${usedProvider}`);
+    return res.json({ success: true, analysis: aiText, provider: usedProvider });
+
   } catch (err) {
     console.error('  ❌ generate-signals error:', err.message);
-    res.json({ success: false, error: 'Lỗi hệ thống: ' + err.message });
+    res.json({ success: false, error: 'Lỗi: ' + err.message });
   }
 });
 
